@@ -13,8 +13,12 @@ export default {
       ...defaultTheme.screens,
     },
 
-    extend: {},
+    extend: {
+      fontFamily : {
+        mono : ['giest-mono' , ...defaultTheme.fontFamily.mono],
+      }
+    },
   },
   darkMode: "class",
-  plugins: [nextui()],
+  plugins: [nextui() , require('@tailwindcss/typography'),],
 };

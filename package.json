@@ -16,18 +16,23 @@
     "@astrojs/rss": "^4.0.5",
     "@astrojs/sitemap": "^3.0.5",
     "@astrojs/tailwind": "^5.1.0",
+    "@fontsource/geist-mono": "^5.1.0",
     "@nextui-org/button": "^2.0.26",
     "@nextui-org/react": "^2.2.9",
+    "@phosphor-icons/react": "^2.1.7",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "astro": "^4.4.0",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.5",
-    "lucide-react": "^0.335.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "rehype-pretty-code": "^0.14.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15"
   }
 }

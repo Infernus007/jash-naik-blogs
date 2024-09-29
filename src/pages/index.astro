@@ -2,10 +2,8 @@
 import Layout from "../layouts/indexLayout.astro";
 import { SITE_TITLE, SITE_DESCRIPTION, words, heroInnerLinks } from "../consts";
 import { TypewriterEffectSmooth } from "../components/Typewriter/index";
-import { Link, Button } from "@nextui-org/react";
-import BlogCard from "../components/BlogCard/index";
-import { Image } from "astro:assets";
-import { getImagePromise } from "../utils/utils.ts";
+import { Link, Button, Image } from "@nextui-org/react";
+import BlogCard from "../components/blog/Card";
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE}>
@@ -16,7 +14,7 @@ import { getImagePromise } from "../utils/utils.ts";
       Hello , I'm Jash
     </h2>
     <h2
-      class="text-2xl noSidebar:hidden font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tigh"
+      class="text-2xl  noSidebar:hidden font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tigh"
     >
       A developer sharing blogs and insights in technology.
     </h2>
@@ -40,13 +38,29 @@ import { getImagePromise } from "../utils/utils.ts";
     }
   </div>
   <div>
-    <BlogCard description="booba looba" title="booba looba" href="booba looba">
+    <BlogCard description="booba looba" title="booba looba" href="booba looba" githubHref="ooba looba" client:load >
       <Image
-        src="https://app.requestly.io/delay/5000/https://nextui-docs-v2.vercel.app/images/hero-card-complete.jpeg"
-        alt={"booba looba"}
-        class="h-full w-full object-covert object-center aspect-video rounded-md "
-        inferSize={true}
-      />
+      client:load
+      width={600}
+      height={200}
+      src="https://app.requestly.io/delay/5000/https://nextui-docs-v2.vercel.app/images/hero-card-complete.jpeg"
+      alt={"booba looba"}
+      loading="eager"
+      isZoomed
+      className="object-cover aspect-video"
+        />
     </BlogCard>
+
+  <a href="/about">
+    <img
+      transition:name="hero" 
+      src="/img.jpg"
+      alt="Your Image Description"
+      width={600}
+      height={400}
+      class="object-cover aspect-video"
+    />
+  </a>
+
   </div>
 </Layout>

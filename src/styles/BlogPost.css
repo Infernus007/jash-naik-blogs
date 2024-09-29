@@ -1,0 +1,94 @@
+:root {
+
+}
+
+
+
+
+
+.content pre {
+  background-color: transparent;
+}
+
+.content pre > code {
+    display: grid; /*  this is way the line will span whole width of `code` component */
+}
+
+
+
+code[data-theme*=" "],
+code[data-theme*=" "] span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  code[data-theme*=" "],
+  code[data-theme*=" "] span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+}
+
+
+code span {
+  @apply hover:bg-sky-200 dark:hover:bg-fuchsia-950 hover:cursor-pointer 
+}
+
+code span[data-highlighted-line] {
+    @apply  py-0.5 font-bold bg-sky-200  dark:bg-fuchsia-950;
+  }
+  
+code mark[data-highlighted-chars=""] {
+  @apply bg-sky-200 dark:bg-fuchsia-950
+}
+
+
+/** 
+ *  data-line-numbers will be enabled on markdown  
+ *  with `showLineNumbers` meta string on it
+ */
+.content pre > code[data-line-numbers] {
+    counter-reset: line;
+}
+.content pre > code[data-line-numbers] > span[data-line=""]::before {
+    counter-increment: line;
+    content: counter(line);
+    display: inline-block;
+    margin-right: 2rem;
+    width: 1rem;
+    text-align: left;
+
+}
+
+.content pre > code > span[data-line=""]{
+  @apply px-2
+}
+
+.content pre > code > span[data-line=""]::before {
+    content: "";
+    display: inline-block;
+    width: 1rem;
+    text-align: right;
+    @apply text-sky-400 dark:text-sky-900
+}
+
+/** 
+ *  we'll need to adjust the space required 
+ *  the number depending on the number of digits 
+ */
+.content pre > code[data-line-numbers-max-digits="2"] > span[data-line=""]::before {
+    width: 2rem;
+}
+
+.content code[data-line-numbers-max-digits="3"] > span[data-line=""]::before {
+    width: 3rem;
+}
+
+/** 
+ *
+ *  styling for the document title
+ *   
+ */
+
+

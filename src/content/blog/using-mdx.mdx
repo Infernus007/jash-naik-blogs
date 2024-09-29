@@ -5,13 +5,44 @@ pubDate: 'Jul 02 2022'
 heroImage: '/blog-placeholder-5.jpg'
 ---
 
-This theme comes with the [@astrojs/mdx](https://docs.astro.build/en/guides/integrations-guide/mdx/) integration installed and configured in your `astro.config.mjs` config file. If you prefer not to use MDX, you can disable support by removing the integration from your config file.
+import Placeholder from "../../components/blog/CodeBlock/index.astro"
 
+This theme comes with the [@astrojs/mdx](https://docs.astro.build/en/guides/integrations-guide/mdx/) integration installed and configured in your `astro.config.mjs` config file. If you prefer not to use MDX, you can disable support by removing the integration from your config file.
+	
 ## Why MDX?
 
 MDX is a special flavor of Markdown that supports embedded JavaScript & JSX syntax. This unlocks the ability to [mix JavaScript and UI Components into your Markdown content](https://docs.astro.build/en/guides/markdown-content/#mdx-features) for things like interactive charts or alerts.
 
 If you have existing content authored in MDX, this integration will hopefully make migrating to Astro a breeze.
+
+<Placeholder>
+
+```js showLineNumbers {1-3} /name/ caption="some js code" title="title.JS"
+console.log("Hello world!");
+
+// highlight-start
+const greeting = "Hello, ";
+const name = "Developer";
+console.log(greeting + name);
+// highlight-end
+
+function add(a, b) {
+  return a + b;
+}
+
+// This is a comment
+const result = add(5, 3);
+console.log(`The result is: ${result}`);
+```
+
+```python title="bar.py"
+console.log("python")
+```
+
+```python title="bar2.py"
+console.log("python")
+```
+</Placeholder>
 
 ## Example
 

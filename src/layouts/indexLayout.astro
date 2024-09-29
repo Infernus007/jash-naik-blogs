@@ -4,15 +4,15 @@ import Header from "../components/Header.astro";
 import Sidebar from "../components/Sidebar/index.tsx";
 
 interface Props {
-  title: string;
-  description: string;
+	title: string;
+	description: string;
 }
 
 const { title, description } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" transition:animate="none">
   <head>
     <BaseHead title={title} description={description} />
   </head>
