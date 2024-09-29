@@ -32,15 +32,15 @@ code[data-theme*=" "] span {
 
 
 code span {
-  @apply hover:bg-sky-200 dark:hover:bg-fuchsia-950 hover:cursor-pointer 
+  @apply hover:bg-sky-100 dark:hover:bg-fuchsia-950 hover:cursor-pointer 
 }
 
 code span[data-highlighted-line] {
-    @apply  py-0.5 font-bold bg-sky-200  dark:bg-fuchsia-950;
+    @apply  py-0.5 font-bold bg-sky-100  dark:bg-fuchsia-950;
   }
   
 code mark[data-highlighted-chars=""] {
-  @apply bg-sky-200 dark:bg-fuchsia-950
+  @apply bg-sky-100 dark:bg-fuchsia-950
 }
 
 

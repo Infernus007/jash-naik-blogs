@@ -3,11 +3,12 @@ import type { CollectionEntry } from "astro:content";
 import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import Toc from "../components/blog/Toc.astro"
 import "../styles/BlogPost.css"
 
 type Props = CollectionEntry<"blog">["data"];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage , } = Astro.props;
 ---
 
 <html lang="en">
@@ -18,8 +19,9 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 
 	<body>
 		<Header />
+		<Toc headings={}/>
 		<div class="">
-		<article class="content mx-auto prose lg:prose-x">
+		<article class="content mx-auto prose ">
 			<slot/>
 		</article>
 	</div>
