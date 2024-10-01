@@ -1,19 +1,25 @@
 ---
 import { getCollection } from "astro:content";
 
-const allBlogs = await getCollection("blog");
+ const allBlogs = await getCollection("blog");
+  
+  // Sort by pubDate descending and take the latest 6 posts
+  const latestBlogs = allBlogs
+    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+    .slice(0, 6);
 
-const groupedBlogs = allBlogs.reduce((acc, blog) => {
-  if (!acc[blog.data.group]) {
-    acc[blog.data.group] = [];
-  }
-  acc[blog.data.group].push(blog);
-  return acc;
-}, {} as Record<string, typeof allBlogs>);
+  // Group the latest posts by their group
+  const groupedBlogs = latestBlogs.reduce((acc, blog) => {
+    if (!acc[blog.data.group]) {
+      acc[blog.data.group] = [];
+    }
+    acc[blog.data.group].push(blog);
+    return acc;
+  }, {} as Record<string, typeof latestBlogs>);
 
-const sortedGroups = Object.keys(groupedBlogs).sort();
+  const sortedGroups = Object.keys(groupedBlogs).sort();
+  const currentPath = Astro.url.pathname;
 
-const currentPath = Astro.url.pathname;
 ---
 
 <aside class="w-64 p-4 bg-white">
@@ -39,18 +45,17 @@ const currentPath = Astro.url.pathname;
       <ul
         id={`collapsible-${index}`}
         class="overflow-hidden transition-all duration-300 ease-in-out ml-4"
-        style="max-height: 0;"
       >
         {groupedBlogs[group].map((blog) => {
           const isActive = currentPath === `/blog/${blog.slug}`;
           return (
-            <li class="mb-1">
+            <li class="mb-1 ">
               <a
                 href={`/blog/${blog.slug}`}
-                class={`block py-1 text-sm transition-colors duration-200 ${
+                class={`block w-fit rounded-md py-1 px-2 text-sm transition-colors duration-200 ${
                   isActive
-                    ? "text-blue-500"
-                    : "text-gray-600 hover:text-gray-800"
+                    ? "bg-blue-400"
+                    : "text-gray-600  hover:bg-gray-300"
                 }`}
               >
                 {blog.data.title}
@@ -68,7 +73,7 @@ const currentPath = Astro.url.pathname;
     document.querySelectorAll('[id^="toggle-btn-"]').forEach((toggleBtn) => {
       const index = toggleBtn.id.split('-')[2];
       const collapsible = document.getElementById(`collapsible-${index}`);
-      let isCollapsed = true;
+      let isCollapsed = false;
 
       toggleBtn.addEventListener('click', () => {
         isCollapsed = !isCollapsed;

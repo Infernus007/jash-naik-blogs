@@ -1,0 +1,42 @@
+---
+// Import necessary components
+import Search from "astro-pagefind/components/Search";
+import { Button } from "@nextui-org/button";
+---
+
+<Button
+  id="btn"
+  variant="bordered"
+  client:load
+>
+  Quick search
+</Button>
+<div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+  <div class="bg-white dark:bg-gray-900 rounded-lg p-6 w-[75%] mx-auto">
+    <h2 class="text-lg font-bold mb-4">Modal Title</h2>
+    <Search /> <!-- Include your search component here -->
+    <button id="close-modal" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+      Close
+    </button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const button = document.getElementById('btn');
+    const modal = document.getElementById('modal');
+    const closeModalButton = document.getElementById('close-modal');
+    
+    if (button) {
+      button.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+      });
+    }
+
+    if (closeModalButton) {
+      closeModalButton.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+    }
+  });
+</script>

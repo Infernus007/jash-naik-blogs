@@ -4,6 +4,17 @@ import { SITE_TITLE, SITE_DESCRIPTION, words, heroInnerLinks } from "../consts";
 import { TypewriterEffectSmooth } from "../components/Typewriter/index";
 import { Link, Button, Image } from "@nextui-org/react";
 import BlogCard from "../components/blog/Card";
+import { getCollection } from "astro:content";
+
+
+const allBlogs = await getCollection("blog");
+  
+  // Sort by pubDate descending and take the latest 6 posts
+  const latestBlogs = allBlogs
+    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+    .slice(0, 6);
+
+
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE}>
@@ -37,30 +48,22 @@ import BlogCard from "../components/blog/Card";
       })
     }
   </div>
-  <div>
-    <BlogCard description="booba looba" title="booba looba" href="booba looba" githubHref="ooba looba" client:load >
-      <Image
-      client:load
-      width={600}
-      height={200}
-      src="https://app.requestly.io/delay/5000/https://nextui-docs-v2.vercel.app/images/hero-card-complete.jpeg"
-      alt={"booba looba"}
-      loading="eager"
-      isZoomed
-      className="object-cover aspect-video"
-        />
-    </BlogCard>
 
-  <a href="/about">
-    <img
-      transition:name="hero" 
-      src="/img.jpg"
-      alt="Your Image Description"
-      width={600}
-      height={400}
-      class="object-cover aspect-video"
-    />
-  </a>
-
-  </div>
+  <section class="mt-10">
+    <h3 class="text-xl font-bold mb-4">Latest Blogs</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {latestBlogs.map((blog) => (
+        <BlogCard
+          key={blog.id}
+          title={blog.data.title}
+          description={blog.data.description}
+          href={blog.data.href}
+          githubHref={blog.data.githubHref}
+        >
+          <img src={blog.data.heroImage} alt={blog.data.title} class="w-full h-auto" />
+        </BlogCard>
+      ))}
+    </div>
+  </section>
+  
 </Layout>

@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
+import IndexLayout from '../../layouts/indexLayout.astro';
+import "../../styles/BlogPost.css"
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -13,9 +14,82 @@ type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
 
-const { Content  } = await post.render();
+const { Content ,  headings} = await post.render();
+
+console.log(headings)
 ---
 
-<BlogPost {...post.data}>
+<IndexLayout title="" description="">
+	
+	<aside class="w-1/4 p-4 sticky top-0 self-start">
+		<h2 class="font-bold mb-4 text-lg">Table of Contents</h2>
+		<div class="relative">
+		  <div id="toc-highlighter" class="absolute border-2 border-black rounded-full transition-all duration-300 ease-in-out flex items-center justify-center" style="height: 2.5rem;"></div>
+		  <ul id="toc" class="space-y-1 relative">
+			{headings.map((heading) => (
+			  <li class={`toc-item depth-${heading.depth}`}>
+				<a href={`#${heading.slug}`} class="toc-link inline-block text-gray-700 hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2" data-depth={heading.depth}>
+				  {heading.text}
+				</a>
+			  </li>
+			))}
+		  </ul>
+		</div>
+	  </aside>
+
 	<Content />
-</BlogPost>
+
+</IndexLayout>
+
+
+
+
+<script>
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const headingElements = Array.from(document.querySelectorAll('h2, h3'));
+    const tocHighlighter = document.getElementById('toc-highlighter');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(link => link.classList.remove('active'));
+          const activeLink = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+          if (activeLink) {
+            activeLink.classList.add('active');
+            const linkRect = activeLink.getBoundingClientRect();
+            const tocRect = document.getElementById('toc').getBoundingClientRect();
+            tocHighlighter.style.top = `${linkRect.top - tocRect.top}px`;
+            tocHighlighter.style.left = `${linkRect.left - tocRect.left}px`;
+            tocHighlighter.style.width = `${linkRect.width}px`;
+            
+            tocHighlighter.textContent = activeLink.textContent;
+          }
+        }
+      });
+    }, { threshold: 0.1 });
+
+    headingElements.forEach(element => observer.observe(element));
+  </script>
+
+  <style>
+    .toc-link {
+      position: relative;
+      z-index: 2;
+    }
+    .toc-link.active {
+      color: transparent;
+    }
+    #toc-highlighter {
+      z-index: 1;
+      color: #1a202c;
+      font-weight: bold;
+    }
+    .toc-item {
+      list-style-type: none;
+    }
+    .toc-item.depth-2 { margin-left: 0; }
+.toc-item.depth-3,
+.toc-item.depth-4,
+.toc-item.depth-5,
+.toc-item.depth-6 { margin-left: 1rem; }
+  </style>
