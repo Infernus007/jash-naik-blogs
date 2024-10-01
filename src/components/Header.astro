@@ -1,7 +1,8 @@
 ---
-import HeaderLink from "./HeaderLink.astro";
-import { SITE_TITLE } from "../consts";
 import NextUINav from "../components/Navbar/index.tsx";
+import ModalButton from "../components/Modal/index.astro";
 ---
 
-<NextUINav client:load />
+<NextUINav client:load >
+    <ModalButton/>
+</NextUINav>

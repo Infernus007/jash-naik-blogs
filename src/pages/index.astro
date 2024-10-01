@@ -8,28 +8,36 @@ import { getCollection } from "astro:content";
 
 
 const allBlogs = await getCollection("blog");
-  
-  // Sort by pubDate descending and take the latest 6 posts
-  const latestBlogs = allBlogs
-    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
-    .slice(0, 6);
+
+// Sort by pubDate descending and take the latest 6 posts
+const latestBlogs = allBlogs
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 6);
+
+// Group all blogs by their group
+const groupedBlogs = allBlogs.reduce((acc, blog) => {
+  if (!acc[blog.data.group]) {
+    acc[blog.data.group] = [];
+  }
+  acc[blog.data.group].push(blog);
+  return acc;
+}, {});
+
+// Sort the groups alphabetically
+const sortedGroups = Object.keys(groupedBlogs).sort();
 
 
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE}>
   <div class="text-center md:text-start">
-    <h2
-      class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tigh"
-    >
-      Hello , I'm Jash
+    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
+      Hello, I'm Jash
     </h2>
-    <h2
-      class="text-2xl  noSidebar:hidden font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tigh"
-    >
+    <h2 class="text-2xl md:text-3xl lg:text-4xl noSidebar:hidden font-bold leading-tight text-gray-900 dark:text-white mt-2">
       A developer sharing blogs and insights in technology.
     </h2>
-    <TypewriterEffectSmooth words={words} client:visible />
+    <TypewriterEffectSmooth words={words} client:visible className="text-2xl md:text-3xl lg:text-[2.75rem] mt-4" />
   </div>
   <div class="flex gap-2 mt-5 justify-center items-center md:justify-start">
     {
@@ -54,10 +62,11 @@ const allBlogs = await getCollection("blog");
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {latestBlogs.map((blog) => (
         <BlogCard
+        client:load
           key={blog.id}
           title={blog.data.title}
           description={blog.data.description}
-          href={blog.data.href}
+          href={`/blog/${blog.slug}`}
           githubHref={blog.data.githubHref}
         >
           <img src={blog.data.heroImage} alt={blog.data.title} class="w-full h-auto" />
@@ -65,5 +74,36 @@ const allBlogs = await getCollection("blog");
       ))}
     </div>
   </section>
+
+ <!-- All Topics section -->
+ <section class="mt-16">
+  <h3 class="text-2xl font-bold mb-8">Explore All Topics</h3>
+  <div class="flex flex-col gap-4">
+    {sortedGroups.map((group) => (
+      <div key={group} class="group">
+        <h4 class="text-xl w-fit font-semibold mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition-colors duration-300">
+          {group}
+        </h4>
+        <ul class="space-y-2">
+          {groupedBlogs[group].map((blog) => (
+            <li key={blog.id} class="group/item">
+              <a href={`/blog/${blog.slug}`} class="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200 flex items-center">
+                <span class="mr-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">&#8594;</span>
+                {blog.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
   
 </Layout>
+
+
+<style>
+  .group:hover h4 {
+    @apply text-blue-500;
+  }
+</style>

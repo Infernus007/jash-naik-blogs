@@ -4,24 +4,14 @@ import {
   Navbar,
   NavbarBrand,
   NavbarContent,
-  NavbarItem,
-  Link,
-  DropdownItem,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  Avatar,
+ 
 } from "@nextui-org/react";
 import { AcmeLogo } from "./Logo.tsx";
-import { SearchIcon } from "./SearchIcon.tsx";
-import { useDisclosure } from "@nextui-org/react";
-import Modal from "../Modal/index.tsx";
 import { ModeToggle } from "../MoodToggle/index.tsx";
 
-export default function NextUINav() {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+export default function NextUINav(props) {
   return (
-    <Navbar>
+    <Navbar className="w-[95%] mx-auto" isBordered maxWidth="full" position="sticky">
       <NavbarContent justify="start">
         <NavbarBrand className="mr-4 ">
           <AcmeLogo />
@@ -32,20 +22,10 @@ export default function NextUINav() {
       </NavbarContent>
 
       <NavbarContent as="div" className="items-center" justify="end">
-        <Button
-          onPress={onOpen}
-          variant="bordered"
-          startContent={<SearchIcon size={14} />}
-        >
-          Quick search
-        </Button>
+        {props.children}
         <ModeToggle />
       </NavbarContent>
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        key={"Quick_Search_Nav_Modal"}
-      />
+     
     </Navbar>
   );
 }

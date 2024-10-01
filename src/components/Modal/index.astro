@@ -1,6 +1,5 @@
 ---
 // Import necessary components
-import Search from "astro-pagefind/components/Search";
 import { Button } from "@nextui-org/button";
 ---
 
@@ -9,19 +8,26 @@ import { Button } from "@nextui-org/button";
   variant="bordered"
   client:load
 >
+<span style="display: inline-flex; align-items: center; gap: 8px;">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    fill="currentColor"
+    class="bi bi-search"
+    viewBox="0 0 16 16"
+  >
+    <path
+      d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.44-9.344a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11z"
+    />
+  </svg>
+</span>
+
   Quick search
 </Button>
-<div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
-  <div class="bg-white dark:bg-gray-900 rounded-lg p-6 w-[75%] mx-auto">
-    <h2 class="text-lg font-bold mb-4">Modal Title</h2>
-    <Search /> <!-- Include your search component here -->
-    <button id="close-modal" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-      Close
-    </button>
-  </div>
-</div>
 
-<script>
+
+<script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('btn');
     const modal = document.getElementById('modal');

@@ -1,7 +1,8 @@
 ---
-import { type CollectionEntry, getCollection } from 'astro:content';
+import { type CollectionEntry, getCollection , getEntries } from 'astro:content';
 import IndexLayout from '../../layouts/indexLayout.astro';
 import "../../styles/BlogPost.css"
+import MyCard from "../../components/blog/Card"
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -14,30 +15,68 @@ type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
 
-const { Content ,  headings} = await post.render();
+
+
+
+const { Content ,  headings , } = await post.render();
+
+let relatedPosts: CollectionEntry<'blog'>[] = []
+
+if(post.data.relatedPosts)
+{
+   relatedPosts = await getEntries(post.data.relatedPosts);
+}
+
+
 
 console.log(headings)
 ---
 
 <IndexLayout title="" description="">
 	
-	<aside class="w-1/4 p-4 sticky top-0 self-start">
-		<h2 class="font-bold mb-4 text-lg">Table of Contents</h2>
-		<div class="relative">
-		  <div id="toc-highlighter" class="absolute border-2 border-black rounded-full transition-all duration-300 ease-in-out flex items-center justify-center" style="height: 2.5rem;"></div>
-		  <ul id="toc" class="space-y-1 relative">
-			{headings.map((heading) => (
-			  <li class={`toc-item depth-${heading.depth}`}>
-				<a href={`#${heading.slug}`} class="toc-link inline-block text-gray-700 hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2" data-depth={heading.depth}>
-				  {heading.text}
-				</a>
-			  </li>
-			))}
-		  </ul>
-		</div>
-	  </aside>
+  <div class="flex flex-col lg:flex-row">
+		
 
-	<Content />
+		<div class="w-full lg:w-3/4 p-4">
+      <div class="content prose max-w-none">
+			<Content />
+    </div>
+			{relatedPosts.length > 0 && (
+				<section class="mt-12 border-t pt-8">
+					<h2 class="text-2xl font-bold mb-6">Related Posts</h2>
+					<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+						{relatedPosts.map((relatedPost) => (
+							<MyCard
+								key={relatedPost.id}
+								title={relatedPost.data.title}
+								description={relatedPost.data.description}
+								href={`/blog/${relatedPost.slug}`}
+								githubHref={relatedPost.data.githubHref}
+							>
+								<img src={relatedPost.data.heroImage} alt={relatedPost.data.title} class="w-full h-auto" />
+							</MyCard>
+						))}
+					</div>
+				</section>
+			)}
+		</div>
+
+    <aside class="w-full lg:w-1/4 p-4 lg:sticky lg:top-10 lg:self-start">
+			<h2 class="font-bold mb-4 text-lg">Table of Contents</h2>
+			<div class="relative">
+				<div id="toc-highlighter" class="absolute border-2 border-black rounded-full transition-all duration-300 ease-in-out flex items-center justify-center" style="height: 2.5rem;"></div>
+				<ul id="toc" class="space-y-1 relative">
+					{headings.map((heading) => (
+						<li class={`toc-item depth-${heading.depth}`}>
+							<a href={`#${heading.slug}`} class="toc-link inline-block text-gray-700 hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2" data-depth={heading.depth}>
+								{heading.text}
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		</aside>
+	</div>
 
 </IndexLayout>
 
@@ -46,7 +85,7 @@ console.log(headings)
 
 <script>
     const tocLinks = document.querySelectorAll('.toc-link');
-    const headingElements = Array.from(document.querySelectorAll('h2, h3'));
+    const headingElements = Array.from(document.querySelectorAll('h2'));
     const tocHighlighter = document.getElementById('toc-highlighter');
 
     const observer = new IntersectionObserver((entries) => {

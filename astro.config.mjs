@@ -4,6 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import react from "@astrojs/react";
 import tailwind from "@astrojs/tailwind";
 import rehypePrettyCode from "rehype-pretty-code";
+import pagefind from "astro-pagefind";
 
 
 /** @type {import('rehype-pretty-code').Options} */
@@ -21,8 +22,11 @@ keepBackground : false
 
 // https://astro.build/config
 export default defineConfig({
+	build : {
+		format : "file"
+	},
 	site: "https://example.com",
-	integrations: [mdx(), sitemap(), react(), tailwind()],
+	integrations: [mdx(), sitemap(), react(), tailwind() , pagefind()],
 
 
 	markdown: {
