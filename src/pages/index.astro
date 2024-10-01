@@ -69,7 +69,9 @@ const sortedGroups = Object.keys(groupedBlogs).sort();
           href={`/blog/${blog.slug}`}
           githubHref={blog.data.githubHref}
         >
-          <img src={blog.data.heroImage} alt={blog.data.title} class="w-full h-auto" />
+          <div class="m-2 rounded-md">
+          <img src={blog.data.heroImage} alt={blog.data.title} class="w-full h-auto rounded-2xl" />
+        </div>
         </BlogCard>
       ))}
     </div>
