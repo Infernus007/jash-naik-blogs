@@ -77,7 +77,7 @@ console.log(headings);
             </div>
           </div>
         </div>
-        <div class="content prose max-w-none">
+        <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-200 dark:prose-a:text-fuchsia-600 prose-code:text-sky-200 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
           <Content />
         </div>
         {
@@ -119,7 +119,7 @@ console.log(headings);
             <li class={`toc-item depth-${heading.depth}`}>
               <a
                 href={`#${heading.slug}`}
-                class="toc-link block text-gray-700 hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2"
+                class="toc-link block  hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2"
                 data-depth={heading.depth}
               >
                 {heading.text}
@@ -180,6 +180,8 @@ console.log(headings);
   </script>
   
   <style>
+
+
     .toc-link {
       position: relative;
       z-index: 2;

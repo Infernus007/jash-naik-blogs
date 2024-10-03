@@ -22,7 +22,7 @@ import { getCollection } from "astro:content";
 
 ---
 
-<aside class="w-64 p-4 bg-white flex flex-col items-center">
+<aside class="w-64 p-4  flex flex-col items-center">
   {sortedGroups.map((group, index) => (
     <div class="mb-4">
       <button
@@ -44,7 +44,7 @@ import { getCollection } from "astro:content";
       </button>
       <ul
         id={`collapsible-${index}`}
-        class="overflow-hidden transition-all duration-300 ease-in-out ml-4"
+        class="overflow-hidden  transition-all duration-300 ease-in-out ml-4"
       >
         {groupedBlogs[group].map((blog) => {
           const isActive = currentPath === `/blog/${blog.slug}`;
@@ -55,7 +55,7 @@ import { getCollection } from "astro:content";
                 class={`block w-fit rounded-md py-1 px-2 text-sm transition-colors duration-200 ${
                   isActive
                     ? "bg-blue-400"
-                    : "text-gray-600  hover:bg-gray-300"
+                    : "text-foreground/85   hover:bg-gray-300"
                 }`}
               >
                 {blog.data.title}

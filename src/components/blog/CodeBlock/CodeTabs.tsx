@@ -114,7 +114,7 @@ export default function CodeTabs({ code }) {
                 </Snippet>
                 {block.caption && (
                   <CardFooter>
-                    <div className="mb-2 text-sm text-gray-600">{block.caption}</div>
+                    <div className="mb-2 text-sm text-foreground/80">{block.caption}</div>
                   </CardFooter>
                 )}
               </Card>

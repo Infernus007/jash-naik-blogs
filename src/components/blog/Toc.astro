@@ -4,7 +4,7 @@
 <nav class="toc w-fit">
     <h2 class="text-xl font-bold mb-4">On this page</h2>
     <ul id="toc-list" class="space-y-2 relative">
-      <div id="toc-indicator" class="absolute left-0 w-1 bg-blue-500 transition-all duration-300 rounded-full"></div>
+      <div id="toc-indicator" class="absolute border-foreground left-0 w-1 bg-blue-500 transition-all duration-300 rounded-full text-foreground"></div>
     </ul>
   </nav>
   
@@ -69,9 +69,9 @@
             
             if (activeLink) {
               tocLinks.forEach(link => {
-                link.classList.remove('text-blue-500', 'font-semibold', 'bg-gray-100');
+                link.classList.remove('text-blue-500', 'font-semibold');
               });
-              activeLink.classList.add('text-blue-500', 'font-semibold', 'bg-gray-100');
+              activeLink.classList.add('text-blue-500', 'font-semibold');
               
               const linkRect = activeLink.getBoundingClientRect();
               const navRect = activeLink.closest('nav').getBoundingClientRect();
