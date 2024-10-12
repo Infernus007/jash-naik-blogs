@@ -1,6 +1,14 @@
+
+
+
+
+
+
+
+
 ---
 // Import necessary components
-import { Button } from "@nextui-org/button";
+import { Button, Kbd } from "@nextui-org/react";
 ---
 
 <Button
@@ -24,6 +32,8 @@ import { Button } from "@nextui-org/button";
 </span>
 
   Quick search
+
+  <Kbd keys={["command"]}>K</Kbd>
 </Button>
 
 
@@ -33,16 +43,42 @@ import { Button } from "@nextui-org/button";
     const modal = document.getElementById('modal');
     const closeModalButton = document.getElementById('close-modal');
     
+    function openModal() {
+      modal.classList.remove('opacity-0');
+      modal.classList.add('opacity-100');
+    }
+
+    function closeModal() {
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
+    }
+
     if (button) {
-      button.addEventListener('click', () => {
-        modal.classList.remove('hidden');
+      button.addEventListener('click', openModal);
+      button.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          openModal();
+        }
       });
     }
 
     if (closeModalButton) {
-      closeModalButton.addEventListener('click', () => {
-        modal.classList.add('hidden');
-      });
+      closeModalButton.addEventListener('click', closeModal);
     }
+
+    // Close modal on Escape key press
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Open modal on Ctrl + K
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && event.key === 'k') {
+        event.preventDefault(); // Prevent default browser behavior
+        openModal();
+      }
+    });
   });
 </script>
