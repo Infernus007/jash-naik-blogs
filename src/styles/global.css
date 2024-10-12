@@ -1,4 +1,58 @@
+html,
+:host {
+	font-family:
+		"giest-mono", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif, monospace;
+}
 
-html , :host{
-    font-family: 'giest-mono' , system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif , monospace;
+:root {
+	--pagefind-ui-scale: 0.8;
+	--pagefind-ui-primary: #1e3a8a; /* Tailwind's blue-900 */
+	--pagefind-ui-text: #ffffff; /* Tailwind's white */
+	--pagefind-ui-message-text: #000000; /* Tailwind's black */
+	--pagefind-ui-result-title-text: #0ea5e9; /* Tailwind's sky-500 */
+	--pagefind-ui-result-text: #374151; /* Tailwind's gray-700 */
+	--pagefind-ui-background: #f3f4f6; /* Tailwind's gray-100 */
+	--pagefind-input-background: #1e3a8a; /* Tailwind's blue-900 */
+	--pagefind-ui-border: #0ea5e9; /* Tailwind's sky-500 */
+	--pagefind-ui-tag: #0d0a01;
+	--pagefind-ui-border-width: 2px;
+	--pagefind-ui-border-radius: 8px;
+	--pagefind-ui-image-border-radius: 8px;
+	--pagefind-ui-image-box-ratio: 3 / 2;
+}
+
+#search .pagefind-ui__search-input {
+	@apply bg-background/15 text-foreground rounded-2xl outline-none focus:outline-none;
+}
+
+.pagefind-ui__form::before {
+	@apply bg-foreground !important;
+}
+
+#search mark {
+	@apply bg-sky-300 dark:bg-fuchsia-600 !important;
+}
+
+.pagefind-ui__result {
+	@apply border-none m-0 p-0 !important;
+}
+
+.pagefind-ui__result-inner {
+	@apply text-foreground/100 rounded-2xl px-3 py-2 border-1 border-foreground/25 shadow border-solid !important;
+}
+
+#search .pagefind-ui__result-title a {
+	@apply text-foreground font-bold !important;
+}
+
+#search .pagefind-ui__button {
+	@apply text-foreground bg-sky-300 hover:opacity-25;
+}
+
+#search .pagefind-ui__message {
+	@apply text-foreground;
+}
+
+.pagefind-ui__search-clear {
+	@apply text-background absolute top-[calc(14px*var(--pagefind-ui-scale))] right-[calc(10px*var(--pagefind-ui-scale))] h-[calc(35px*var(--pagefind-ui-scale))] px-[calc(10px*var(--pagefind-ui-scale))] py-0  text-[calc(14px*var(--pagefind-ui-scale))] cursor-pointer bg-foreground rounded-full flex items-center !important;
 }

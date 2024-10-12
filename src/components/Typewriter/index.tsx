@@ -44,46 +44,46 @@ export const TypewriterEffectSmooth = ({
 
 	return (
 		<div className={cn("noSidebar:flex space-x-1 my-1 hidden", className)}>
-		  <motion.div
-			className="overflow-hidden"
-			initial={{
-			  width: "0%",
-			}}
-			whileInView={{
-			  width: "fit-content",
-			}}
-			transition={{
-			  duration: 2,
-			  ease: "linear",
-			  delay: 1,
-			}}
-		  >
-			<div
-			  className="font-bold leading-tight text-gray-900 dark:text-white"
-			  style={{
-				whiteSpace: "nowrap",
-			  }}
+			<motion.div
+				className="overflow-hidden"
+				initial={{
+					width: "0%",
+				}}
+				animate={{
+					width: "fit-content",
+				}}
+				transition={{
+					duration: 2,
+					ease: "linear",
+					delay: 1,
+				}}
 			>
-			  {renderWords()}{" "}
-			</div>{" "}
-		  </motion.div>
-		  <motion.span
-			initial={{
-			  opacity: 0,
-			}}
-			animate={{
-			  opacity: 1,
-			}}
-			transition={{
-			  duration: 0.8,
-			  repeat: Infinity,
-			  repeatType: "reverse",
-			}}
-			className={cn(
-			  "block rounded-sm w-[4px] h-8 md:h-10 lg:h-12 bg-blue-500",
-			  cursorClassName
-			)}
-		  ></motion.span>
+				<div
+					className="font-bold leading-tight text-gray-900 dark:text-white"
+					style={{
+						whiteSpace: "nowrap",
+					}}
+				>
+					{renderWords()}{" "}
+				</div>{" "}
+			</motion.div>
+			<motion.span
+				initial={{
+					opacity: 0,
+				}}
+				animate={{
+					opacity: 1,
+				}}
+				transition={{
+					duration: 0.8,
+					repeat: Infinity,
+					repeatType: "reverse",
+				}}
+				className={cn(
+					"block rounded-sm w-[4px] h-8 md:h-10 lg:h-12 bg-blue-500",
+					cursorClassName,
+				)}
+			></motion.span>
 		</div>
-	  );
+	);
 };

@@ -6,27 +6,24 @@ import { Link, Button, Image } from "@nextui-org/react";
 import BlogCard from "../components/blog/Card";
 import { getCollection } from "astro:content";
 
-
 const allBlogs = await getCollection("blog");
 
 // Sort by pubDate descending and take the latest 6 posts
 const latestBlogs = allBlogs
-  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
-  .slice(0, 6);
+	.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+	.slice(0, 6);
 
 // Group all blogs by their group
 const groupedBlogs = allBlogs.reduce((acc, blog) => {
-  if (!acc[blog.data.group]) {
-    acc[blog.data.group] = [];
-  }
-  acc[blog.data.group].push(blog);
-  return acc;
+	if (!acc[blog.data.group]) {
+		acc[blog.data.group] = [];
+	}
+	acc[blog.data.group].push(blog);
+	return acc;
 }, {});
 
 // Sort the groups alphabetically
 const sortedGroups = Object.keys(groupedBlogs).sort();
-
-
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE}>
@@ -37,7 +34,7 @@ const sortedGroups = Object.keys(groupedBlogs).sort();
     <h2 class="text-2xl md:text-3xl lg:text-4xl noSidebar:hidden font-bold leading-tight text-gray-900 dark:text-white mt-2">
       A developer sharing blogs and insights in technology.
     </h2>
-    <TypewriterEffectSmooth words={words} client:visible className="text-2xl md:text-3xl lg:text-[2.75rem] mt-4" />
+    <TypewriterEffectSmooth words={words} client:visible className="text-2xl md:text-3xl lg:text-[2.7rem] pb-2  mt-4" />
   </div>
   <div class="flex gap-2 mt-5 justify-center items-center md:justify-start">
     {
