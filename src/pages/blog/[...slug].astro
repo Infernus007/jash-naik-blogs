@@ -217,24 +217,25 @@ console.log(headings);
       const drawer = document.getElementById('summaryDrawer');
       const summaryContent = drawer ? drawer.querySelector('#summaryContent') : null;
       const skeletonLoader = drawer ? drawer.querySelector('#skeletonLoader') : null;
-    
-      if (summarizeButton && drawer && summaryContent && skeletonLoader) {
+      const pulsingCursor = drawer ? drawer.querySelector('#pulsingCursor') : null;
+
+      if (summarizeButton && drawer && summaryContent && skeletonLoader && pulsingCursor) {
         summarizeButton.addEventListener('click', async () => {
           // Open the drawer
           drawer.classList.remove('translate-x-full');
           drawer.classList.remove('right-0');
           drawer.classList.add('right-5');
-
           drawer.classList.add('w-96');
 
           // Check if content has already been generated
-          if (summaryContent.children.length > 1 || (summaryContent.children.length === 1 && !summaryContent.querySelector('.pulse-dot'))) {
+          if (summaryContent.children.length > 0) {
             // Content already exists, no need to fetch again
             return;
           }
 
           skeletonLoader.classList.remove('hidden');
-          summaryContent.innerHTML = '<p class="pulse-dot">Generating summary</p>';
+          summaryContent.innerHTML = '';
+          pulsingCursor.classList.add('hidden');
 
           const content = document.querySelector('.content')?.textContent || '';
           const optimizedPrompt = `Summarize the following text in a concise and informative manner, ensuring the output is valid HTML with proper formatting:
@@ -267,18 +268,24 @@ Maintain a professional and objective tone.`;
             const data = await response.json();
             const summary = data.candidates[0].content.parts[0].text;
 
+            // Hide skeleton loader and show pulsing cursor
+            skeletonLoader.classList.add('hidden');
+            pulsingCursor.classList.remove('hidden');
+
             // Incrementally add content
-            summaryContent.innerHTML = '';
             const parser = new DOMParser();
             const doc = parser.parseFromString(summary, 'text/html');
             const elements = Array.from(doc.body.children);
 
             for (let i = 0; i < elements.length; i++) {
-              await new Promise(resolve => setTimeout(resolve, 100)); // Delay between elements
+              await new Promise(resolve => setTimeout(resolve, 430)); // Delay between elements
               summaryContent.appendChild(elements[i]);
+              pulsingCursor.remove();
+              summaryContent.appendChild(pulsingCursor);
             }
 
-            skeletonLoader.classList.add('hidden');
+            // Remove pulsing cursor after all content is added
+            pulsingCursor.remove();
           } catch (error) {
             console.error('Error fetching summary:', error);
             skeletonLoader.classList.add('hidden');
@@ -286,7 +293,7 @@ Maintain a professional and objective tone.`;
           }
         });
       } else {
-        console.error('One or more elements not found: summarizeButton, summaryDrawer, summaryContent, skeletonLoader');
+        console.error('One or more elements not found: summarizeButton, summaryDrawer, summaryContent, skeletonLoader, pulsingCursor');
       }
 
     });
