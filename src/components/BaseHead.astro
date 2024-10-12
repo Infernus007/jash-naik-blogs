@@ -25,7 +25,12 @@ const {
 	description = SITE_DESCRIPTION,
 	image = "/og-image.png",
 } = Astro.props;
-const resolvedImageWithDomain = new URL("/og-image.png", Astro.site).toString();
+const resolvedImageWithDomain = new URL(image, Astro.site).toString();
+
+const resolvedFaviconWithDomain = new URL(
+	"/favicon.svg",
+	Astro.site,
+).toString();
 ---
 
 <!-- Global Metadata -->
@@ -67,7 +72,7 @@ const resolvedImageWithDomain = new URL("/og-image.png", Astro.site).toString();
 			{
 				rel: "icon",
 				type: "image/svg+xml",
-				href: "/favicon.svg",
+				href: resolvedFaviconWithDomain,
 			},
 		],
 		meta: [
