@@ -28,8 +28,6 @@ let relatedPosts: CollectionEntry<"blog">[] = [];
 if (post.data.relatedPosts) {
 	relatedPosts = await getEntries(post.data.relatedPosts);
 }
-
-console.log(headings);
 ---
 
 <IndexLayout title={post.data.title} description={post.data.description} image={post.data.heroImage}>

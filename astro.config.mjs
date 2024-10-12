@@ -19,7 +19,7 @@ const options = {
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://example.com",
+	site: "https://jash-naik-blogs.vercel.app/",
 	integrations: [
 		mdx(),
 		sitemap(),
