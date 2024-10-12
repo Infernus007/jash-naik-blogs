@@ -3,9 +3,11 @@ import { type CollectionEntry, getCollection, getEntries } from "astro:content";
 import IndexLayout from "../../layouts/indexLayout.astro";
 import "../../styles/BlogPost.css";
 import MyCard from "../../components/blog/Card";
-import { Avatar } from "@nextui-org/react";
 import SummaryDrawer from "../../components/blog/SummaryDrawer.astro";
 import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
+
+import { Button } from "@nextui-org/react";
+import { Sparkle } from "@phosphor-icons/react";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("blog");
@@ -79,12 +81,19 @@ console.log(headings);
                 </div>
               </div>
             </div>
-            <button
-              id="summarizeButton"
-              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
+            <Button 
+              id="summarizeButton" 
+              variant="bordered" 
+              radius="full"
+              className="relative group overflow-hidden"
             >
-              Summarize
-            </button>
+              <span class="absolute inset-0 bg-gradient-to-r from-sky-500 to-fuchsia-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span class="absolute inset-[2px] bg-stone-200 dark:bg-gray-900 rounded-full"></span>
+              <span class="relative z-10 flex items-center">
+                <Sparkle/>
+                Summarize
+              </span>
+            </Button>
           </div>
         </div>
         <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
@@ -213,7 +222,17 @@ console.log(headings);
         summarizeButton.addEventListener('click', async () => {
           // Open the drawer
           drawer.classList.remove('translate-x-full');
+          drawer.classList.remove('right-0');
+          drawer.classList.add('right-5');
+
           drawer.classList.add('w-96');
+
+          // Check if content has already been generated
+          if (summaryContent.children.length > 1 || (summaryContent.children.length === 1 && !summaryContent.querySelector('.pulse-dot'))) {
+            // Content already exists, no need to fetch again
+            return;
+          }
+
           skeletonLoader.classList.remove('hidden');
           summaryContent.innerHTML = '<p class="pulse-dot">Generating summary</p>';
 

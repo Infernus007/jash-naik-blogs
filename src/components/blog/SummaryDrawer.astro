@@ -1,9 +1,9 @@
 ---
 ---
 
-<div id="summaryDrawer" class="fixed top-16 right-0 bottom-0 w-0 md:w-96 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto z-50">
+<div id="summaryDrawer" class="fixed my-5 border-foreground/35 border-1 border-solid rounded-xl top-16 right-0 bottom-0 w-0 md:w-96 bg-background shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto z-50">
   <div class="p-4 h-full flex flex-col">
-    <div class="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
+    <div class="flex justify-between items-center mb-4 sticky top-0  z-10 py-2">
       <h2 class="text-xl font-bold">Summary</h2>
       <button id="closeDrawer" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -11,11 +11,12 @@
         </svg>
       </button>
     </div>
-    <div id="summaryContent" class="flex-grow overflow-y-auto prose">
+    <div  class="flex-grow overflow-y-auto prose">
       <!-- Pulsing Cursor Loader -->
       <div id="skeletonLoader" class="flex items-center justify-center h-full">
-        <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+        <div class="w-3 h-3 bg-sky-700  dark:bg-fuchsia-700 rounded-full animate-puls"></div>
       </div>
+<div id="summaryContent"></div>
       <!-- Actual content will be inserted here -->
     </div>
   </div>
@@ -27,20 +28,13 @@
 
   closeButton.addEventListener('click', () => {
     drawer.classList.add('translate-x-full');
+    drawer.classList.remove('right-5');
+    drawer.classList.add('right-0');
     drawer.classList.remove('w-96');
   });
 </script>
 
 <style>
-/* {{ edit_1 }} Add Pulsing Cursor Styles */
-.pulsing-cursor {
-  width: 12px;
-  height: 12px;
-  border: 2px solid #3498db;
-  border-top: 2px solid transparent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
 
 @keyframes spin {
   to {
