@@ -31,7 +31,7 @@ export function ModeToggle() {
 	return (
 		<Dropdown>
 			<DropdownTrigger>
-				<Button variant="bordered" isIconOnly>
+				<Button variant="bordered" aria-label="Toggle theme" isIconOnly>
 					{theme === "dark" ? (
 						<Moon />
 					) : theme === "theme-light" ? (

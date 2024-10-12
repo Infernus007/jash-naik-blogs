@@ -117,7 +117,14 @@ export default function CodeTabs(props) {
 	}, [codeBlocks, loading]);
 
 	if (loading) {
-		return <Skeleton className="w-full h-[350px]" />;
+		return (
+			<div className="w-full h-[350px]">
+				<span className="sr-only" aria-hidden={true}>
+					{code.props.value}
+				</span>
+				<Skeleton className="w-full h-full" />
+			</div>
+		);
 	}
 	return (
 		<div className="flex w-full flex-col not-prose" ref={containerRef}>

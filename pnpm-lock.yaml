@@ -47,9 +47,15 @@ importers:
       astro:
         specifier: ^4.4.0
         version: 4.4.0(typescript@5.3.3)
+      astro-compressor:
+        specifier: ^0.4.1
+        version: 0.4.1
       astro-pagefind:
         specifier: ^1.6.0
         version: 1.6.0(astro@4.4.0(typescript@5.3.3))
+      astro-seo:
+        specifier: ^0.8.4
+        version: 0.8.4(typescript@5.3.3)
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1602,10 +1608,16 @@ packages:
     resolution: {integrity: sha512-ISvCdHdlTDlH5IpxQJIex7BWBywFWgjJSVdwst+/iQCoEYnyOaQ95+X1JGshuBjGp6nxKUy1jMgE3zPqN7fQdg==}
     hasBin: true
 
+  astro-compressor@0.4.1:
+    resolution: {integrity: sha512-IAgYAlxYRMolaptsFB9quH7RxX4eUeC4UfULCPhT+ILcg7m1kbaxuyUKqGg9Hh+KZ+FNPPDAz7DqUfl+HDWhQg==}
+
   astro-pagefind@1.6.0:
     resolution: {integrity: sha512-U/WuE0ktkZkoFJf6yopWO4DjIJ3+wrnopE2L3kUYiyqNTJpqmp13bFLR8gir6B+KzQ5dsXQtJZYTQtKJg1FxIA==}
     peerDependencies:
       astro: ^2.0.4 || ^3.0.0 || ^4.0.0
+
+  astro-seo@0.8.4:
+    resolution: {integrity: sha512-Ou1vzQSXAxa0K8rtNtXNvSpYqOGEgMhh0immMxJeXmbVZac3UKCNWAoXWyOQDFYsZvBugCRSg0N1phBqPMVgCw==}
 
   astro@4.4.0:
     resolution: {integrity: sha512-JAsMrm1Z6W4Iqg9Q7LW/6lCXrqa4jndEOlR/yu7NGNP0BrPwSM8i4+yzya6hxgsNvyyVK8ywthaNhFmqd8Z+cg==}
@@ -5841,12 +5853,22 @@ snapshots:
 
   astring@1.8.6: {}
 
+  astro-compressor@0.4.1: {}
+
   astro-pagefind@1.6.0(astro@4.4.0(typescript@5.3.3)):
     dependencies:
       '@pagefind/default-ui': 1.1.1
       astro: 4.4.0(typescript@5.3.3)
       pagefind: 1.1.1
       sirv: 2.0.4
+
+  astro-seo@0.8.4(typescript@5.3.3):
+    dependencies:
+      '@astrojs/check': 0.5.4(typescript@5.3.3)
+    transitivePeerDependencies:
+      - prettier
+      - prettier-plugin-astro
+      - typescript
 
   astro@4.4.0(typescript@5.3.3):
     dependencies:

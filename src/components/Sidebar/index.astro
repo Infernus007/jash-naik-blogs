@@ -53,6 +53,7 @@ const currentPath = Astro.url.pathname;
           return (
             <li class="mb-1 ">
               <a
+                title={blog.data.title}
                 href={`/blog/${blog.slug}`}
                 class={`block w-fit rounded-md py-1 px-2 text-sm transition-colors duration-200 ${
                   isActive

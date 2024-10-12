@@ -5,6 +5,7 @@ import react from "@astrojs/react";
 import tailwind from "@astrojs/tailwind";
 import rehypePrettyCode from "rehype-pretty-code";
 import pagefind from "astro-pagefind";
+import compressor from "astro-compressor";
 
 /** @type {import('rehype-pretty-code').Options} */
 const options = {
@@ -19,7 +20,14 @@ const options = {
 // https://astro.build/config
 export default defineConfig({
 	site: "https://example.com",
-	integrations: [mdx(), sitemap(), react(), tailwind(), pagefind()],
+	integrations: [
+		mdx(),
+		sitemap(),
+		react(),
+		tailwind(),
+		pagefind(),
+		compressor(),
+	],
 
 	markdown: {
 		syntaxHighlight: false,

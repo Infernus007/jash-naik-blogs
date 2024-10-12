@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection, getEntries } from "astro:content";
 import IndexLayout from "../../layouts/indexLayout.astro";
+import { Image } from "astro:assets";
 import "../../styles/BlogPost.css";
 import MyCard from "../../components/blog/Card";
 import SummaryDrawer from "../../components/blog/SummaryDrawer.astro";
@@ -31,7 +32,7 @@ if (post.data.relatedPosts) {
 console.log(headings);
 ---
 
-<IndexLayout title="" description="">
+<IndexLayout title={post.data.title} description={post.data.description} image={post.data.heroImage}>
   <div class="flex flex-col lg:flex-row relative">
     <div class="w-full lg:w-3/4 p-4">
       <div class="mb-8">
@@ -97,6 +98,7 @@ console.log(headings);
           </div>
         </div>
         <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
+         {post.data.heroImage && <Image src={post.data.heroImage} alt={post.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl"/>}
           <Content />
         </div>
         {

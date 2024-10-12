@@ -25,6 +25,7 @@ const MyCard: React.FC<MyCardProps> = ({
 		<Card
 			as="a"
 			isPressable
+			title={title}
 			href={href}
 			onClick={(e) => {
 				e.preventDefault();
@@ -37,7 +38,7 @@ const MyCard: React.FC<MyCardProps> = ({
 				<h3>{title}</h3>
 				<p>{description}</p>
 			</CardBody>
-			{githubHref && githubHref.startsWith("https://") && (
+			{githubHref?.startsWith("https://") && (
 				<CardFooter>
 					<Link
 						isExternal
