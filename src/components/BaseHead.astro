@@ -19,16 +19,13 @@ interface Props {
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const resolvedImageWithDomain = new URL(
-	"/meta/opengraph.png",
-	Astro.site,
-).toString();
 
 const {
 	title = SITE_TITLE,
 	description = SITE_DESCRIPTION,
 	image = "/og-image.png",
 } = Astro.props;
+const resolvedImageWithDomain = new URL("/og-image.png", Astro.site).toString();
 ---
 
 <!-- Global Metadata -->
@@ -88,7 +85,7 @@ const {
 			},
 			{
 				name: "twitter:image",
-				content: image,
+				content: resolvedImageWithDomain,
 			},
 			{ name: "twitter:title", content: title },
 			{ name: "twitter:description", content: description },
