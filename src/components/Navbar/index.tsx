@@ -8,15 +8,15 @@ export default function NextUINav(props) {
 	return (
 		<Navbar
 			className="w-[95%] mx-auto bg-inherit"
+			position="sticky"
 			isBordered
 			maxWidth="full"
-			position="sticky"
 		>
 			<NavbarContent justify="start">
 				<NavbarBrand className="mr-4 ">
 					<AcmeLogo />
 					<p className="hidden sm:block font-bold text-inherit m-0">
-						Lazy blogs
+						Jash Naik
 					</p>
 				</NavbarBrand>
 			</NavbarContent>

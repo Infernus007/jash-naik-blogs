@@ -6,6 +6,7 @@
 
 
 
+
 ---
 // Import necessary components
 import { Button, Kbd } from "@nextui-org/react";
@@ -46,11 +47,15 @@ import { Button, Kbd } from "@nextui-org/react";
     function openModal() {
       modal.classList.remove('opacity-0');
       modal.classList.add('opacity-100');
+      modal.classList.remove('-z-10');
+      modal.classList.add('z-50'); // Add this line to increase the z-index when the modal opens
     }
 
     function closeModal() {
       modal.classList.remove('opacity-100');
       modal.classList.add('opacity-0');
+      modal.classList.remove('z-50'); // Add this line to remove the increased z-index when the modal closes
+      modal.classList.add('-z-10');
     }
 
     if (button) {
@@ -80,5 +85,8 @@ import { Button, Kbd } from "@nextui-org/react";
         openModal();
       }
     });
+
+    
   });
 </script>
+

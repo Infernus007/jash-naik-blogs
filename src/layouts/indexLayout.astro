@@ -17,17 +17,17 @@ const { title, description } = Astro.props;
   <head>
     <BaseHead title={title} description={description} />
   </head>
-  <body class="bg-stone-200 dark:bg-gray-900">
+  <body class="bg-stone-200 dark:bg-gray-900 min-h-screen flex flex-col">
     <Header />
-    <main class="relative flex mt-10 z-10">
-      <div class="h-full sticky top-12">
+    <main class="flex flex-1 mt-16">
+      <div class="h-full sticky top-16 overflow-y-scroll">
         <Sidebar />
       </div>
-        <div class="p-5 lg:ps-[78px] flex-1">
+      <div class="p-5 lg:ps-[78px] flex-1">
         <slot />
       </div>
 
-      <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-start justify-center pt-20 z-20 opacity-0 transition-opacity duration-300">
+      <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-start justify-center pt-20 -z-10 opacity-0 transition-opacity duration-300">
         <div class="bg-white box-border dark:bg-gray-900 w-full max-w-xl mx-auto overflow-hidden
                     border-1 border-background rounded-3xl shadow-2xl animate-in zoom-in-95">
           <div class="py-3 px-6">

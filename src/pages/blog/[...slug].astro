@@ -4,13 +4,15 @@ import IndexLayout from "../../layouts/indexLayout.astro";
 import "../../styles/BlogPost.css";
 import MyCard from "../../components/blog/Card";
 import { Avatar } from "@nextui-org/react";
+import SummaryDrawer from "../../components/blog/SummaryDrawer.astro";
+import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog");
-  return posts.map((post) => ({
-    params: { slug: post.slug },
-    props: post,
-  }));
+	const posts = await getCollection("blog");
+	return posts.map((post) => ({
+		params: { slug: post.slug },
+		props: post,
+	}));
 }
 type Props = CollectionEntry<"blog">;
 
@@ -21,25 +23,25 @@ const { Content, headings } = await post.render();
 let relatedPosts: CollectionEntry<"blog">[] = [];
 
 if (post.data.relatedPosts) {
-  relatedPosts = await getEntries(post.data.relatedPosts);
+	relatedPosts = await getEntries(post.data.relatedPosts);
 }
 
 console.log(headings);
 ---
 
 <IndexLayout title="" description="">
-  <div class="flex flex-col lg:flex-row">
+  <div class="flex flex-col lg:flex-row relative">
     <div class="w-full lg:w-3/4 p-4">
       <div class="mb-8">
         <div class="mb-6">
           <div class="flex items-center space-x-2 mb-4">
             <a
               href="/"
-              class="flex gap-2 justify-center items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              class="flex gap-2 justify-center items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md rounded-lg p-2"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6"
+                class="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:-translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -50,34 +52,42 @@ console.log(headings);
                   stroke-width="2"
                   d="M15 19l-7-7 7-7"></path>
               </svg>
-              <span class="text-lg font-semibold text-gray-800 dark:text-white"
-              >Blog</span
+              <span class="text-lg font-semibold text-gray-800 dark:text-white group-hover:underline"
+              >Back</span
             >
             </a>
             
           </div>
 
-          <div class="flex items-center space-x-4">
-            <Avatar name="Junior" src="#" />
-            <div>
-              <h1 class="font-semibold text-gray-900 dark:text-white">
-                Jash Naik
-              </h1>
-              <div
-                class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400"
-              >
-                <span>{post.data.pubDate.toDateString()}</span>
-                <span class="flex items-center">
-                  <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>
-                  {post.data.group}
-                  /
-                  {post.data.title}
-                </span>
+          <div class="flex items-center justify-between space-x-4">
+            <div class="flex items-center space-x-4">
+              <AcmeLogo />
+              <div>
+                <h1 class="font-semibold text-gray-900 dark:text-white">
+                  Jash Naik
+                </h1>
+                <div
+                  class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400"
+                >
+                  <span>{post.data.pubDate.toDateString()}</span>
+                  <span class="flex items-center">
+                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>
+                    {post.data.group}
+                    /
+                    {post.data.title}
+                  </span>
+                </div>
               </div>
             </div>
+            <button
+              id="summarizeButton"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
+            >
+              Summarize
+            </button>
           </div>
         </div>
-        <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-200 dark:prose-a:text-fuchsia-600 prose-code:text-sky-200 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
+        <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
           <Content />
         </div>
         {
@@ -91,13 +101,14 @@ console.log(headings);
                     title={relatedPost.data.title}
                     description={relatedPost.data.description}
                     href={`/blog/${relatedPost.slug}`}
-                    githubHref={relatedPost.data.githubHref}
                   >
+                    <div class="m-2 rounded-md">
                     <img
                       src={relatedPost.data.heroImage}
                       alt={relatedPost.data.title}
-                      class="w-full h-auto"
+                      class="w-full h-auto rounded-2xl"
                     />
+                    </div>
                   </MyCard>
                 ))}
               </div>
@@ -129,58 +140,151 @@ console.log(headings);
         </ul>
       </div>
     </aside>
-    </div>
+    
   </div>
-
-  <script>
-    const tocLinks = document.querySelectorAll(".toc-link");
-    const headingElements = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
-    const tocHighlighter = document.getElementById("toc-highlighter");
+  <SummaryDrawer/>
   
-    const SCROLL_OFFSET = 80;
-
-  tocLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const targetId = link.getAttribute('href').slice(1);
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', () => {
+      // Handle Table of Contents (TOC) interactions
+      const tocLinks = document.querySelectorAll(".toc-link");
+      const headingElements = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
+      const tocHighlighter = document.getElementById("toc-highlighter");
+      const toc = document.getElementById("toc");
+    
+      if (tocHighlighter) {
+        // Proceed with manipulations
       }
-    });
-  });
-
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            tocLinks.forEach((link) => link.classList.remove("active"));
-            const activeLink = document.querySelector(
-              `.toc-link[href="#${entry.target.id}"]`
-            );
-            if (activeLink) {
-              activeLink.classList.add("active");
-              const linkRect = activeLink.getBoundingClientRect();
-              const tocRect = document.getElementById("toc").getBoundingClientRect();
-              tocHighlighter.style.top = `${linkRect.top - tocRect.top}px`;
-              tocHighlighter.style.width = `${linkRect.width}px`;
-            }
+    
+      if (toc) {
+        const tocRect = toc.getBoundingClientRect();
+        // Use tocRect as needed
+      }
+    
+      // Similarly for other potentially null elements
+    
+      const SCROLL_OFFSET = 80;
+    
+      tocLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href').slice(1);
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
           }
         });
-      },
-      { threshold: 0.1 }
-    );
-  
-    headingElements.forEach((element) => observer.observe(element));
-  </script>
-  
-  <style>
+      });
+    
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              tocLinks.forEach((link) => link.classList.remove("active"));
+              const activeLink = document.querySelector(
+                `.toc-link[href="#${entry.target.id}"]`
+              );
+              if (activeLink) {
+                activeLink.classList.add("active");
+                const linkRect = activeLink.getBoundingClientRect();
+                const tocRect = document.getElementById("toc").getBoundingClientRect();
+                tocHighlighter.style.top = `${linkRect.top - tocRect.top}px`;
+                tocHighlighter.style.width = `${linkRect.width}px`;
+              }
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+    
+      headingElements.forEach((element) => observer.observe(element));
+    
+      // Handle Summary Drawer functionality
+      const summarizeButton = document.getElementById('summarizeButton');
+      const drawer = document.getElementById('summaryDrawer');
+      const summaryContent = drawer ? drawer.querySelector('#summaryContent') : null;
+      const skeletonLoader = drawer ? drawer.querySelector('#skeletonLoader') : null;
+    
+      if (summarizeButton && drawer && summaryContent && skeletonLoader) {
+        summarizeButton.addEventListener('click', async () => {
+          // Open the drawer
+          drawer.classList.remove('translate-x-full');
+          drawer.classList.add('w-96');
+          skeletonLoader.classList.remove('hidden');
+          summaryContent.innerHTML = '<p class="pulse-dot">Generating summary</p>';
 
+          const content = document.querySelector('.content')?.textContent || '';
+          const optimizedPrompt = `Summarize the following text in a concise and informative manner, ensuring the output is valid HTML with proper formatting:
+
+${content}
+
+Please structure the summary using the following HTML tags:
+1. Use <h2> or <h3> for titles and subtitles.
+2. Enclose each paragraph within <p class="mb-4"> tags.
+3. Utilize <ul> or <ol> for lists if necessary.
+4. Apply <strong> tags for emphasis.
+
+Maintain a professional and objective tone.`;
+
+          try {
+            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyB0m5BB0yRXAWPySU_pcKBwJwZFKGV-yos', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [{
+                    text: optimizedPrompt
+                  }]
+                }]
+              }),
+            });
+
+            const data = await response.json();
+            const summary = data.candidates[0].content.parts[0].text;
+
+            // Incrementally add content
+            summaryContent.innerHTML = '';
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(summary, 'text/html');
+            const elements = Array.from(doc.body.children);
+
+            for (let i = 0; i < elements.length; i++) {
+              await new Promise(resolve => setTimeout(resolve, 100)); // Delay between elements
+              summaryContent.appendChild(elements[i]);
+            }
+
+            skeletonLoader.classList.add('hidden');
+          } catch (error) {
+            console.error('Error fetching summary:', error);
+            skeletonLoader.classList.add('hidden');
+            summaryContent.innerHTML = '<p class="text-red-500">An error occurred while generating the summary. Please try again later.</p>';
+          }
+        });
+      } else {
+        console.error('One or more elements not found: summarizeButton, summaryDrawer, summaryContent, skeletonLoader');
+      }
+
+    });
+  </script>
+
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .pulse-dot::after {
+      content: '•';
+      display: inline-block;
+      animation: pulse 1s ease-in-out infinite;
+      margin-left: 0.25rem;
+    }
 
     .toc-link {
       position: relative;
