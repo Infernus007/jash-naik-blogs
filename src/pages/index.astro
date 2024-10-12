@@ -2,28 +2,44 @@
 import Layout from "../layouts/indexLayout.astro";
 import { SITE_TITLE, SITE_DESCRIPTION, words, heroInnerLinks } from "../consts";
 import { TypewriterEffectSmooth } from "../components/Typewriter/index";
-import { Link, Button, Image } from "@nextui-org/react";
+import { Link, Button } from "@nextui-org/react";
 import BlogCard from "../components/blog/Card";
 import { getCollection } from "astro:content";
 
-const allBlogs = await getCollection("blog");
+interface Blog {
+	id: string;
+	data: {
+		title: string;
+		description: string;
+		pubDate: Date;
+		group: string;
+		githubHref?: string;
+		heroImage?: string;
+	};
+	slug: string;
+}
+
+const allBlogs: Blog[] = await getCollection("blog");
 
 // Sort by pubDate descending and take the latest 6 posts
-const latestBlogs = allBlogs
+const latestBlogs: Blog[] = allBlogs
 	.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
 	.slice(0, 6);
 
 // Group all blogs by their group
-const groupedBlogs = allBlogs.reduce((acc, blog) => {
-	if (!acc[blog.data.group]) {
-		acc[blog.data.group] = [];
-	}
-	acc[blog.data.group].push(blog);
-	return acc;
-}, {});
+const groupedBlogs: { [key: string]: Blog[] } = allBlogs.reduce(
+	(acc, blog) => {
+		if (!acc[blog.data.group]) {
+			acc[blog.data.group] = [];
+		}
+		acc[blog.data.group].push(blog);
+		return acc;
+	},
+	{} as { [key: string]: Blog[] },
+);
 
 // Sort the groups alphabetically
-const sortedGroups = Object.keys(groupedBlogs).sort();
+const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE}>
@@ -60,7 +76,6 @@ const sortedGroups = Object.keys(groupedBlogs).sort();
       {latestBlogs.map((blog) => (
         <BlogCard
         client:load
-          key={blog.id}
           title={blog.data.title}
           description={blog.data.description}
           href={`/blog/${blog.slug}`}
@@ -79,13 +94,13 @@ const sortedGroups = Object.keys(groupedBlogs).sort();
   <h3 class="text-2xl font-bold mb-8">Explore All Topics</h3>
   <div class="flex flex-col gap-4">
     {sortedGroups.map((group) => (
-      <div key={group} class="group">
+      <div  class="group">
         <h4 class="text-xl w-fit font-semibold mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition-colors duration-300">
           {group}
         </h4>
         <ul class="space-y-2">
           {groupedBlogs[group].map((blog) => (
-            <li key={blog.id} class="group/item">
+            <li  class="group/item">
               <a href={`/blog/${blog.slug}`} class="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200 flex items-center">
                 <span class="mr-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">&#8594;</span>
                 {blog.data.title}

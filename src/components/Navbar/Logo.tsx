@@ -1,4 +1,3 @@
-import React from "react";
 export const AcmeLogo = () => (
 	<svg
 		xlinkTitle="logo"

@@ -106,7 +106,6 @@ console.log(headings);
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {relatedPosts.map((relatedPost) => (
                   <MyCard
-                    key={relatedPost.id}
                     title={relatedPost.data.title}
                     description={relatedPost.data.description}
                     href={`/blog/${relatedPost.slug}`}
@@ -154,21 +153,12 @@ console.log(headings);
   <SummaryDrawer/>
   
   <script type="module">
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('astro:page-load', () => {
       // Handle Table of Contents (TOC) interactions
       const tocLinks = document.querySelectorAll(".toc-link");
       const headingElements = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
       const tocHighlighter = document.getElementById("toc-highlighter");
       const toc = document.getElementById("toc");
-    
-      if (tocHighlighter) {
-        // Proceed with manipulations
-      }
-    
-      if (toc) {
-        const tocRect = toc.getBoundingClientRect();
-        // Use tocRect as needed
-      }
     
       // Similarly for other potentially null elements
     

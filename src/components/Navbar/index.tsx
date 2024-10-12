@@ -1,9 +1,8 @@
-import { Button } from "@nextui-org/react";
-
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/react";
 import { AcmeLogo } from "./Logo.tsx";
 import { ModeToggle } from "../MoodToggle/index.tsx";
 
+//@ts-ignore
 export default function NextUINav(props) {
 	return (
 		<Navbar

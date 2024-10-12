@@ -1,25 +1,27 @@
 ---
 import { getCollection } from "astro:content";
 
- const allBlogs = await getCollection("blog");
-  
-  // Sort by pubDate descending and take the latest 6 posts
-  const latestBlogs = allBlogs
-    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
-    .slice(0, 6);
+const allBlogs = await getCollection("blog");
 
-  // Group the latest posts by their group
-  const groupedBlogs = latestBlogs.reduce((acc, blog) => {
-    if (!acc[blog.data.group]) {
-      acc[blog.data.group] = [];
-    }
-    acc[blog.data.group].push(blog);
-    return acc;
-  }, {} as Record<string, typeof latestBlogs>);
+// Sort by pubDate descending and take the latest 6 posts
+const latestBlogs = allBlogs
+	.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+	.slice(0, 6);
 
-  const sortedGroups = Object.keys(groupedBlogs).sort();
-  const currentPath = Astro.url.pathname;
+// Group the latest posts by their group
+const groupedBlogs = latestBlogs.reduce(
+	(acc, blog) => {
+		if (!acc[blog.data.group]) {
+			acc[blog.data.group] = [];
+		}
+		acc[blog.data.group].push(blog);
+		return acc;
+	},
+	{} as Record<string, typeof latestBlogs>,
+);
 
+const sortedGroups = Object.keys(groupedBlogs).sort();
+const currentPath = Astro.url.pathname;
 ---
 
 <aside class="w-64 p-4  flex flex-col items-center">
@@ -54,8 +56,8 @@ import { getCollection } from "astro:content";
                 href={`/blog/${blog.slug}`}
                 class={`block w-fit rounded-md py-1 px-2 text-sm transition-colors duration-200 ${
                   isActive
-                    ? "bg-blue-400"
-                    : "text-foreground/85   hover:bg-gray-300"
+                    ? "bg-sky-400 dark:bg-fuchsia-400"
+                    : "text-foreground/85   hover:bg-gray-300 dark:hover:bg-gray-700"
                 }`}
               >
                 {blog.data.title}
@@ -68,23 +70,25 @@ import { getCollection } from "astro:content";
   ))}
 </aside>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+<script >
+  document.addEventListener('astro:page-load', () => {
     document.querySelectorAll('[id^="toggle-btn-"]').forEach((toggleBtn) => {
       const index = toggleBtn.id.split('-')[2];
-      const collapsible = document.getElementById(`collapsible-${index}`);
+      const collapsible = document.getElementById(`collapsible-${index}`) as HTMLElement | null;
       let isCollapsed = false;
 
       toggleBtn.addEventListener('click', () => {
         isCollapsed = !isCollapsed;
-        const icon = toggleBtn.querySelector('svg');
+        const icon = toggleBtn.querySelector('svg') as SVGElement | null;
         
-        if (isCollapsed) {
-          collapsible.style.maxHeight = '0';
-          icon.style.transform = 'rotate(0deg)';
-        } else {
-          collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
-          icon.style.transform = 'rotate(180deg)';
+        if (collapsible && icon) {
+          if (isCollapsed) {
+            collapsible.style.maxHeight = '0';
+            icon.style.transform = 'rotate(0deg)';
+          } else {
+            collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
+            icon.style.transform = 'rotate(180deg)';
+          }
         }
       });
     });
