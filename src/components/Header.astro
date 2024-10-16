@@ -1,8 +1,29 @@
 ---
 import NextUINav from "../components/Navbar/index.tsx";
 import ModalButton from "../components/Modal/index.astro";
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+
+const allBlogs = await getCollection("blog");
+
+// Sort by pubDate descending and take the latest 6 posts
+const latestBlogs = allBlogs
+	.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+	.slice(0, 6);
+
+// Group the latest posts by their group
+const groupedBlogs = latestBlogs.reduce(
+	(acc, blog) => {
+		if (!acc[blog.data.group]) {
+			acc[blog.data.group] = [];
+		}
+		acc[blog.data.group].push(blog);
+		return acc;
+	},
+	{} as Record<string, CollectionEntry<'blog'>[]>
+);
 ---
 
-    <NextUINav client:load >
-        <ModalButton/>
-    </NextUINav>
+<NextUINav client:load groupedBlogs={groupedBlogs}>
+	<ModalButton />
+</NextUINav>

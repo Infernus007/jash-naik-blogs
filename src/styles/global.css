@@ -56,3 +56,27 @@ html,
 .pagefind-ui__search-clear {
 	@apply text-background absolute top-[calc(14px*var(--pagefind-ui-scale))] right-[calc(10px*var(--pagefind-ui-scale))] h-[calc(35px*var(--pagefind-ui-scale))] px-[calc(10px*var(--pagefind-ui-scale))] py-0  text-[calc(14px*var(--pagefind-ui-scale))] cursor-pointer bg-foreground rounded-full flex items-center !important;
 }
+
+/* Make the scroll shadow thin across all browsers */
+* {
+	scrollbar-width: thin; /* Firefox */
+	scrollbar-color: #888 #f1f1f1; /* Firefox */
+}
+
+*::-webkit-scrollbar {
+	width: 4px; /* Chrome, Safari, and Opera */
+}
+
+*::-webkit-scrollbar-track {
+	background: #f1f1f1; /* Chrome, Safari, and Opera */
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: #888; /* Chrome, Safari, and Opera */
+	border-radius: 10px; /* Chrome, Safari, and Opera */
+	border: 2px solid #f1f1f1; /* Chrome, Safari, and Opera */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background: #555; /* Chrome, Safari, and Opera */
+}

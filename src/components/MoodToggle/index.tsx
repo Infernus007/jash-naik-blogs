@@ -11,13 +11,16 @@ import {
 import { Moon, Sun, Airplay } from "@phosphor-icons/react";
 
 export function ModeToggle() {
-	const [theme, setThemeState] = React.useState<
-		"theme-light" | "dark" | "system"
-	>("theme-light");
+	const [theme, setThemeState] = React.useState<"light" | "dark" | "system">("system");
 
 	React.useEffect(() => {
-		const isDarkMode = document.documentElement.classList.contains("dark");
-		setThemeState(isDarkMode ? "dark" : "theme-light");
+		const storedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" | null;
+		if (storedTheme) {
+			setThemeState(storedTheme);
+		} else {
+			const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+			setThemeState(prefersDark ? "dark" : "light");
+		}
 	}, []);
 
 	React.useEffect(() => {
@@ -25,7 +28,8 @@ export function ModeToggle() {
 			theme === "dark" ||
 			(theme === "system" &&
 				window.matchMedia("(prefers-color-scheme: dark)").matches);
-		document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+		document.documentElement.classList.toggle("dark", isDark);
+		localStorage.setItem("theme", theme);
 	}, [theme]);
 
 	return (
@@ -34,7 +38,7 @@ export function ModeToggle() {
 				<Button variant="bordered" aria-label="Toggle theme" isIconOnly>
 					{theme === "dark" ? (
 						<Moon />
-					) : theme === "theme-light" ? (
+					) : theme === "light" ? (
 						<Sun />
 					) : (
 						<Airplay />
@@ -43,7 +47,7 @@ export function ModeToggle() {
 				</Button>
 			</DropdownTrigger>
 			<DropdownMenu aria-label="Static Actions" className="dark:text-white">
-				<DropdownItem key="light" onClick={() => setThemeState("theme-light")}>
+				<DropdownItem key="light" onClick={() => setThemeState("light")}>
 					Light
 				</DropdownItem>
 				<DropdownItem key="dark" onClick={() => setThemeState("dark")}>
