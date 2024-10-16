@@ -14,7 +14,7 @@ interface NextUINavProps {
 
 export default function NextUINav({ groupedBlogs }: NextUINavProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-	const isMobile = useMediaQuery('(max-width: 640px)');
+	const isMobile = useMediaQuery('(max-width: 639px)');
 
 	return (
 		<Navbar 

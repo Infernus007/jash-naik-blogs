@@ -5,6 +5,7 @@ import Sidebar from "../components/Sidebar/index.astro";
 import Search from "astro-pagefind/components/Search";
 import Footer from "../components/Footer.astro";
 import {ScrollShadow} from "@nextui-org/react";
+import { ViewTransitions } from "astro:transitions";
 
 interface Props {
 	title: string;
@@ -19,6 +20,7 @@ const { title, description, image } = Astro.props;
 <html lang="en" transition:animate="none">
   <head>
     <BaseHead title={title} description={description} image={image} />
+    <ViewTransitions />
     <script is:inline>
       function getThemePreference() {
         if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
@@ -45,10 +47,12 @@ const { title, description, image } = Astro.props;
   <body class="bg-stone-200 dark:bg-gray-900 min-h-screen flex flex-col">
     <Header />
     <main class="flex flex-1 mt-16">
-      <ScrollShadow className="max-h-[80vh] sticky top-16 " client:load>
-        <Sidebar />
-      </ScrollShadow>
-      <div class="p-5 lg:ps-[78px] flex-1">
+      <div class="hidden sm:block">
+        <ScrollShadow className="max-h-[80vh] sticky top-16" client:load>
+          <Sidebar />
+        </ScrollShadow>
+      </div>
+      <div class="p-5 lg:ps-[78px] flex-1 w-full sm:w-auto">
         <slot />
       </div>
 
