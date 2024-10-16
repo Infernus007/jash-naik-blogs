@@ -9,10 +9,11 @@ export default function SearchButton() {
   return (
     <Button
       aria-label="Search"
-      className="text-sm font-normal text-default-500 bg-default-100"
       endContent={!isMobile && <kbd className="bg-default-100 px-1 py-0.5 rounded">⌘ K</kbd>}
       startContent={<MagnifyingGlass size={18} />}
-      variant="flat"
+      id="btn"
+      variant="bordered"
+      radius='lg'
       isIconOnly={isMobile}
     >
       {!isMobile && "Quick search..."}

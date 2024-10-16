@@ -33,7 +33,7 @@ const currentPath = Astro.url.pathname;
       >
         <span>{group}</span>
         <svg
-          class="w-3 h-3 ml-1 transition-transform duration-300"
+          class="w-3 h-3 ml-1 transition-transform duration-300 rotate-180"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -51,13 +51,13 @@ const currentPath = Astro.url.pathname;
         {groupedBlogs[group].map((blog) => {
           const isActive = currentPath === `/blog/${blog.slug}`;
           return (
-            <li class="mb-1">
+            <li class="mb-1 w-fit">
               <a
                 title={blog.data.title}
                 href={`/blog/${blog.slug}`}
                 class={`block w-full rounded-md py-1 px-2 text-sm transition-colors duration-200 ${
                   isActive
-                    ? "bg-sky-400 dark:bg-fuchsia-400"
+                    ? "bg-sky-400 dark:bg-fuchsia-600"
                     : "text-foreground/85 hover:bg-gray-300 dark:hover:bg-gray-700"
                 }`}
               >
@@ -76,10 +76,10 @@ const currentPath = Astro.url.pathname;
     document.querySelectorAll('[id^="toggle-btn-"]').forEach((toggleBtn) => {
       const index = toggleBtn.id.split('-')[2];
       const collapsible = document.getElementById(`collapsible-${index}`) as HTMLElement | null;
-      let isCollapsed = true; // Start collapsed
+      let isCollapsed = false; // Start expanded
 
-      if (collapsible && collapsible.scrollHeight > 0) {
-        collapsible.style.maxHeight = '0';
+      if (collapsible) {
+        collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
       }
 
       toggleBtn.addEventListener('click', () => {

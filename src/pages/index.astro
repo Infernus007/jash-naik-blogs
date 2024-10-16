@@ -44,16 +44,16 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE} image="/og-image.png">
-  <div class="text-center md:text-start">
-    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
+  <div class="text-center sm:text-start">
+    <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
       Hello, I'm Jash
-    </h2>
-    <h2 class="text-2xl md:text-3xl lg:text-4xl noSidebar:hidden font-bold leading-tight text-gray-900 dark:text-white mt-2">
+    </h1>
+    <h2 class="block lg:hidden text-xl sm:text-2xl   font-bold leading-tight text-gray-900 dark:text-white mt-2">
       A developer sharing blogs and insights in technology.
     </h2>
-    <TypewriterEffectSmooth words={words} client:visible className="text-2xl md:text-3xl lg:text-[2.7rem] pb-2  mt-4" />
+    <TypewriterEffectSmooth words={words} client:visible className="text-lg sm:text-xl md:text-2xl lg:text-[2.7rem] pb-2 mt-4" />
   </div>
-  <div class="flex gap-2 mt-5 justify-center items-center md:justify-start">
+  <div class="flex flex-wrap gap-2 mt-5 justify-center sm:justify-start">
     {
       heroInnerLinks.map((e) => {
         return (
@@ -63,6 +63,8 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
             color="primary"
             showAnchorIcon
             variant="flat"
+            size="sm"
+            className="text-sm sm:text-base"
             aria-label={e.text}
           >
             {e.text}
@@ -73,50 +75,48 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
   </div>
 
   <section class="mt-10">
-    <h3 class="text-xl font-bold mb-4">Latest Blogs</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <h3 class="text-lg sm:text-xl font-bold mb-4">Latest Blogs</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
       {latestBlogs.map((blog) => (
         <BlogCard
-        client:load
+          client:load
           title={blog.data.title}
           description={blog.data.description}
           href={`/blog/${blog.slug}`}
           githubHref={blog.data.githubHref}
         >
           <div class="m-2 rounded-md">
-          {blog.data.heroImage && <Image src={blog.data.heroImage} alt={blog.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl" />}
-        </div>
+            {blog.data.heroImage && <Image src={blog.data.heroImage} alt={blog.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl" />}
+          </div>
         </BlogCard>
       ))}
     </div>
   </section>
 
- <!-- All Topics section -->
- <section class="mt-16">
-  <h3 class="text-2xl font-bold mb-8">Explore All Topics</h3>
-  <div class="flex flex-col gap-4">
-    {sortedGroups.map((group) => (
-      <div  class="group">
-        <h4 class="text-xl w-fit font-semibold mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition-colors duration-300">
-          {group}
-        </h4>
-        <ul class="space-y-2">
-          {groupedBlogs[group].map((blog) => (
-            <li  class="group/item">
-              <a href={`/blog/${blog.slug}`} class="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200 flex items-center">
-                <span class="mr-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">&#8594;</span>
-                {blog.data.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
-  </div>
-</section>
-  
+  <!-- All Topics section -->
+  <section class="mt-12 sm:mt-16">
+    <h3 class="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Explore All Topics</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+      {sortedGroups.map((group) => (
+        <div class="group">
+          <h4 class="text-lg sm:text-xl w-fit font-semibold mb-3 sm:mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition-colors duration-300">
+            {group}
+          </h4>
+          <ul class="space-y-2">
+            {groupedBlogs[group].map((blog) => (
+              <li class="group/item">
+                <a href={`/blog/${blog.slug}`} class="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200 flex items-center">
+                  <span class="mr-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">&#8594;</span>
+                  {blog.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
 </Layout>
-
 
 <style>
   .group:hover h4 {

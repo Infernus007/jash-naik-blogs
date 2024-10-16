@@ -10,11 +10,15 @@ type BlogPost = CollectionEntry<'blog'>;
 
 interface NextUINavProps {
   groupedBlogs: Record<string, BlogPost[]>;
+  children?: React.ReactNode;
+  // biome-ignore lint/suspicious/noExplicitAny: this is to allow for additional props, including client directives
+  [key: string]: any;
 }
 
-export default function NextUINav({ groupedBlogs }: NextUINavProps) {
+export default function NextUINav(props: NextUINavProps) {
+  const { groupedBlogs, children, ...rest } = props;
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-	const isMobile = useMediaQuery('(max-width: 639px)');
+	const isMobile = useMediaQuery('(max-width: 767px)');
 
 	return (
 		<Navbar 
@@ -27,11 +31,11 @@ export default function NextUINav({ groupedBlogs }: NextUINavProps) {
 			<NavbarContent>
 				<NavbarMenuToggle
 					aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-					className="sm:hidden"
+					className="md:hidden"
 				/>
 				<NavbarBrand className="mr-4">
 					<AcmeLogo />
-					<p className="hidden sm:block font-bold text-inherit m-0">
+					<p className="hidden md:block font-bold text-inherit m-0">
 						Jash Naik
 					</p>
 				</NavbarBrand>
@@ -39,7 +43,7 @@ export default function NextUINav({ groupedBlogs }: NextUINavProps) {
 
 			<NavbarContent as="div" className="items-center" justify="end">
 				<NavbarItem>
-					<SearchButton />
+					{children}
 				</NavbarItem>
 				<NavbarItem>
 					<ModeToggle />

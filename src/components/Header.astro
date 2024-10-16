@@ -1,6 +1,6 @@
 ---
 import NextUINav from "../components/Navbar/index.tsx";
-import ModalButton from "../components/Modal/index.astro";
+import SearchButton from "../components/Modal/index.astro";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from 'astro:content';
 
@@ -25,5 +25,5 @@ const groupedBlogs = latestBlogs.reduce(
 ---
 
 <NextUINav client:load groupedBlogs={groupedBlogs}>
-	<ModalButton />
+	<SearchButton />
 </NextUINav>
