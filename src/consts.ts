@@ -32,11 +32,11 @@ export const words = [
 
 export const heroInnerLinks: { href: string; text: string }[] = [
 	{
-		href: "#",
+		href: "#contact",
 		text: "Contact me",
 	},
 	{
-		href: "#",
+		href: "https://jashnaik.vercel.app/",
 		text: "About",
 	},
 ];
