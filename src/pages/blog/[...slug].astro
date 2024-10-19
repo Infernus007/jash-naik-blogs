@@ -6,6 +6,8 @@ import "../../styles/BlogPost.css";
 import MyCard from "../../components/blog/Card";
 import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
 import SummaryDrawer from "../../components/blog/SummaryDrawer.tsx";
+import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro"
+
 
 export async function getStaticPaths() {
 	const posts = await getCollection("blog");
@@ -31,61 +33,62 @@ const geminiApiKey = import.meta.env.GEMINI_API_KEY;
 ---
 
 <IndexLayout title={post.data.title} description={post.data.description} image={post.data.heroImage}>
-  <div class="flex flex-col lg:flex-row relative">
-    <div class="w-full lg:w-3/4 py-4">
-      <div class="mb-8">
-        <div class="mb-6">
-          <div class="flex items-center space-x-2 mb-4">
-            <a
-              href="/"
-              class="flex gap-2 justify-center items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md rounded-lg p-2"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:-translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 19l-7-7 7-7"></path>
-              </svg>
-              <span class="text-lg font-semibold text-gray-800 dark:text-white group-hover:underline"
-              >Back</span
-            >
-            </a>
-            
-          </div>
+  <div class="mb-6">
+    <div class="flex items-center space-x-2 mb-4">
+      <a
+        href="/"
+        class="flex gap-2 justify-center items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md rounded-lg p-2"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:-translate-x-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"></path>
+        </svg>
+        <span class="text-lg font-semibold text-gray-800 dark:text-white group-hover:underline"
+        >Back</span
+      >
+      </a>
+      
+    </div>
 
-          <div class="flex items-center justify-between space-x-4">
-            <div class="flex flex-wrap items-center space-x-4">
-              <AcmeLogo />
-              <div>
-                <h1 class="font-semibold text-gray-900 dark:text-white">
-                  Jash Naik
-                </h1>
-                <div
-                  class="flex flex-wrap gap-2 md:gap-0 items-center space-x-2 text-sm text-gray-600 dark:text-gray-400"
-                >
-                  <span>{post.data.pubDate.toDateString()}</span>
-                  <span class="flex items-center">
-                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>
-                    {post.data.group}
-                    /
-                    {post.data.title}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <SummaryDrawer client:load  geminiApiKey={geminiApiKey}/>
+    <div class="flex items-center justify-between space-x-4 max-w-4xl">
+      <div class="flex flex-wrap items-center space-x-4">
+        <AcmeLogo />
+        <div>
+          <h1 class="font-semibold text-gray-900 dark:text-white">
+            Jash Naik
+          </h1>
+          <div
+            class="flex flex-wrap gap-2 md:gap-0 items-center space-x-2 text-sm text-gray-600 dark:text-gray-400"
+          >
+            <span>{post.data.pubDate.toDateString()}</span>
+            <span class="flex items-center">
+              <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>
+              {post.data.group}
+              /
+              {post.data.title}
+            </span>
           </div>
         </div>
+      </div>
+      <SummaryDrawer client:load  geminiApiKey={geminiApiKey}/>
+    </div>
+  </div>
+  <div class="flex flex-col-reverse lg:flex-row relative">
+    <div class="w-full lg:w-3/4 py-4">
+      <div class="mb-8">
+       
         <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
          {post.data.heroImage && <Image src={post.data.heroImage} alt={post.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl"/>}
-          <Content />
+          <Content components={{img:ImageWrapper}}/>
         </div>
         {
           relatedPosts.length > 0 && (

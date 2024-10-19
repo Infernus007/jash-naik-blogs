@@ -6,6 +6,7 @@ import tailwind from "@astrojs/tailwind";
 import rehypePrettyCode from "rehype-pretty-code";
 import pagefind from "astro-pagefind";
 import compressor from "astro-compressor";
+import embeds from 'astro-embed/integration';
 
 /** @type {import('rehype-pretty-code').Options} */
 const options = {
@@ -21,6 +22,7 @@ const options = {
 export default defineConfig({
 	site: "https://jash-naik-blogs.vercel.app/",
 	integrations: [
+		embeds(),
 		mdx(),
 		sitemap(),
 		react(),
