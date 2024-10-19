@@ -7,7 +7,8 @@ import MyCard from "../../components/blog/Card";
 import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
 import SummaryDrawer from "../../components/blog/SummaryDrawer.tsx";
 import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro"
-
+import { Button } from "@nextui-org/button";
+import { getImagePromise } from "../../utils/utils.ts";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("blog");
@@ -87,8 +88,11 @@ const geminiApiKey = import.meta.env.GEMINI_API_KEY;
       <div class="mb-8">
        
         <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
-         {post.data.heroImage && <Image src={post.data.heroImage} alt={post.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl"/>}
+         {post.data.heroImage && <Image src={getImagePromise(post.data.heroImage)} alt={post.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl"/>}
           <Content components={{img:ImageWrapper}}/>
+          {post.data.tags && <div class="flex flex-wrap gap-2">
+            {post.data.tags.map((tag) => <Button variant="bordered" radius="full" size="sm" color="primary">#{tag}</Button>)}
+          </div>}
         </div>
         {
           relatedPosts.length > 0 && (

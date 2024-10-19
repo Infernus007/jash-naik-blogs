@@ -20,6 +20,8 @@ interface Blog {
 	slug: string;
 }
 
+import { getImagePromise } from "../utils/utils";
+
 const allBlogs: Blog[] = await getCollection("blog");
 
 // Sort by pubDate descending and take the latest 6 posts
@@ -86,7 +88,7 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
           githubHref={blog.data.githubHref}
         >
           <div class="m-2 rounded-md">
-            {blog.data.heroImage && <Image src={blog.data.heroImage} alt={blog.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl" />}
+            {blog.data.heroImage && <Image src={getImagePromise(blog.data.heroImage)} alt={blog.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl" />}
           </div>
         </BlogCard>
       ))}
