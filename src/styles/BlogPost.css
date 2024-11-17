@@ -1,6 +1,3 @@
-
-
-
 .content pre {
   background-color: transparent;
 }
@@ -78,5 +75,14 @@ code mark[data-highlighted-chars=""] {
 
 .content code[data-line-numbers-max-digits="3"] > span[data-line=""]::before {
     width: 3rem;
+}
+
+.ai-features {
+  margin: 2rem 0;
+}
+
+.generate-summary-btn {
+  /* Your existing button styles */
+  display: block;
 }
 

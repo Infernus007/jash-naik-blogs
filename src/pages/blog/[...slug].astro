@@ -9,9 +9,11 @@ import SummaryDrawer from "../../components/blog/SummaryDrawer.tsx";
 import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro"
 import { Button } from "@nextui-org/button";
 import { getImagePromise } from "../../utils/utils.ts";
+import { siteConfig } from '../../site.config';
 
 export async function getStaticPaths() {
 	const posts = await getCollection("blog");
+  console.log(posts)
 	return posts.map((post) => ({
 		params: { slug: post.slug },
 		props: post,
@@ -30,6 +32,7 @@ if (post.data.relatedPosts) {
 }
 
 const geminiApiKey = import.meta.env.GEMINI_API_KEY;
+const showAiFeatures = siteConfig.enableAiFeatures;
 
 ---
 
@@ -80,7 +83,7 @@ const geminiApiKey = import.meta.env.GEMINI_API_KEY;
           </div>
         </div>
       </div>
-      <SummaryDrawer client:load  geminiApiKey={geminiApiKey}/>
+      {showAiFeatures && <SummaryDrawer client:load geminiApiKey={geminiApiKey}/>}
     </div>
   </div>
   <div class="flex flex-col-reverse lg:flex-row relative">

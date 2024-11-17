@@ -1,4 +1,5 @@
 import type { ImageMetadata } from "astro";
+import { siteConfig } from '../site.config';
 
 export const getImagePromise = (imagePath: string) => {
 	const images = import.meta.glob<{ default: ImageMetadata }>(
@@ -12,4 +13,8 @@ export const getImagePromise = (imagePath: string) => {
 
 
 	return images[`/src/assets/${imagePath}`]();
+};
+
+export const useAiFeatures = () => {
+	return siteConfig.enableAiFeatures;
 };
