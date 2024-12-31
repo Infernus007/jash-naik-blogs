@@ -46,7 +46,7 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE} image="/og-image.png">
-  <div class="text-center sm:text-start">
+  <div class="text-center sm:text-start" data-pagefind-ignore>
     <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
       Hello, I'm Jash
     </h1>
@@ -55,7 +55,7 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
     </h2>
     <TypewriterEffectSmooth words={words} client:visible className="text-lg sm:text-xl md:text-xl lg:text-[2.7rem] pb-2 mt-4" />
   </div>
-  <div class="flex flex-wrap gap-2 mt-5 justify-center sm:justify-start">
+  <div class="flex flex-wrap gap-2 mt-5 justify-center sm:justify-start" data-pagefind-ignore>
     {
       heroInnerLinks.map((e) => {
         return (
@@ -80,17 +80,19 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
     <h3 class="text-lg sm:text-xl font-bold mb-4">Latest Blogs</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
       {latestBlogs.map((blog) => (
-        <BlogCard
-          client:load
-          title={blog.data.title}
-          description={blog.data.description}
-          href={`/blog/${blog.slug}`}
-          githubHref={blog.data.githubHref}
-        >
-          <div class="m-2 rounded-md">
-            {blog.data.heroImage && <Image src={getImagePromise(blog.data.heroImage)} alt={blog.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl" />}
-          </div>
-        </BlogCard>
+        <article data-pagefind-body>
+          <BlogCard
+            client:load
+            title={blog.data.title}
+            description={blog.data.description}
+            href={`/blog/${blog.slug}`}
+            githubHref={blog.data.githubHref}
+          >
+            <div class="m-2 rounded-md">
+              {blog.data.heroImage && <Image src={getImagePromise(blog.data.heroImage)} alt={blog.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl" />}
+            </div>
+          </BlogCard>
+        </article>
       ))}
     </div>
   </section>
@@ -100,14 +102,14 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
     <h3 class="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Explore All Topics</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       {sortedGroups.map((group) => (
-        <div class="group">
-          <h4 class="text-lg sm:text-xl w-fit font-semibold mb-3 sm:mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition-colors duration-300">
+        <div class="group" data-pagefind-body>
+          <h4 class="text-lg sm:text-xl w-fit font-semibold mb-3 sm:mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition-colors duration-300" data-pagefind-meta="group:{group}">
             {group}
           </h4>
           <ul class="space-y-2">
             {groupedBlogs[group].map((blog) => (
               <li class="group/item">
-                <a href={`/blog/${blog.slug}`} class="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200 flex items-center">
+                <a href={`/blog/${blog.slug}`} class="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200 flex items-center" data-pagefind-index-text={blog.data.title}>
                   <span class="mr-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">&#8594;</span>
                   {blog.data.title}
                 </a>

@@ -37,7 +37,7 @@ const showAiFeatures = siteConfig.enableAiFeatures;
 ---
 
 <IndexLayout title={post.data.title} description={post.data.description} image={post.data.heroImage}>
-  <div class="mb-6">
+  <div class="mb-6 transition-all duration-300" id="header">
     <div class="flex items-center space-x-2 mb-4">
       <a
         href="/"
@@ -86,11 +86,23 @@ const showAiFeatures = siteConfig.enableAiFeatures;
       {showAiFeatures && <SummaryDrawer client:load geminiApiKey={geminiApiKey}/>}
     </div>
   </div>
-  <div class="flex flex-col-reverse lg:flex-row relative">
-    <div class="w-full lg:w-3/4 py-4">
+
+  <Button 
+    id="zenModeToggle"
+    variant="bordered"
+    radius="full"
+    size="sm"
+    color="primary"
+    class="fixed bottom-4 right-4 z-50"
+  >
+    Toggle Zen Mode
+  </Button>
+
+  <div class="flex flex-col-reverse lg:flex-row relative transition-all duration-300" id="layoutContainer">
+    <div class="w-full lg:w-3/4 py-4 mx-auto transition-all duration-300" id="mainContent">
       <div class="mb-8">
        
-        <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground  max-w-none">
+        <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground dark:prose-li:text-foreground  max-w-none">
          {post.data.heroImage && <Image src={getImagePromise(post.data.heroImage)} alt={post.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl"/>}
           <Content components={{img:ImageWrapper}}/>
           {post.data.tags && <div class="flex flex-wrap gap-2">
@@ -123,7 +135,7 @@ const showAiFeatures = siteConfig.enableAiFeatures;
         }
       </div>
     </div>
-    <aside class="w-full lg:w-1/4 p-4 lg:sticky lg:top-12 lg:self-start">
+    <aside class="w-full lg:w-1/4 p-4 lg:sticky lg:top-12 lg:self-start transition-all duration-300" id="sidebar">
       <h2 class="font-bold mb-4 text-lg">Table of Contents</h2>
       <div class="relative">
         <div
@@ -132,7 +144,7 @@ const showAiFeatures = siteConfig.enableAiFeatures;
           style="height: 2rem; top: 0; width: 0;"
         ></div>
         <ul id="toc" class="space-y-1 relative">
-          {headings.map((heading) => (
+          {headings.filter((heading) => heading.depth > 1).map((heading) => (
             <li class={`toc-item depth-${heading.depth}`}>
               <a
                 href={`#${heading.slug}`}
@@ -153,7 +165,7 @@ const showAiFeatures = siteConfig.enableAiFeatures;
     document.addEventListener('astro:page-load', () => {
       // Handle Table of Contents (TOC) interactions
       const tocLinks = document.querySelectorAll<HTMLAnchorElement>(".toc-link");
-      const headingElements = Array.from(document.querySelectorAll<HTMLHeadingElement>("h1, h2, h3, h4, h5, h6"));
+      const headingElements = Array.from(document.querySelectorAll<HTMLHeadingElement>("h2, h3, h4, h5, h6"));
       const tocHighlighter = document.getElementById("toc-highlighter") as HTMLElement | null;
       const toc = document.getElementById("toc");
     
@@ -198,6 +210,51 @@ const showAiFeatures = siteConfig.enableAiFeatures;
       );
     
       headingElements.forEach((element) => observer.observe(element));
+
+      // Enhanced Zen Mode Toggle
+      const zenModeToggle = document.getElementById('zenModeToggle');
+      const header = document.getElementById('header');
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const layoutContainer = document.getElementById('layoutContainer');
+      const mainHeader = document.querySelector('header'); // Main site header
+      const leftSidebar = document.querySelector('aside'); // Left sidebar
+
+      let isZenMode = false;
+
+      zenModeToggle?.addEventListener('click', () => {
+        isZenMode = !isZenMode;
+        
+        if (isZenMode) {
+          // Hide elements
+          header?.classList.add('opacity-0', 'pointer-events-none');
+          sidebar?.classList.add('opacity-0', 'pointer-events-none');
+          mainHeader?.classList.add('opacity-0', 'pointer-events-none');
+          leftSidebar?.classList.add('hidden');
+          
+          // Adjust main content
+          mainContent?.classList.remove('lg:w-3/4');
+          mainContent?.classList.add('lg:w-full', 'max-w-3xl');
+          layoutContainer?.classList.add('justify-center');
+          
+          // Remove top margin from main content
+          document.querySelector('main')?.classList.remove('mt-16');
+        } else {
+          // Show elements
+          header?.classList.remove('opacity-0', 'pointer-events-none');
+          sidebar?.classList.remove('opacity-0', 'pointer-events-none');
+          mainHeader?.classList.remove('opacity-0', 'pointer-events-none');
+          leftSidebar?.classList.remove('hidden');
+          
+          // Reset main content
+          mainContent?.classList.add('lg:w-3/4');
+          mainContent?.classList.remove('lg:w-full', 'max-w-3xl');
+          layoutContainer?.classList.remove('justify-center');
+          
+          // Restore top margin
+          document.querySelector('main')?.classList.add('mt-16');
+        }
+      });
     });
    
   </script>

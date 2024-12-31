@@ -45,14 +45,14 @@ const { title, description, image } = Astro.props;
     </script>
   </head>
   <body class="bg-stone-200 dark:bg-gray-900 min-h-screen flex flex-col">
-    <Header />
-    <main class="flex flex-1 mt-16 container mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="hidden md:block w-64 flex-shrink-0">
+    <Header class="transition-all duration-300" />
+    <main class="flex flex-1 mt-16 container mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300">
+      <div class="hidden md:block w-64 flex-shrink-0 transition-all duration-300">
         <ScrollShadow className="max-h-[80vh] sticky top-16" client:load>
           <Sidebar />
         </ScrollShadow>
       </div>
-      <div class="flex-1 w-full max-w-full md:max-w-[calc(100%-16rem)] mx-auto">
+      <div class="flex-1 w-full max-w-full md:max-w-[calc(100%-16rem)] mx-auto transition-all duration-300">
         <slot />
       </div>
 
