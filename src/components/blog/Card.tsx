@@ -31,7 +31,7 @@ const MyCard: React.FC<MyCardProps> = ({
 				e.preventDefault();
 				setTimeout(() => window.open(href, "_self"), 500);
 			}}
-			className="max-w-[400px] bg-foreground-200 p-0 rounded-3xl hover:bg-sky-200 dark:hover:bg-red-400 transition-all ease-linear"
+			className="max-w-[400px] bg-foreground-200 p-0 rounded-3xl hover:scale-[1.02] hover:shadow-xl dark:hover:shadow-blue-500/20 hover:bg-gradient-to-br hover:from-blue-400 hover:to-blue-600 hover:text-white transition-all duration-300 ease-out"
 		>
 			<CardHeader className="flex gap-3 p-0">{children}</CardHeader>
 			<CardBody>

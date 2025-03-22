@@ -1,0 +1,11 @@
+import type { ComponentProps } from "react";
+import { AssetsWrapper } from "./wrapper";
+
+type Props = ComponentProps<typeof AssetsWrapper>;
+
+const props = Astro.props;
+
+<AssetsWrapper
+  client:load
+  {...props}
+/> 

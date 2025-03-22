@@ -33,7 +33,7 @@ export default function NextUINav(props: NextUINavProps) {
 					aria-label={isMenuOpen ? "Close menu" : "Open menu"}
 					className="md:hidden"
 				/>
-				<NavbarBrand className="mr-4">
+				<NavbarBrand className="mr-4" as="a" href='/'>
 					<AcmeLogo />
 					<p className="hidden md:block font-bold text-inherit m-0">
 						Jash Naik

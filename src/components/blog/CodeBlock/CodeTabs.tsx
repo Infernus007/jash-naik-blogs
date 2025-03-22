@@ -81,24 +81,19 @@ export default function CodeTabs(props) {
 		if (!loading && codeBlocks.length > 0) {
 			const adjustHeight = () => {
 				if (containerRef.current) {
-					console.log("Adjusting height...");
 					const tabContents =
 						containerRef.current.querySelectorAll<HTMLElement>(
 							'[data-slot="panel"]',
 						);
-					console.log("tabcontents", tabContents);
 					if (tabContents.length > 0) {
 						const heights = Array.from(tabContents).map(
 							(el) => el.offsetHeight,
 						);
 						const maxHeight = Math.max(...heights);
-						containerRef.current.style.height = `${maxHeight}px`;
-						console.log("Height adjusted to", maxHeight);
-					} else {
-						console.log("No tab contents found");
+						// Set a minimum height of 100px to prevent overlap
+						const finalHeight = Math.max(maxHeight, 100);
+						containerRef.current.style.height = `${finalHeight}px`;
 					}
-				} else {
-					console.log("Container ref not available");
 				}
 			};
 
@@ -118,7 +113,7 @@ export default function CodeTabs(props) {
 
 	if (loading) {
 		return (
-			<div className="w-full h-[350px]">
+			<div className="w-full h-[350px] mb-8">
 				<span className="sr-only" aria-hidden={true}>
 					{code.props.value}
 				</span>
@@ -127,7 +122,7 @@ export default function CodeTabs(props) {
 		);
 	}
 	return (
-		<div className="flex w-full flex-col not-prose" ref={containerRef}>
+		<div className="flex w-full flex-col not-prose min-h-[100px] mb-8" ref={containerRef}>
 			<Tabs aria-label="Code examples">
 				{codeBlocks.map((block, index) => {
 					const IconComponent =
@@ -148,15 +143,15 @@ export default function CodeTabs(props) {
 								<Snippet
 									symbol=""
 									classNames={{
-										base: "relative w-full block w-auto h-auto m-0 p-0 text-base font-normal text-inherit bg-transparent rounded-none",
+										base: "relative w-full block w-auto h-auto m-0 p-0 text-[1.1rem] font-mono text-inherit bg-transparent rounded-none",
 										copyButton: "absolute right-1 top-1 bg-content1",
 										content: "",
-										pre: "w-full",
+										pre: "w-full [&_code]:!text-[1.1rem] [&_code]:leading-relaxed",
 									}}
 								>
-									<CardBody>
+									<CardBody className="p-4 overflow-x-auto">
 										{/* biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation> */}
-										<div dangerouslySetInnerHTML={{ __html: block.content }} />
+										<div dangerouslySetInnerHTML={{ __html: block.content }} className="[&_pre]:!text-[1.1rem] [&_code]:!text-[1.1rem] [&_code]:leading-relaxed" />
 									</CardBody>
 								</Snippet>
 								{block.caption && (

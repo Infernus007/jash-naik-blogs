@@ -6,10 +6,9 @@
 // Import the global.css file here so that it is included on
 // all pages through the use of the <BaseHead /> component.
 import "../styles/global.css";
-import "@fontsource/geist-mono";
+import '@fontsource-variable/gabarito';
 import { SEO } from "astro-seo";
 import { SITE_TITLE, SITE_DESCRIPTION, TWITTER_CREATOR } from "../consts";
-
 import { ViewTransitions } from "astro:transitions";
 
 interface Props {
@@ -38,6 +37,11 @@ const resolvedFaviconWithDomain = new URL(
 
 <!-- Primary Meta Tags -->
 <title>{title}</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&family=Gabarito+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <SEO
 	title={title}

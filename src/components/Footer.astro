@@ -2,42 +2,157 @@
 import { XLogo, LinkedinLogo, GithubLogo } from "@phosphor-icons/react";
 ---
 
-<footer id="contact">
-	&copy; 2024 Jash Naik. All rights reserved.
-	<div class="social-links">
-		<a href="https://x.com/CodeAIShield" target="_blank">
-			<span class="sr-only">Follow Jash on X</span>
-			<XLogo size={32} />
-		</a>
-		<a href="https://www.linkedin.com/in/jash-naik-7612b8162/" target="_blank">
-			<span class="sr-only">Connect with Jash on LinkedIn</span>
-			<LinkedinLogo size={32} />
-		</a>
-		<a href="https://github.com/Infernus007" target="_blank">
-			<span class="sr-only">Go to Jash's GitHub profile</span>
-			<GithubLogo size={32} />
-		</a>
+<footer id="contact" class="relative mt-32">
+	<!-- Background Logo -->
+	<div class="absolute inset-0 flex items-center justify-center">
+		<svg
+			width="400"
+			height="400"
+			viewBox="0 0 114 130"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			class="w-full h-full max-w-[400px] text-slate-900/[0.07] dark:text-white/[0.07]"
+		>
+			<path
+				d="M51.762 129.913C80.3493 129.913 103.524 106.738 103.524 78.1511C103.524 49.5637 80.3493 26.3891 51.762 26.3891C23.1746 26.3891 0 49.5637 0 78.1511C0 106.738 23.1746 129.913 51.762 129.913Z"
+				fill="currentColor"
+			/>
+			<path
+				d="M52.7299 47.4511C45.8104 41.725 36.5607 47.1408 28.7355 46.3721C21.2491 45.6368 15.2234 39.0484 13.5814 31.9586C11.6657 23.6873 15.8182 15.2852 22.0734 9.98658C28.9243 4.18331 38.1222 2.37995 46.8876 3.26301C56.9339 4.27511 66.1895 8.7732 74.5223 14.2683C82.5623 19.4034 89.9811 25.4517 96.6307 32.2922C102.589 38.6268 107.68 46.2156 109.423 54.8588C111.008 62.7137 110.078 71.469 105.546 78.2348C103.14 81.7041 99.8805 84.4949 96.0821 86.3379C92.1238 88.3758 87.8884 89.8594 84.0596 92.1512C78.2705 95.6165 72.7141 102.679 74.6851 109.882C75.1081 111.455 75.9116 112.901 77.0247 114.091C78.362 115.52 80.6878 113.554 79.347 112.121C76.992 109.604 77.018 106.188 78.189 103.108C79.5851 99.6357 82.1191 96.7406 85.3758 94.8969C89.3838 92.5033 93.8301 90.9883 97.9429 88.7993C101.881 86.7961 105.277 83.8711 107.842 80.2731C112.682 73.2712 113.998 64.2534 112.712 55.9587C111.321 46.9825 106.542 38.8927 100.616 32.1499C94.1661 24.8118 86.2978 18.6461 78.2744 13.1252C69.6652 7.20123 60.1838 2.23476 49.7646 0.57127C40.7329 -0.87073 30.9953 0.307708 23.2175 5.36244C15.9573 10.0807 10.4729 18.064 10.0798 26.8756C9.95475 30.8838 10.9 34.8529 12.8182 38.3745C14.7365 41.8961 17.5584 44.843 20.9937 46.9118C24.5167 48.9302 28.5844 49.7915 32.6231 49.3742C36.9423 49.0152 41.2458 47.6088 45.6049 47.8937C47.5766 47.9758 49.4677 48.6985 50.9918 49.9521C52.5036 51.2031 54.2293 48.6919 52.7299 47.4511Z"
+				fill="currentColor"
+			/>
+		</svg>
+	</div>
+
+	<!-- Content container with gradient background -->
+	<div class="relative">
+		<!-- Top fade gradient that blends with the body background -->
+		<div class="absolute inset-x-0 -top-32 h-32 bg-gradient-to-b from-slate-200 via-slate-200/50 to-transparent dark:from-[#0B1120] dark:via-[#0B1120]/50 dark:to-transparent"></div>
+		
+		<!-- Main content with subtle blue gradient -->
+		<div class="relative z-10 container mx-auto px-4 py-16">
+			<div class="py-12 bg-gradient-to-b from-blue-500/10 via-blue-500/20 to-blue-500/30 backdrop-blur-sm rounded-3xl">
+				<div class="flex flex-col md:flex-row items-center justify-between gap-8 px-8">
+					<!-- Brand Section -->
+					<div class="flex items-center space-x-4">
+						<div class="text-3xl font-bold text-blue-600 dark:text-blue-400">JN</div>
+						<div class="h-8 w-px bg-blue-200/20 dark:bg-blue-400/20"></div>
+						<div class="text-sm text-gray-700 dark:text-gray-300">
+							<div class="font-medium">Jash Naik</div>
+							<div class="text-xs opacity-60">Full Stack Developer</div>
+						</div>
+					</div>
+
+					<!-- Social Links -->
+					<div class="social-links">
+						<a href="https://x.com/CodeAIShield" 
+						   target="_blank" 
+						   class="social-link group"
+						   aria-label="Twitter">
+							<XLogo weight="bold" size={24} />
+							<span class="social-tooltip">Twitter</span>
+						</a>
+						<a href="https://www.linkedin.com/in/jash-naik-7612b8162/" 
+						   target="_blank" 
+						   class="social-link group"
+						   aria-label="LinkedIn">
+							<LinkedinLogo weight="bold" size={24} />
+							<span class="social-tooltip">LinkedIn</span>
+						</a>
+						<a href="https://github.com/Infernus007" 
+						   target="_blank" 
+						   class="social-link group"
+						   aria-label="GitHub">
+							<GithubLogo weight="bold" size={24} />
+							<span class="social-tooltip">GitHub</span>
+						</a>
+					</div>
+				</div>
+				
+				<div class="mt-12 pt-8 border-t border-blue-200/10 dark:border-blue-400/10 px-8">
+					<p class="text-center text-sm text-gray-600 dark:text-gray-400">
+						&copy; 2024 Jash Naik. All rights reserved.
+					</p>
+				</div>
+			</div>
+		</div>
 	</div>
 </footer>
 
 <style>
 	footer {
-		padding: 2em 1em 6em 1em;
-		background: linear-gradient(var(--gray-gradient)) no-repeat;
-		color: rgb(var(--gray));
-		text-align: center;
+		position: relative;
+		min-height: 350px;
+		background: transparent;
 	}
+
 	.social-links {
 		display: flex;
-		justify-content: center;
-		gap: 1em;
-		margin-top: 1em;
+		gap: 1.5em;
+		align-items: center;
 	}
-	.social-links a {
-		text-decoration: none;
-		color: rgb(var(--gray));
+
+	.social-link {
+		position: relative;
+		color: #3b82f6;
+		opacity: 0.8;
+		transition: all 0.3s ease-in-out;
+		padding: 0.75em;
+		border-radius: 12px;
+		background: rgba(59, 130, 246, 0.1);
+		backdrop-filter: blur(10px);
 	}
-	.social-links a:hover {
-		color: rgb(var(--gray-dark));
+
+	.social-link:hover {
+		opacity: 1;
+		background: rgba(59, 130, 246, 0.2);
+		transform: translateY(-2px);
+		color: #2563eb;
+	}
+
+	.social-tooltip {
+		position: absolute;
+		bottom: -2rem;
+		left: 50%;
+		transform: translateX(-50%) translateY(10px);
+		background: rgba(0, 0, 0, 0.8);
+		color: white;
+		padding: 0.5em 1em;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.2s ease-in-out;
+		white-space: nowrap;
+	}
+
+	.social-link:hover .social-tooltip {
+		opacity: 1;
+		visibility: visible;
+		transform: translateX(-50%) translateY(0);
+	}
+
+	@media (max-width: 640px) {
+		footer {
+			min-height: 300px;
+		}
+		
+		.social-links {
+			gap: 1em;
+		}
+
+		.social-link {
+			padding: 0.5em;
+		}
+	}
+
+	:global(.dark) .social-link {
+		color: #60a5fa;
+		background: rgba(96, 165, 250, 0.1);
+	}
+
+	:global(.dark) .social-link:hover {
+		background: rgba(96, 165, 250, 0.2);
+		color: #93c5fd;
 	}
 </style>
