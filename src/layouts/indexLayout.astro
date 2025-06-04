@@ -49,13 +49,13 @@ const { title, description, image } = Astro.props;
   </head>
   <body class="font-gabarito min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-slate-100 to-slate-200 dark:from-[#0B1120] dark:via-[#0B1120] dark:to-[#0B1120] transition-all duration-300">
     <Header class="transition-all duration-300 relative z-10" />
-    <main class="flex flex-1 mt-16 container mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 relative z-10" data-pagefind-body>
-      <div class="hidden md:block w-64 flex-shrink-0 transition-all duration-300">
+    <main class="flex flex-1 mt-16 container mx-auto px-12 max-w-[1920px] transition-all duration-300 relative z-10" data-pagefind-body>
+      <div class="hidden md:block w-96 flex-shrink-0 transition-all duration-300">
         <ScrollShadow className="max-h-[80vh] sticky top-16" client:load>
           <Sidebar />
         </ScrollShadow>
       </div>
-      <div class="flex-1 w-full max-w-full md:max-w-[calc(100%-16rem)] mx-auto transition-all duration-300">
+      <div class="flex-1 w-full max-w-full md:max-w-[calc(100%-24rem)] ms-16 transition-all duration-300">
         <slot />
       </div>
 
@@ -209,9 +209,7 @@ const { title, description, image } = Astro.props;
         background-color: #f3f4f6;
       }
 
-      .dark .prose code {
-        background-color: #1f2937;
-      }
+  
 
       /* Code block specific styles */
       pre {
@@ -229,9 +227,7 @@ const { title, description, image } = Astro.props;
         background-color: #f3f4f6;
       }
 
-      .dark :not(pre) > code {
-        background-color: #1f2937;
-      }
+    
     </style>
 
     <script>

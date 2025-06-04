@@ -3,11 +3,10 @@ import { ShowCase } from "./ShowCase.tsx";
 
 interface Props {
     content: string[];
-    type: "danger" | "info" | "warning" | "success";
+    type: "danger" | "info" | "warning" | "success" | "primary";
 }
 
 const { content, type }: Props = Astro.props;
-
 ---
 
-<ShowCase content={content} type={type} client:load/>
+<ShowCase content={content} type={type} client:load />

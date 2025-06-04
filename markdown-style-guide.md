@@ -8,11 +8,32 @@ group : "AI"
 
 import Placeholder from "../../components/blog/CodeBlock/index.astro"
 import ShowCase from "../../components/blog/ShowCase/index.astro"
+import LinkPreview from "../../components/LinkPreview/index.astro"
+
 
 This theme comes with the [@astrojs/mdx](https://docs.astro.build/en/guides/integrations-guide/mdx/) integration installed and configured in your `astro.config.mjs` config file. If you prefer not to use MDX, you can disable support by removing the integration from your config file.
 
 ## Why MDX?
 
+
+ <LinkPreview 
+    url="https://aws.amazon.com/blogs/opensource/introducing-strands-agents"
+    imageSrc={getImagePromise("/strands/thumbnail.png")}
+    width={300}
+    height={150}
+  >
+    🚀 Read the AWS Blog Post
+  </LinkPreview>
+
+  or 
+for dynamic loading image
+   <LinkPreview 
+    url="https://aws.amazon.com/blogs/opensource/introducing-strands-agents"
+    width={300}
+    height={150}
+  >
+    🚀 Read the AWS Blog Post
+  </LinkPreview>
 
 To use images in your MDX files, you can use the standard Markdown syntax or HTML img tag:
 

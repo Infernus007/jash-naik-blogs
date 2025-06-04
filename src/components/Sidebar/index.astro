@@ -24,12 +24,12 @@ const sortedGroups = Object.keys(groupedBlogs).sort();
 const currentPath = Astro.url.pathname;
 ---
 
-<aside class="w-64 p-4 flex flex-col items-center">
+<aside class="w-full p-4 flex flex-col items-center">
   {sortedGroups.map((group, index) => (
     <div class="mb-4 w-full">
       <button
         id={`toggle-btn-${index}`}
-        class="w-full flex items-center justify-between text-base font-semibold mb-2 focus:outline-none py-1"
+        class="w-full flex items-center justify-between text-lg font-semibold mb-2 focus:outline-none py-1"
       >
         <span>{group}</span>
         <svg
@@ -55,7 +55,7 @@ const currentPath = Astro.url.pathname;
               <a
                 title={blog.data.title}
                 href={`/blog/${blog.slug}`}
-                class={`block w-full rounded-md py-1 px-2 text-sm transition-colors duration-200 ${
+                class={`block w-full rounded-md py-1 px-2 text-base transition-colors duration-200 ${
                   isActive
                     ? "bg-sky-300 dark:bg-fuchsia-600"
                     : "text-foreground/85 hover:bg-gray-300 dark:hover:bg-gray-700"

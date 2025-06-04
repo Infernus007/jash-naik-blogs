@@ -3,32 +3,22 @@
 
 export const SITE_TITLE = "Jash's Blog";
 export const SITE_DESCRIPTION =
-	"Stay ahead in the tech world with expert insights, detailed tutorials, and real-world projects in cybersecurity, AI, and web development. Whether you're a seasoned developer or just starting out, explore practical guides, hands-on coding examples, and the latest trends in IT to sharpen your skills and stay informed.";
+	"Explore cutting-edge insights in Cybersecurity and Artificial Intelligence with in-depth blogs, tutorials, and projects. Learn how AI is transforming security, master ethical hacking, and stay ahead of digital threats. Perfect for students, developers, and security professionals looking to level up their tech skills.";
+
 export const TWITTER_CREATOR = "@CodeAIShield";
 export const words = [
-	{
-		text: "A developer",
-	},
-	{
-		text: "sharing",
-	},
-	{
-		text: "blogs",
-	},
-	{
-		text: "and",
-	},
-	{
-		text: "insights",
-	},
-	{
-		text: "in",
-	},
-	{
-		text: "technology.",
-		className: "text-blue-500 dark:text-blue-500",
-	},
+	{ text: "Exploring", className: "text-blue-500 dark:text-blue-500" },
+	{ text: "Cybersecurity" },
+	{ text: "and" },
+	{ text: "AI" },
+	{ text: "for" },
+	{ text: "modern" },
+	{ text: "builders." },
+	{ text: "Stay", className: "text-blue-500 dark:text-blue-500" },
+	{ text: "informed", className: "text-blue-500 dark:text-blue-500" },
 ];
+
+
 
 export const heroInnerLinks: { href: string; text: string }[] = [
 	{

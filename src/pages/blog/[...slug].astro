@@ -8,6 +8,7 @@ import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
 import SummaryDrawer from "../../components/blog/SummaryDrawer.tsx";
 import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro"
 import { Button } from "@nextui-org/button";
+import { Skeleton } from "@nextui-org/skeleton";
 import { getImagePromise } from "../../utils/utils.ts";
 import { siteConfig } from '../../site.config';
 
@@ -90,25 +91,27 @@ const showAiFeatures = siteConfig.enableAiFeatures;
       </a>
     </div>
 
-    <div class="flex items-center justify-between space-x-4 max-w-4xl">
-      <div class="flex flex-wrap items-center space-x-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-4xl">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
         <AcmeLogo />
-        <div>
-          <h1 class="font-semibold text-gray-900 dark:text-white">
+        <div class="w-full sm:w-auto">
+          <h1 class="font-semibold text-gray-900 dark:text-white mb-2 sm:mb-0">
             Jash Naik
           </h1>
-          <div class="flex flex-wrap gap-2 md:gap-0 items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+          <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <span>{post.data.pubDate.toDateString()}</span>
-            <span class="flex items-center">
-              <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>
-              {post.data.group}
-              /
-              {post.data.title}
+            <span class="flex items-center gap-1 max-w-full">
+              <span class="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
+              <span class="truncate">
+                <span class="text-purple-500">{post.data.group}</span>
+                <span class="mx-1">/</span>
+                <span class="text-gray-900 dark:text-white">{post.data.title}</span>
+              </span>
             </span>
           </div>
         </div>
       </div>
-      {showAiFeatures && <SummaryDrawer client:load geminiApiKey={geminiApiKey}/>}
+      {showAiFeatures && <SummaryDrawer client:load geminiApiKey={geminiApiKey} class="mt-4 sm:mt-0"/>}
     </div>
   </div>
 
@@ -167,13 +170,82 @@ const showAiFeatures = siteConfig.enableAiFeatures;
                   description={suggestedPost.data.description}
                   href={`/blog/${suggestedPost.slug}`}
                 >
-                  <div class="m-2 rounded-md">
-                    <img
-                      src={suggestedPost.data.heroImage}
-                      alt={suggestedPost.data.title}
-                      class="w-full h-auto rounded-2xl"
-                    />
-                  </div>
+                   <div class="m-2 rounded-md h-[250px] relative w-full">
+    {suggestedPost.data.heroImage ? (
+      <Image
+        src={getImagePromise(suggestedPost.data.heroImage)}
+        alt={suggestedPost.data.title}
+        width={1000}
+        height={1000}
+        class="rounded-2xl h-full w-full"
+        style={{ objectFit: 'cover' }}
+      />
+    ) : (
+     <div 
+        class="h-full w-full rounded-2xl relative overflow-hidden group cursor-pointer"
+        style={{
+          background: `linear-gradient(135deg, 
+            hsl(${Math.floor(Math.random() * 360)}, 75%, 55%) 0%, 
+            hsl(${Math.floor(Math.random() * 360)}, 80%, 60%) 50%, 
+            hsl(${Math.floor(Math.random() * 360)}, 70%, 45%) 100%)`,
+          filter: 'saturate(1.3) contrast(1.2)'
+        }}
+      >
+        {/* Mesh gradient overlay for depth */}
+        <div 
+          class="absolute inset-0 opacity-30"
+          style={{
+            background: `
+              radial-gradient(circle at 20% 80%, hsla(${Math.floor(Math.random() * 360)}, 100%, 80%, 0.4) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, hsla(${Math.floor(Math.random() * 360)}, 100%, 75%, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, hsla(${Math.floor(Math.random() * 360)}, 100%, 70%, 0.2) 0%, transparent 50%)`
+          }}
+        ></div>
+        
+        {/* Floating geometric elements */}
+        <div class="absolute top-6 right-8 w-12 h-12 border-2 border-white/30 rounded-lg rotate-12 group-hover:rotate-45 transition-transform duration-700"></div>
+        <div class="absolute bottom-8 left-8 w-16 h-2 bg-white/20 rounded-full transform -rotate-12 group-hover:rotate-12 transition-transform duration-500"></div>
+        <div class="absolute top-1/3 left-1/4 w-6 h-6 bg-white/25 rotate-45 rounded-sm group-hover:scale-125 transition-transform duration-300"></div>
+        <div class="absolute bottom-1/3 right-1/3 w-8 h-8 border border-white/40 rounded-full group-hover:border-white/60 transition-colors duration-300"></div>
+        
+        {/* Dynamic noise texture */}
+        <div class="absolute inset-0 opacity-10 mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
+        
+        {/* Strong contrast overlay for text readability */}
+        <div class="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/50"></div>
+        
+        {/* Content container */}
+        <div class="relative h-full w-full flex flex-col items-center justify-center p-6 z-10">
+          {/* Title initials with enhanced contrast */}
+          <div 
+            class="text-5xl font-black mb-3 group-hover:scale-110 transition-all duration-300 select-none"
+            style={{ 
+              color: 'white',
+              textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 0 2px rgba(0,0,0,0.3)',
+              WebkitTextStroke: '1px rgba(0,0,0,0.3)'
+            }}
+          >
+            {suggestedPost.data.title.split(' ').map(word => word[0]).join('').slice(0, 3)}
+          </div>
+          
+          {/* Modern decorative elements */}
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-0.5 bg-white/80 rounded-full group-hover:w-12 transition-all duration-300"></div>
+            <div class="w-2 h-2 bg-white/60 rounded-full"></div>
+            <div class="w-8 h-0.5 bg-white/80 rounded-full group-hover:w-12 transition-all duration-300"></div>
+          </div>
+          
+          {/* Subtle accent text */}
+          <div class="text-white/70 text-xs font-medium uppercase tracking-wider">
+            Blog Post
+          </div>
+        </div>
+        
+        {/* Subtle glow effect on hover */}
+        <div class="absolute inset-0 rounded-2xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    )}
+  </div>
                 </MyCard>
               ))}
             </div>
@@ -181,27 +253,61 @@ const showAiFeatures = siteConfig.enableAiFeatures;
         )}
       </div>
     </div>
-    <aside class="w-full lg:w-1/4 p-4 lg:sticky lg:top-12 lg:self-start transition-all duration-300" id="sidebar">
-      <h2 class="font-bold mb-4 text-lg">Table of Contents</h2>
-      <div class="relative">
-        <div
-          id="toc-highlighter"
-          class="absolute left-0 border-2 border-black dark:border-white rounded-full transition-all duration-300 ease-in-out"
-          style="height: 2rem; top: 0; width: 0;"
-        ></div>
-        <ul id="toc" class="space-y-1 relative">
-          {headings.filter((heading) => heading.depth > 1).map((heading) => (
-            <li class={`toc-item depth-${heading.depth}`}>
-              <a
-                href={`#${heading.slug}`}
-                class="toc-link block hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2"
-                data-depth={heading.depth}
-              >
-                {heading.text}
-              </a>
-            </li>
-          ))}
-        </ul>
+    <aside class="w-full min-w-[15rem] lg:w-1/4 p-4 lg:sticky lg:top-12 lg:self-start transition-all duration-300" id="sidebar">
+      <div class="w-full relative lg:min-h-[24rem]">
+        <button 
+          class="w-full flex items-center justify-between font-bold mb-4 text-lg lg:pointer-events-none" 
+          id="toc-toggle"
+          aria-expanded="false"
+          aria-controls="toc-container"
+        >
+          <span>Table of Contents</span>
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            class="h-5 w-5 lg:hidden transition-transform duration-300" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="overflow-hidden lg:overflow-visible transition-all duration-300 ease-in-out h-0 lg:h-auto" id="toc-container">
+          <div class="relative w-full">
+            <div
+              id="toc-highlighter"
+              class="absolute left-0 border-2 border-black dark:border-white rounded-full transition-all duration-300 ease-in-out opacity-0"
+              style="height: 2rem; top: 0; width: 0;"
+            ></div>
+
+            {/* Static Skeleton loader */}
+            <div id="toc-skeleton" class="space-y-3">
+              {Array(5).fill(null).map((_, i) => (
+                <div class="flex items-center mb-2">
+                  <Skeleton 
+                    client:load
+                    className={`h-6 rounded-lg ${i === 0 ? 'w-full' : i === 1 ? 'w-11/12' : i === 2 ? 'w-10/12' : 'w-9/12'}`}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Actual TOC content */}
+            <ul id="toc" class="space-y-1 w-full lg:min-h-[200px] opacity-0 transition-opacity duration-300">
+              {headings.filter((heading) => heading.depth > 1).map((heading) => (
+                <li class={`toc-item depth-${heading.depth}`}>
+                  <a
+                    href={`#${heading.slug}`}
+                    class="toc-link block hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2"
+                    data-depth={heading.depth}
+                  >
+                    {heading.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </aside>
   </div>
@@ -213,6 +319,62 @@ const showAiFeatures = siteConfig.enableAiFeatures;
       const headingElements = Array.from(document.querySelectorAll<HTMLHeadingElement>("h2, h3, h4, h5, h6"));
       const tocHighlighter = document.getElementById("toc-highlighter") as HTMLElement | null;
       const toc = document.getElementById("toc");
+      const tocSkeleton = document.getElementById("toc-skeleton");
+      const tocContainer = document.getElementById("toc-container") as HTMLElement;
+      const tocToggle = document.getElementById('toc-toggle');
+      const tocArrow = tocToggle?.querySelector('svg');
+
+      tocToggle?.addEventListener('click', () => {
+        const isExpanded = tocToggle.getAttribute('aria-expanded') === 'true';
+        tocToggle.setAttribute('aria-expanded', (!isExpanded).toString());
+        
+        if (tocContainer) {
+          if (!isExpanded) {
+            tocContainer.style.height = `${tocContainer.scrollHeight}px`;
+          } else {
+            tocContainer.style.height = '0';
+          }
+        }
+        
+        tocArrow?.style.setProperty('transform', isExpanded ? 'rotate(0deg)' : 'rotate(180deg)');
+      });
+
+      // Handle window resize for TOC visibility
+      const updateTocVisibility = () => {
+        if (window.innerWidth >= 1024) { // lg breakpoint
+          if (tocContainer) {
+            tocContainer.style.removeProperty('height');
+            tocToggle?.setAttribute('aria-expanded', 'true');
+          }
+        } else if (tocToggle?.getAttribute('aria-expanded') === 'false' && tocContainer) {
+          tocContainer.style.height = '0';
+        }
+      };
+
+      // Initial check for large screens
+      updateTocVisibility();
+      
+      // Handle window resize
+      window.addEventListener('resize', updateTocVisibility);
+
+      // Ensure TOC is ready before showing it
+      requestAnimationFrame(() => {
+        if (toc && tocSkeleton) {
+          // First make sure TOC is properly positioned
+          toc.style.visibility = 'hidden';
+          toc.style.opacity = '1';
+          
+          // Give browser time to calculate layout
+          requestAnimationFrame(() => {
+            tocSkeleton.style.opacity = '0';
+            toc.style.visibility = 'visible';
+            
+            setTimeout(() => {
+              tocSkeleton.style.display = 'none';
+            }, 300);
+          });
+        }
+      });
     
       const SCROLL_OFFSET = 100; // Increased offset for better visibility
       let currentActiveHeading: string | null = null;

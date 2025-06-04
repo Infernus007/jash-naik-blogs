@@ -35,7 +35,7 @@ const MyCard: React.FC<MyCardProps> = ({
 		>
 			<CardHeader className="flex gap-3 p-0">{children}</CardHeader>
 			<CardBody>
-				<h3 className="font-semibold">{title}</h3>
+				<h3 className="font-bold text-xl">{title}</h3>
 				<p className="truncate">{description}</p>
 			</CardBody>
 			{githubHref?.startsWith("https://") && (
