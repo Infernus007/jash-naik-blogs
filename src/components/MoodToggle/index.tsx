@@ -32,6 +32,8 @@ export function ModeToggle() {
 		localStorage.setItem("theme", theme);
 	}, [theme]);
 
+	const DropdownMenuComponent = DropdownMenu as any;
+
 	return (
 		<Dropdown>
 			<DropdownTrigger>
@@ -46,17 +48,17 @@ export function ModeToggle() {
 					<span className="sr-only">Toggle theme</span>
 				</Button>
 			</DropdownTrigger>
-			<DropdownMenu aria-label="Static Actions" className="dark:text-white">
-				<DropdownItem key="light" onClick={() => setThemeState("light")}>
+			<DropdownMenuComponent aria-label="Static Actions">
+				<DropdownItem key="light" onPress={() => setThemeState("light")}>
 					Light
 				</DropdownItem>
-				<DropdownItem key="dark" onClick={() => setThemeState("dark")}>
+				<DropdownItem key="dark" onPress={() => setThemeState("dark")}>
 					Dark
 				</DropdownItem>
-				<DropdownItem key="system" onClick={() => setThemeState("system")}>
+				<DropdownItem key="system" onPress={() => setThemeState("system")}>
 					System
 				</DropdownItem>
-			</DropdownMenu>
+			</DropdownMenuComponent>
 		</Dropdown>
 	);
 }

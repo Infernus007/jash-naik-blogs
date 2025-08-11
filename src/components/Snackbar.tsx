@@ -48,7 +48,7 @@ export const Snackbar = ({ message, showKbd = false, id, persistent = false }: S
   return (
     <div className="fixed bottom-4 right-4 bg-background/80 backdrop-blur-md border border-foreground/10 p-4 rounded-lg shadow-lg z-50 flex items-center gap-2">
       {message}
-      {showKbd && <Kbd keys={["escape"]}>ESC</Kbd>}
+      {showKbd && <Kbd>ESC</Kbd>}
     </div>
   );
 };

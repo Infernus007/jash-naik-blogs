@@ -11,9 +11,10 @@ function index({
 	isOpen: boolean;
 	onOpenChange: Dispatch<SetStateAction<boolean>>;
 }) {
+	const ModalComponent = Modal as any;
+	
 	return (
-		<Modal
-			closeButton={<div />}
+		<ModalComponent
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
 			scrollBehavior="inside"
@@ -137,7 +138,7 @@ function index({
 					</>
 				)}
 			</ModalContent>
-		</Modal>
+		</ModalComponent>
 	);
 }
 

@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection, getEntries } from "astro:content";
+import { type CollectionEntry, getCollection } from "astro:content";
 import IndexLayout from "../../layouts/indexLayout.astro";
 import { Image } from "astro:assets";
 import "../../styles/BlogPost.css";
@@ -403,7 +403,7 @@ const showAiFeatures = siteConfig.enableAiFeatures;
           if (targetId) {
             const targetElement = document.getElementById(targetId);
             if (targetElement) {
-              const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
+              const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
               window.scrollTo({
                 top: targetPosition,
                 behavior: 'smooth'

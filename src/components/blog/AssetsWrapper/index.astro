@@ -1,11 +1,13 @@
-import type { ComponentProps } from "react";
-import { AssetsWrapper } from "./wrapper";
+---
+export interface AssetProps {
+  src: string;
+  type: string;
+  children?: any;
+}
 
-type Props = ComponentProps<typeof AssetsWrapper>;
+const props = Astro.props as AssetProps;
+---
 
-const props = Astro.props;
-
-<AssetsWrapper
-  client:load
-  {...props}
-/> 
+<div {...props}>
+  <slot />
+</div> 

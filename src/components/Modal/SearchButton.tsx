@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from "@nextui-org/react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import { useMediaQuery } from '../../hooks/useMediaQuery';

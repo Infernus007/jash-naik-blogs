@@ -2,7 +2,6 @@ import React from 'react';
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem } from "@nextui-org/react";
 import { AcmeLogo } from "./Logo.tsx";
 import { ModeToggle } from "../MoodToggle/index.tsx";
-import SearchButton from "../Modal/SearchButton.tsx";
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import type { CollectionEntry } from 'astro:content';
 
@@ -16,7 +15,7 @@ interface NextUINavProps {
 }
 
 export default function NextUINav(props: NextUINavProps) {
-  const { groupedBlogs, children, ...rest } = props;
+  const { groupedBlogs, children } = props;
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 	const isMobile = useMediaQuery('(max-width: 767px)');
 

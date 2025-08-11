@@ -1,8 +1,8 @@
 ---
-import { AssetsWrapper } from "./wrapper";
-const props = Astro.props;
-
+import AssetsWrapper from "./index.astro";
+const { src, alt, ...props } = Astro.props;
 ---
-<AssetsWrapper>
-<img {...props}/>
+
+<AssetsWrapper src={src} type="image" {...props}>
+  <img src={src} alt={alt} {...props} />
 </AssetsWrapper>

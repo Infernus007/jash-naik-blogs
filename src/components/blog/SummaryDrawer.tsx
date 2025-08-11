@@ -83,7 +83,7 @@ Maintain a professional and objective tone.`;
   return (
     <>
       <Button 
-        onClick={() => setIsOpen(true)}
+        onPress={() => setIsOpen(true)}
         variant="bordered" 
         radius="full"
         className="relative group overflow-hidden"
@@ -100,7 +100,7 @@ Maintain a professional and objective tone.`;
           <CardBody>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold">Summary</h2>
-              <Button size="sm" variant="light" onClick={() => setIsOpen(false)}>Close</Button>
+              <Button size="sm" variant="light" onPress={() => setIsOpen(false)}>Close</Button>
             </div>
             {isLoading ? (
               <div>
