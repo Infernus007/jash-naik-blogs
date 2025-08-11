@@ -9,7 +9,7 @@ import SummaryDrawer from "../../components/blog/SummaryDrawer.tsx";
 import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro"
 import { Button } from "@nextui-org/button";
 import { Skeleton } from "@nextui-org/skeleton";
-import { getImagePromise } from "../../utils/utils.ts";
+import { getImagePromise, resolveHeroImageUrl } from "../../utils/utils.ts";
 import { siteConfig } from '../../site.config';
 
 export async function getStaticPaths() {
@@ -65,9 +65,16 @@ const suggestedPosts = allPosts
 
 const geminiApiKey = import.meta.env.GEMINI_API_KEY;
 const showAiFeatures = siteConfig.enableAiFeatures;
+
+// Resolve hero image path for OG image using utility function
+const heroImageUrl = resolveHeroImageUrl(post.data.heroImage, Astro.site!);
 ---
 
-<IndexLayout title={post.data.title} description={post.data.description} image={post.data.heroImage}>
+<IndexLayout 
+	title={post.data.title} 
+	description={post.data.description} 
+	image={heroImageUrl}
+>
   <div class="mb-6 transition-all duration-300" id="header">
     <div class="flex items-center space-x-2 mb-4">
       <a

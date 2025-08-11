@@ -4,10 +4,14 @@ import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import LinkPreview from "../components/LinkPreview/index.astro";
+import { resolveHeroImageUrl } from "../utils/utils.ts";
 
 type Props = CollectionEntry<"blog">["data"];
 
 const { title, description, heroImage } = Astro.props;
+
+// Resolve hero image URL for OG tags using utility function
+const heroImageUrl = resolveHeroImageUrl(heroImage, Astro.site!);
 
 // MDX Component mapping
 export const components = {
@@ -25,7 +29,7 @@ export const components = {
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description} image={heroImageUrl} />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">

@@ -24,7 +24,24 @@ const {
 	description = SITE_DESCRIPTION,
 	image = "/og-image.png",
 } = Astro.props;
-const resolvedImageWithDomain = new URL(image, Astro.site).toString();
+
+// Enhanced image resolution for hero images and assets
+const resolveImageUrl = (imageUrl: string) => {
+	if (!imageUrl) return new URL("/og-image.png", Astro.site).toString();
+	
+	// If it's already a full URL, return as is
+	if (imageUrl.startsWith('http')) return imageUrl;
+	
+	// If it starts with /, treat as public asset
+	if (imageUrl.startsWith('/')) {
+		return new URL(imageUrl, Astro.site).toString();
+	}
+	
+	// Otherwise, treat as asset from src/assets
+	return new URL(`/src/assets/${imageUrl}`, Astro.site).toString();
+};
+
+const resolvedImageWithDomain = resolveImageUrl(image);
 
 const resolvedFaviconWithDomain = new URL(
 	"/favicon.svg",
