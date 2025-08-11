@@ -1,0 +1,36 @@
+# Robots.txt for Jash Naik's Blog
+# Generated for enhanced SEO
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://jash-naik-blogs.vercel.app/sitemap-index.xml
+
+# Allow all content for search engines
+Allow: /blog/
+Allow: /search/
+Allow: /assets/
+
+# Block any admin or development paths
+Disallow: /admin/
+Disallow: /.well-known/
+Disallow: /api/
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Specific instructions for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block any AI training bots if needed
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: ChatGPT-User
+# Disallow: /

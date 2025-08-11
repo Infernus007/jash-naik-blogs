@@ -239,7 +239,7 @@ export default function CodeTabs(props) {
 	const parsedCodeBlocks = useMemo(() => {
 		if (!code?.props?.value) return [];
 		
-		try {
+			try {
 			const htmlContent = code.props.value;
 			
 			// For very large content, use a more efficient parsing approach
@@ -247,6 +247,50 @@ export default function CodeTabs(props) {
 				console.log('Processing large code block with optimized parsing');
 			}
 
+			// Check if we're in a browser environment
+			if (typeof window === 'undefined') {
+				// Server-side: Use a simple regex-based approach for parsing
+				const figureRegex = /<figure[^>]*>([\s\S]*?)<\/figure>/g;
+				const blocks = [];
+				let match;
+				let index = 0;
+				
+				while ((match = figureRegex.exec(htmlContent)) !== null) {
+					const figureContent = match[1];
+					
+					// Extract title
+					const titleMatch = figureContent.match(/data-rehype-pretty-code-title[^>]*>([^<]*)</);
+					const languageMatch = figureContent.match(/data-language="([^"]*)"/) || figureContent.match(/language-(\w+)/);
+					const preMatch = figureContent.match(/<pre[^>]*>[\s\S]*?<\/pre>/);
+					const captionMatch = figureContent.match(/<figcaption[^>]*>([^<]*)<\/figcaption>/);
+					
+					let title = titleMatch?.[1] || "";
+					const language = languageMatch?.[1] || null;
+					
+					if (!title) {
+						title = language
+							? language.charAt(0).toUpperCase() + language.slice(1)
+							: `Code ${index + 1}`;
+					}
+					
+					const content = preMatch?.[0] || "";
+					const caption = captionMatch?.[1];
+					const finalCaption = caption && caption !== title ? caption : "";
+					
+					blocks.push({
+						title,
+						language,
+						content,
+						caption: finalCaption,
+						index
+					});
+					index++;
+				}
+				
+				return blocks;
+			}
+
+			// Client-side: Use DOMParser
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(htmlContent, "text/html");
 			const figures = doc.querySelectorAll("figure");

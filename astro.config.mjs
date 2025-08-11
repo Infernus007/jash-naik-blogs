@@ -7,6 +7,7 @@ import rehypePrettyCode from "rehype-pretty-code";
 import pagefind from "astro-pagefind";
 import compressor from "astro-compressor";
 import embeds from 'astro-embed/integration';
+import fs from 'fs';
 
 /** @type {import('rehype-pretty-code').Options} */
 const options = {
@@ -24,7 +25,18 @@ export default defineConfig({
 	integrations: [
 		embeds(),
 		mdx(),
-		sitemap(),
+		sitemap({
+			changefreq: 'weekly',
+			priority: 0.7,
+			lastmod: new Date(),
+			// Add custom entries for better SEO
+			customPages: [
+				'https://jash-naik-blogs.vercel.app/',
+				'https://jash-naik-blogs.vercel.app/search',
+			],
+			// Filter out unnecessary pages
+			filter: (page) => !page.includes('/api/') && !page.includes('/sidebar-content'),
+		}),
 		react(),
 		tailwind(),
 		pagefind(),

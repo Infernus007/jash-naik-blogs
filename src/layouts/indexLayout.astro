@@ -6,20 +6,51 @@ import Search from "astro-pagefind/components/Search";
 import Footer from "../components/Footer.astro";
 import {ScrollShadow} from "@nextui-org/react";
 import { ViewTransitions } from "astro:transitions";
+import WebVitals from "../components/Performance/WebVitals.astro";
+import SEOAudit from "../components/SEO/Audit.astro";
 
 interface Props {
 	title: string;
 	description: string;
 	image?: string;
+	type?: 'website' | 'article';
+	publishedDate?: Date;
+	modifiedDate?: Date;
+	tags?: string[];
+	author?: string;
+	canonical?: string;
+	noindex?: boolean;
 }
 
-const { title, description, image } = Astro.props;
+const { 
+	title, 
+	description, 
+	image, 
+	type = "website",
+	publishedDate,
+	modifiedDate,
+	tags,
+	author,
+	canonical,
+	noindex
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" transition:animate="none">
   <head>
-    <BaseHead title={title} description={description} image={image} />
+    <BaseHead 
+      title={title} 
+      description={description} 
+      image={image}
+      type={type}
+      publishedDate={publishedDate}
+      modifiedDate={modifiedDate}
+      tags={tags}
+      author={author}
+      canonical={canonical}
+      noindex={noindex}
+    />
     <ViewTransitions />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,6 +118,12 @@ const { title, description, image } = Astro.props;
       </div>
     </main>
     <Footer/>
+    
+    <!-- Performance Monitoring -->
+    <WebVitals />
+    
+    <!-- SEO Audit (Development Only) -->
+    <SEOAudit />
 
     <style is:global>
       :root {

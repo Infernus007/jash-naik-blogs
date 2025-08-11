@@ -5,13 +5,17 @@ export const getImagePromise = (imagePath: string) => {
 	const images = import.meta.glob<{ default: ImageMetadata }>(
 		"/src/assets/**/*.{jpeg,jpg,png,gif,svg,webm}",
 	);
-	if (!images[`/src/assets${imagePath}`])
+	
+	// Normalize the path to always start with /
+	const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+	const fullPath = `/src/assets${normalizedPath}`;
+	
+	if (!images[fullPath])
 		throw new Error(
-			`"${imagePath}" does not exist in glob: "src/assets/*.{jpeg,jpg,png,gif}"`,
+			`"${imagePath}" does not exist in glob: "src/assets/**/*.{jpeg,jpg,png,gif,svg,webm}". Tried path: ${fullPath}`,
 		);
 
-
-	return images[`/src/assets${imagePath}`]();
+	return images[fullPath]();
 };
 
 export const useAiFeatures = () => {

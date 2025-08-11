@@ -45,7 +45,33 @@ const groupedBlogs: { [key: string]: Blog[] } = allBlogs.reduce(
 const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
 ---
 
-<Layout description={SITE_DESCRIPTION} title={SITE_TITLE} image="/og-image.png">
+<Layout description={SITE_DESCRIPTION} title={SITE_TITLE} image="/og-image.png" type="website">
+  <!-- Blog listing structured data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": SITE_TITLE,
+    "description": SITE_DESCRIPTION,
+    "url": Astro.site?.toString(),
+    "author": {
+      "@type": "Person",
+      "name": "Jash Naik",
+      "url": "https://www.linkedin.com/in/jash-naik-7612b8162/"
+    },
+    "blogPost": latestBlogs.map(blog => ({
+      "@type": "BlogPosting",
+      "headline": blog.data.title,
+      "description": blog.data.description,
+      "datePublished": blog.data.pubDate.toISOString(),
+      "url": new URL(`/blog/${blog.slug}`, Astro.site).toString(),
+      "author": {
+        "@type": "Person",
+        "name": "Jash Naik"
+      },
+      "image": blog.data.heroImage ? new URL(blog.data.heroImage.startsWith('/') ? blog.data.heroImage : `/assets/${blog.data.heroImage}`, Astro.site).toString() : new URL("/og-image.png", Astro.site).toString()
+    }))
+  })} is:inline />
+  
   <div class="text-center sm:text-start" data-pagefind-ignore>
     <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
       Hello, I'm Jash

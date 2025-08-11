@@ -215,22 +215,11 @@ const websiteStructuredData = type === 'website' ? {
 	}}
 />
 
-<!-- Performance optimizations -->
-<meta name="dns-prefetch" content="//fonts.googleapis.com" />
-<meta name="dns-prefetch" content="//fonts.gstatic.com" />
-
-<!-- Security headers -->
-<meta http-equiv="X-Content-Type-Options" content="nosniff" />
-<meta http-equiv="X-Frame-Options" content="DENY" />
-<meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-
 <!-- Structured Data -->
-{structuredData && (
-	<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
+{structuredData && (  <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
 )}
 
-{websiteStructuredData && (
-	<script type="application/ld+json" set:html={JSON.stringify(websiteStructuredData)} is:inline />
+{websiteStructuredData && (  <script type="application/ld+json" is:inline set:html={JSON.stringify(websiteStructuredData)} />
 )}
 
 <!-- View Transitions for better UX -->

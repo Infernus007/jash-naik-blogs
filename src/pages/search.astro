@@ -1,0 +1,94 @@
+---
+import Layout from "../layouts/indexLayout.astro";
+import { SITE_TITLE } from "../consts";
+import SearchComponent from "astro-pagefind/components/Search";
+---
+
+<Layout 
+  title={`Search - ${SITE_TITLE}`} 
+  description="Search through all blog posts and articles on Jash Naik's blog" 
+  image="/og-image.png"
+>
+  <div class="max-w-4xl mx-auto py-12">
+    <div class="mb-8">
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        Search Blog Posts
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-400">
+        Find articles on AI, cybersecurity, programming, and more
+      </p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <SearchComponent
+        id="search"
+        className="pagefind-ui"
+        uiOptions={{
+          showImages: true,
+          showSubResults: true,
+          excerptLength: 200,
+          resetStyles: false,
+        }}
+      />
+    </div>
+
+    <div class="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-xl p-8">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        Search Tips
+      </h2>
+      <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+        <li class="flex items-start">
+          <span class="text-blue-500 mr-2">•</span>
+          Use specific keywords like "cybersecurity", "AI", "machine learning"
+        </li>
+        <li class="flex items-start">
+          <span class="text-blue-500 mr-2">•</span>
+          Search for topics like "zero trust", "supply chain", "neural networks"
+        </li>
+        <li class="flex items-start">
+          <span class="text-blue-500 mr-2">•</span>
+          Try partial matches - the search will find relevant content automatically
+        </li>
+        <li class="flex items-start">
+          <span class="text-blue-500 mr-2">•</span>
+          Browse by categories using the navigation menu for organized exploration
+        </li>
+      </ul>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* Enhanced search UI styling */
+  :global(.pagefind-ui__search-input) {
+    @apply w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+  }
+
+  :global(.pagefind-ui__results) {
+    @apply mt-6 space-y-4;
+  }
+
+  :global(.pagefind-ui__result) {
+    @apply p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:shadow-md transition-shadow duration-200;
+  }
+
+  :global(.pagefind-ui__result-title) {
+    @apply text-lg font-semibold text-blue-600 dark:text-blue-400 hover:underline;
+  }
+
+  :global(.pagefind-ui__result-excerpt) {
+    @apply mt-2 text-gray-600 dark:text-gray-300 leading-relaxed;
+  }
+
+  :global(.pagefind-ui__result-tags) {
+    @apply mt-3 flex flex-wrap gap-2;
+  }
+
+  :global(.pagefind-ui__result-tag) {
+    @apply px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full;
+  }
+
+  :global(.pagefind-ui__message) {
+    @apply text-center py-8 text-gray-600 dark:text-gray-400;
+  }
+</style>

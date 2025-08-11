@@ -1,0 +1,67 @@
+---
+// SEO Audit and Performance Monitoring
+interface AuditResult {
+  score: number;
+  issues: string[];
+  recommendations: string[];
+}
+
+interface SEOAudit {
+  metaTags: AuditResult;
+  images: AuditResult;
+  links: AuditResult;
+  performance: AuditResult;
+  accessibility: AuditResult;
+  overall: number;
+}
+---
+
+<script is:inline>
+  // SEO Audit functionality - simplified for production
+  if (window.location.hostname === 'localhost') {
+    // Only run detailed audit in development
+    class SEOAuditor {
+      constructor() {
+        this.results = {
+          metaTags: { score: 0, issues: [], recommendations: [] },
+          images: { score: 0, issues: [], recommendations: [] },
+          overall: 0
+        };
+      }
+
+      auditBasics() {
+        const title = document.querySelector('title');
+        const description = document.querySelector('meta[name="description"]');
+        
+        if (!title || title.textContent.length < 30) {
+          console.warn('SEO: Title should be 30-60 characters');
+        }
+        
+        if (!description || description.getAttribute('content').length < 120) {
+          console.warn('SEO: Meta description should be 120-160 characters');
+        }
+        
+        const images = document.querySelectorAll('img');
+        let missingAlt = 0;
+        images.forEach(img => {
+          if (!img.alt || img.alt.trim() === '') {
+            missingAlt++;
+          }
+        });
+        
+        if (missingAlt > 0) {
+          console.warn(`SEO: ${missingAlt} images missing alt text`);
+        }
+        
+        console.log('✅ SEO Basic audit completed');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const auditor = new SEOAuditor();
+      setTimeout(() => {
+        auditor.auditBasics();
+      }, 2000);
+    });
+  }
+</script>

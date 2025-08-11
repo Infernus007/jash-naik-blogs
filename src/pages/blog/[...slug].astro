@@ -11,6 +11,8 @@ import { Button } from "@nextui-org/button";
 import { Skeleton } from "@nextui-org/skeleton";
 import { getImagePromise, resolveHeroImageUrl } from "../../utils/utils.ts";
 import { siteConfig } from '../../site.config';
+import Breadcrumb from "../../components/Breadcrumb/index.astro";
+import SocialShare from "../../components/SocialShare/index.astro";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("blog");
@@ -68,14 +70,30 @@ const showAiFeatures = siteConfig.enableAiFeatures;
 
 // Resolve hero image path for OG image using utility function
 const heroImageUrl = resolveHeroImageUrl(post.data.heroImage, Astro.site!);
+
+// Generate breadcrumb items
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Blog", url: "/blog" },
+  { name: post.data.group, url: `/blog?group=${encodeURIComponent(post.data.group)}` },
+  { name: post.data.title, url: `/blog/${post.slug}` }
+];
 ---
 
 <IndexLayout 
 	title={post.data.title} 
 	description={post.data.description} 
 	image={heroImageUrl}
+	type="article"
+	publishedDate={post.data.pubDate}
+	modifiedDate={post.data.updatedDate}
+	tags={post.data.tags}
+	author="Jash Naik"
 >
   <div class="mb-6 transition-all duration-300" id="header">
+    <!-- Add Breadcrumbs -->
+    <Breadcrumb items={breadcrumbItems} />
+    
     <div class="flex items-center space-x-2 mb-4">
       <a
         href="/"
@@ -144,6 +162,16 @@ const heroImageUrl = resolveHeroImageUrl(post.data.heroImage, Astro.site!);
               <Button variant="bordered" radius="full" size="sm" color="primary">#{tag}</Button>
             ))}
           </div>}
+        </div>
+
+        <!-- Social Share Section -->
+        <div class="mt-8">
+          <SocialShare 
+            title={post.data.title}
+            url={new URL(Astro.url.pathname, Astro.site).toString()}
+            description={post.data.description}
+            hashtags={post.data.tags || []}
+          />
         </div>
 
         <!-- Navigation -->

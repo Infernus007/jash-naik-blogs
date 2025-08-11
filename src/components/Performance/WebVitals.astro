@@ -1,0 +1,24 @@
+---
+// Core Web Vitals monitoring component
+---
+
+<script is:inline>
+  // Core Web Vitals monitoring  
+  function reportWebVitals() {
+    if (typeof window === 'undefined') return;
+
+    // Simple performance monitoring without complex types
+    if ('PerformanceObserver' in window) {
+      // Log basic performance info
+      window.addEventListener('load', () => {
+        const navigation = performance.getEntriesByType('navigation')[0];
+        if (navigation && window.location.hostname === 'localhost') {
+          const pageLoadTime = navigation.loadEventEnd - navigation.fetchStart;
+          console.log('Page Load Time:', Math.round(pageLoadTime), 'ms');
+        }
+      });
+    }
+  }
+
+  reportWebVitals();
+</script>

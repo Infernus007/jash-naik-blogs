@@ -34,7 +34,7 @@ Web applications face constant threats from various types of attacks. Here are t
     "Path Traversal",
     "Server-Side Request Forgery (SSRF)",
     "Command Injection"
-]} type="danger" client:load/>
+]} type="danger"/>
 
 Traditional rule-based detection systems often struggle with:
 
@@ -43,7 +43,7 @@ Traditional rule-based detection systems often struggle with:
     "Sophisticated attack patterns",
     "Evolving attack techniques",
     "High false positive rates"
-]} type="warning" client:load/>
+]} type="warning"/>
 
 This led us to explore machine learning-based solutions, specifically using BERT (Bidirectional Encoder Representations from Transformers) for attack detection.
 
@@ -168,7 +168,7 @@ Now that we have our data generator, let's look at how we use it to train BERT m
     "Tokenize HTTP requests",
     "Convert to BERT-compatible format",
     "Create train/validation/test splits"
-]} type="info" client:load/>
+]} type="info"/>
 
 #### Step 2: Model Architecture
 
@@ -185,7 +185,7 @@ We use a fine-tuned BERT model with:
     "Implement domain-specific tokenization",
     "Train binary and multi-class classifiers",
     "Implement OOD detection"
-]} type="success" client:load/>
+]} type="success"/>
 
 ## Key Features and Innovations
 
@@ -227,7 +227,7 @@ python http_generator.py --convert samples.txt
     "94.8% accuracy in OOD detection",
     "< 1% false positive rate",
     "< 2% false negative rate"
-]} type="success" client:load/>
+]} type="success"/>
 
 ## Future Improvements
 
