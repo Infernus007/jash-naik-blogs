@@ -1,10 +1,11 @@
 ---
 import CodeTabs from "./CodeTabs";
 ---
-<!-- @ts-ignore -->
-<CodeTabs client:load >
-    <div slot="code" class="my-5">
-    <slot/>
 
-</div>
+<!-- Use client:visible for lazy loading when component comes into view -->
+<!-- @ts-ignore -->
+<CodeTabs client:visible>
+    <div slot="code" class="my-5">
+        <slot/>
+    </div>
 </CodeTabs>
