@@ -181,21 +181,7 @@ agent("Calculate 2+2")
 
 **Note**: While both Async Iterators and Callback Handlers provide streaming capabilities, **Async Iterators are ideal for asynchronous frameworks** like FastAPI, while callback handlers can be used by passing a callback function.
 
-## Key Takeaways
-
-<div className="my-6">
-  <h3 className="text-xl font-semibold mb-4">Core Features Demonstrated:</h3>
-  <ShowCase 
-    content={[
-      "Automatic session and context management",
-      "Easy tool integration with @tool decorator",
-      "Custom conversation management for advanced use cases",
-      "Multi-agent workflows for complex tasks",
-      "Production-ready deployment options"
-    ]} 
-    type="success"
-  />
-</div>
+## Advanced Features & Capabilities
 
 ### Model Providers and Flexibility
 
@@ -207,7 +193,7 @@ For developers seeking alternatives, the framework seamlessly integrates with:
 - Local models via Ollama
 - Meta's Llama models
 
-## Multi-Agent Systems: Collaboration at Scale
+### Multi-Agent Systems: Collaboration at Scale
 
 Modern AI challenges often require multiple specialized agents working together. Strands excels at orchestrating these complex interactions through several architectural patterns.
 
@@ -232,7 +218,7 @@ In multi-agent networks, specialized agents collaborate as equals, each contribu
 
 For structured workflows, Strands supports hierarchical arrangements where orchestrator agents delegate tasks to specialized workers. This pattern works particularly well for complex business processes requiring multiple steps and validations.
 
-## Safety & Responsibility: Building Trustworthy Agents
+### Safety & Responsibility: Building Trustworthy Agents
 
 As AI agents become more powerful, ensuring safe and responsible operation becomes critical. Strands incorporates multiple safety mechanisms designed for production environments.
 
@@ -249,7 +235,7 @@ As AI agents become more powerful, ensuring safe and responsible operation becom
   />
 </div>
 
-## Observability & Evaluation: Seeing Inside Your Agents
+### Observability & Evaluation: Monitoring Your Agents
 
 Production AI systems require comprehensive monitoring and evaluation capabilities. Strands provides enterprise-grade observability through native OpenTelemetry integration.
 
@@ -267,7 +253,9 @@ const agent = new StrandsAgent({
 ```
 </Placeholder>
 
-## Deployment in the Real World
+## Production Deployment & Examples
+
+### Deployment Options
 
 Strands agents transition smoothly from development to production across various AWS deployment options. Each option serves different use cases and scaling requirements.
 
@@ -298,11 +286,11 @@ Strands agents transition smoothly from development to production across various
   />
 </div>
 
-## Hands-On Examples: Building Real AI Agents
+### Hands-On Implementation Examples
 
 Let's explore practical examples that demonstrate how to build and customize AI agents using AWS Strands Agents SDK.
 
-### 1. Basic Agent Setup
+#### 1. Basic Agent Setup
 
 <Placeholder>
 ```python showLineNumbers caption="Creating a basic agent with Claude" title="basic_agent.py"
@@ -328,7 +316,7 @@ while True:
 ```
 </Placeholder>
 
-### 2. Custom Tools Integration
+#### 2. Custom Tools Integration
 
 <Placeholder>
 ```python showLineNumbers caption="Adding custom tools to your agent" title="custom_tools.py"
@@ -356,7 +344,7 @@ print(agent("What's the weather in New York?"))  # Uses http_request
 ```
 </Placeholder>
 
-### 3. Advanced Context Management
+#### 3. Advanced Context Management
 
 <Placeholder>
 ```python showLineNumbers caption="Custom conversation management" title="context_management.py"
@@ -377,7 +365,7 @@ print(agent("What's its population?"))  # Agent remembers we're talking about Pa
 ```
 </Placeholder>
 
-### 4. Multi-Agent Collaboration
+#### 4. Multi-Agent Collaboration
 
 <Placeholder>
 ```python showLineNumbers caption="Creating a research and analysis workflow" title="multi_agent.py"
@@ -405,7 +393,7 @@ print(summary)
 ```
 </Placeholder>
 
-### 5. Production Deployment
+#### 5. Production Deployment
 
 <Placeholder>
 ```python showLineNumbers caption="AWS Lambda deployment" title="lambda_deployment.py"
@@ -426,7 +414,7 @@ def lambda_handler(event, context):
 ```
 </Placeholder>
 
-### 6. Complete Example: Full-Featured Agent
+#### 6. Complete Example: Full-Featured Agent
 
 <Placeholder>
 ```python showLineNumbers caption="Combining all features" title="complete_agent.py"
@@ -459,6 +447,22 @@ while True:
     print("Agent:", response)
 ```
 </Placeholder>
+
+## Key Takeaways
+
+<div className="my-6">
+  <h3 className="text-xl font-semibold mb-4">Core Features Demonstrated:</h3>
+  <ShowCase 
+    content={[
+      "Automatic session and context management",
+      "Easy tool integration with @tool decorator",
+      "Custom conversation management for advanced use cases",
+      "Multi-agent workflows for complex tasks",
+      "Production-ready deployment options"
+    ]} 
+    type="success"
+  />
+</div>
 
 
 ## Conclusion: Making AI Agents Accessible

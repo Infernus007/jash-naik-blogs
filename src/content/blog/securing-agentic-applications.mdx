@@ -1,227 +1,1070 @@
 ---
-title: "Securing Agentic Applications: A Comprehensive Guide"
-description: "Best practices and strategies for securing AI agents and autonomous systems"
+title: "Securing AI Agents: Enterprise-Grade Security for Autonomous Systems"
+description: "Complete security framework for deploying AI agents in production environments, covering threat modeling, access control, monitoring, and governance"
 pubDate: "2024-03-22"
-updatedDate: "2024-03-22"
+updatedDate: "2025-08-11"
 group: "CyberSecurity"
-tags: ["AI Agents", "Autonomous Systems", "Security", "Machine Learning", "Agent Safety", "AI Governance"]
-readingTime: 10
+tags: ["AI Agents", "Enterprise Security", "Autonomous Systems", "AI Governance", "Zero Trust", "Production Security"]
+readingTime: 18
 ---
 
 import Placeholder from "../../components/blog/CodeBlock/index.astro"
 import ShowCase from "../../components/blog/ShowCase/index.astro"
 import LinkPreview from "../../components/LinkPreview/index.astro"
 
-# Securing Agentic Applications: A Comprehensive Guide
+# Securing AI Agents: Enterprise-Grade Security for Autonomous Systems
 
-In this blog post, we'll explore the critical aspects of securing agentic applications - AI systems that can act autonomously and make decisions. As these systems become more prevalent, ensuring their security and safety becomes increasingly important.
+AI agents are rapidly becoming essential components of enterprise infrastructure, from customer service chatbots to autonomous trading systems. However, their autonomous nature and broad capabilities create unique security challenges that traditional IT security frameworks aren't designed to handle. This guide provides a comprehensive approach to securing AI agents in production environments.
 
-<LinkPreview 
-    url="https://arxiv.org/abs/2206.03466"
-    width={300}
-    height={150}
->
-    🤖 Read the Agent Safety Paper
-</LinkPreview>
-
-## Understanding Agentic Applications
-
-Agentic applications are AI systems that can:
-- Make autonomous decisions
-- Interact with their environment
-- Learn from experience
-- Adapt to new situations
-- Execute complex tasks
+## Executive Summary
 
 <ShowCase content={[
-    "Autonomous decision-making capabilities",
-    "Environment interaction and adaptation",
-    "Learning and self-improvement",
-    "Task execution and planning",
-    "Goal-oriented behavior"
-]} type="info"/>
-
-## Security Challenges in Agentic Systems
-
-### 1. Core Security Concerns
-
-<ShowCase content={[
-    "Goal misalignment",
-    "Unintended consequences",
-    "Adversarial manipulation",
-    "System boundaries",
-    "Resource constraints"
-]} type="danger"/>
-
-### 2. Implementation Security
-
-<Placeholder>
-```python showLineNumbers {1-20} /agent/ caption="Agent Security Framework" title="agent_security.py"
-class AgentSecurityFramework:
-    def __init__(self):
-        self.safety_checks = SafetyChecks()
-        self.boundary_enforcer = BoundaryEnforcer()
-        self.goal_validator = GoalValidator()
-        
-    def secure_agent_action(self, action, context):
-        # Validate action against safety constraints
-        if not self.safety_checks.validate(action):
-            return self.handle_violation(action)
-            
-        # Enforce system boundaries
-        if not self.boundary_enforcer.check(action):
-            return self.handle_boundary_violation(action)
-            
-        # Validate goal alignment
-        if not self.goal_validator.verify(action):
-            return self.handle_goal_misalignment(action)
-            
-        return self.execute_safe_action(action)
-```
-</Placeholder>
-
-## Security Implementation Strategies
-
-### 1. Goal Alignment and Safety
-
-<Placeholder>
-```python showLineNumbers {1-15} /safety/ caption="Safety Mechanisms" title="safety_mechanisms.py"
-class SafetyMechanisms:
-    def __init__(self):
-        self.constraints = SafetyConstraints()
-        self.monitor = SafetyMonitor()
-        
-    def ensure_safety(self, agent_action):
-        # Check against safety constraints
-        if not self.constraints.check(agent_action):
-            return self.constrain_action(agent_action)
-            
-        # Monitor for potential issues
-        if self.monitor.detect_risk(agent_action):
-            return self.mitigate_risk(agent_action)
-            
-        return agent_action
-```
-</Placeholder>
-
-### 2. Boundary Enforcement
-
-<ShowCase content={[
-    "Resource usage limits",
-    "Action space constraints",
-    "Environment boundaries",
-    "Interaction protocols",
-    "Access control mechanisms"
+    "AI agents pose unique security risks due to their autonomous decision-making capabilities",
+    "Traditional security models are insufficient for agent-based systems", 
+    "Multi-layered security approach required: identity, access, behavior, and data protection",
+    "Continuous monitoring and governance are critical for agent deployments",
+    "Regulatory compliance adds complexity to agent security implementations"
 ]} type="warning"/>
 
-## Best Practices for Agent Security
+## Understanding AI Agent Security Risks
 
-### 1. Design Principles
+### The Agent Security Challenge
+
+Unlike traditional applications, AI agents can:
+- **Make autonomous decisions** that affect business operations
+- **Access multiple systems** through API integrations
+- **Modify their behavior** based on interactions and learning
+- **Generate unpredictable outputs** that may contain sensitive information
+- **Scale interactions** across thousands of users simultaneously
+
+### Critical Threat Vectors
+
+**Prompt Injection Attacks**: Malicious users manipulate agent instructions through crafted inputs, potentially causing unauthorized actions or data disclosure.
+
+**Data Exfiltration**: Agents with access to sensitive systems may inadvertently leak confidential information through responses or logs.
+
+**Privilege Escalation**: Compromised agents can abuse their access credentials to perform unauthorized operations across connected systems.
+
+**Model Manipulation**: Adversaries may attempt to alter agent behavior through adversarial inputs or training data poisoning.
 
 <ShowCase content={[
-    "Implement robust safety checks",
-    "Define clear system boundaries",
-    "Establish monitoring mechanisms",
-    "Create fallback procedures",
-    "Maintain audit trails"
-]} type="success"/>
+    "Input Manipulation: Users craft malicious prompts to bypass security controls",
+    "Session Hijacking: Attackers compromise agent communication channels", 
+    "Context Pollution: Injection of malicious context to influence agent behavior",
+    "Resource Exhaustion: Deliberate attempts to overwhelm agent processing capacity",
+    "Social Engineering: Manipulation of agents through deceptive conversation patterns"
+]} type="danger"/>
 
-### 2. Implementation Guidelines
+## Enterprise Security Framework for AI Agents
+
+### 1. Identity and Access Management (IAM)
+
+AI agents require sophisticated identity management that goes beyond traditional service accounts.
 
 <Placeholder>
-```python showLineNumbers {1-20} /implementation/ caption="Security Implementation" title="security_impl.py"
-class AgentSecurityImplementation:
-    def __init__(self):
-        self.audit_logger = AuditLogger()
-        self.monitor = SecurityMonitor()
-        self.validator = ActionValidator()
+```python showLineNumbers {1-35} /iam/ caption="Agent Identity and Access Management" title="agent_iam.py"
+import jwt
+import hashlib
+import secrets
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+import asyncio
+
+class AgentIdentityManager:
+    def __init__(self, secret_key: str, token_expiry_hours: int = 24):
+        self.secret_key = secret_key
+        self.token_expiry = timedelta(hours=token_expiry_hours)
+        self.active_sessions = {}
+        self.capability_registry = {}
         
-    def secure_implementation(self, agent):
-        # Set up security monitoring
-        self.monitor.attach_to_agent(agent)
+    def create_agent_identity(self, agent_id: str, capabilities: List[str], 
+                            max_sessions: int = 10) -> Dict:
+        """Create a new agent identity with defined capabilities"""
         
-        # Implement action validation
-        agent.add_validator(self.validator)
+        # Generate unique agent credentials
+        agent_secret = secrets.token_hex(32)
+        credential_hash = hashlib.sha256(
+            f"{agent_id}:{agent_secret}".encode()
+        ).hexdigest()
         
-        # Set up audit logging
-        agent.add_logger(self.audit_logger)
+        # Register agent capabilities
+        self.capability_registry[agent_id] = {
+            'capabilities': capabilities,
+            'max_sessions': max_sessions,
+            'created_at': datetime.utcnow(),
+            'credential_hash': credential_hash,
+            'status': 'active'
+        }
         
-        # Configure safety constraints
-        agent.configure_safety(self.get_safety_config())
+        return {
+            'agent_id': agent_id,
+            'agent_secret': agent_secret,
+            'capabilities': capabilities,
+            'credential_hash': credential_hash
+        }
+    
+    async def authenticate_agent(self, agent_id: str, agent_secret: str, 
+                               requested_capabilities: List[str]) -> Optional[str]:
+        """Authenticate agent and issue capability-scoped token"""
+        
+        # Verify agent credentials
+        expected_hash = hashlib.sha256(
+            f"{agent_id}:{agent_secret}".encode()
+        ).hexdigest()
+        
+        agent_record = self.capability_registry.get(agent_id)
+        if not agent_record or agent_record['credential_hash'] != expected_hash:
+            raise ValueError("Invalid agent credentials")
+        
+        if agent_record['status'] != 'active':
+            raise ValueError("Agent identity is disabled")
+        
+        # Check session limits
+        active_count = len([s for s in self.active_sessions.values() 
+                           if s['agent_id'] == agent_id])
+        if active_count >= agent_record['max_sessions']:
+            raise ValueError("Maximum session limit exceeded")
+        
+        # Verify requested capabilities
+        allowed_capabilities = agent_record['capabilities']
+        unauthorized = set(requested_capabilities) - set(allowed_capabilities)
+        if unauthorized:
+            raise ValueError(f"Unauthorized capabilities requested: {unauthorized}")
+        
+        # Generate session token
+        session_id = secrets.token_hex(16)
+        token_payload = {
+            'agent_id': agent_id,
+            'session_id': session_id,
+            'capabilities': requested_capabilities,
+            'issued_at': datetime.utcnow().isoformat(),
+            'expires_at': (datetime.utcnow() + self.token_expiry).isoformat()
+        }
+        
+        access_token = jwt.encode(token_payload, self.secret_key, algorithm='HS256')
+        
+        # Track active session
+        self.active_sessions[session_id] = {
+            'agent_id': agent_id,
+            'capabilities': requested_capabilities,
+            'created_at': datetime.utcnow(),
+            'last_activity': datetime.utcnow()
+        }
+        
+        return access_token
+    
+    def validate_agent_capability(self, token: str, required_capability: str) -> bool:
+        """Validate that agent token has required capability"""
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=['HS256'])
+            
+            # Check token expiry
+            expires_at = datetime.fromisoformat(payload['expires_at'])
+            if datetime.utcnow() > expires_at:
+                return False
+            
+            # Check capability
+            agent_capabilities = payload.get('capabilities', [])
+            
+            # Update session activity
+            session_id = payload['session_id']
+            if session_id in self.active_sessions:
+                self.active_sessions[session_id]['last_activity'] = datetime.utcnow()
+            
+            return required_capability in agent_capabilities
+            
+        except (jwt.InvalidTokenError, KeyError, ValueError):
+            return False
+    
+    def revoke_agent_session(self, session_id: str) -> bool:
+        """Revoke specific agent session"""
+        if session_id in self.active_sessions:
+            del self.active_sessions[session_id]
+            return True
+        return False
+    
+    def disable_agent_identity(self, agent_id: str) -> bool:
+        """Disable agent identity and revoke all sessions"""
+        if agent_id in self.capability_registry:
+            self.capability_registry[agent_id]['status'] = 'disabled'
+            
+            # Revoke all active sessions for this agent
+            sessions_to_remove = [
+                sid for sid, session in self.active_sessions.items()
+                if session['agent_id'] == agent_id
+            ]
+            
+            for session_id in sessions_to_remove:
+                del self.active_sessions[session_id]
+            
+            return True
+        return False
 ```
 </Placeholder>
 
-## Monitoring and Maintenance
+### 2. Input Validation and Sanitization
 
-### 1. Continuous Monitoring
+Robust input validation is critical for preventing prompt injection and manipulation attacks.
+
+<Placeholder>
+```python showLineNumbers {1-40} /validation/ caption="Agent Input Validation System" title="input_validator.py"
+import re
+import json
+from typing import Dict, List, Any, Tuple
+from dataclasses import dataclass
+from enum import Enum
+
+class ThreatLevel(Enum):
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    CRITICAL = 4
+
+@dataclass
+class ValidationResult:
+    is_safe: bool
+    threat_level: ThreatLevel
+    detected_threats: List[str]
+    sanitized_input: str
+    confidence_score: float
+
+class AgentInputValidator:
+    def __init__(self):
+        # Define threat patterns
+        self.injection_patterns = [
+            # Direct instruction injection
+            r'(?i)(ignore|disregard|forget).{0,50}(previous|above|prior|earlier).{0,20}(instruction|prompt|rule)',
+            r'(?i)(now|instead).{0,20}(act|behave|pretend|role.?play).{0,20}as',
+            r'(?i)(system|admin|root|developer).{0,20}(mode|access|privilege)',
+            
+            # Data extraction attempts
+            r'(?i)(show|display|reveal|tell).{0,20}(password|key|secret|token|credential)',
+            r'(?i)(what|how).{0,20}(is|are).{0,20}(your|the).{0,20}(instruction|prompt|rule)',
+            
+            # Code injection attempts
+            r'(?i)<script[^>]*>.*?</script>',
+            r'(?i)javascript:',
+            r'(?i)eval\s*\(',
+            r'(?i)exec\s*\(',
+            
+            # Command injection
+            r'[;&|`$(){}\\]',
+            r'(?i)(curl|wget|nc|netcat|ping|nslookup)\s+',
+        ]
+        
+        # Sensitive information patterns
+        self.sensitive_patterns = [
+            r'\b(?:\d{4}[-.\s]?\d{4}[-.\s]?\d{4}[-.\s]?\d{4})\b',  # Credit cards
+            r'\b\d{3}-\d{2}-\d{4}\b',  # SSN
+            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # Email
+        ]
+        
+        self.max_input_length = 10000
+        self.max_context_depth = 10
+    
+    def validate_input(self, user_input: str, context: Dict[str, Any] = None) -> ValidationResult:
+        """Comprehensive input validation for agent interactions"""
+        
+        threats_detected = []
+        threat_level = ThreatLevel.LOW
+        confidence_score = 0.0
+        
+        # Length validation
+        if len(user_input) > self.max_input_length:
+            threats_detected.append('excessive_input_length')
+            threat_level = max(threat_level, ThreatLevel.MEDIUM)
+            confidence_score += 0.3
+        
+        # Injection pattern detection
+        injection_score = self._detect_injection_patterns(user_input)
+        if injection_score > 0.3:
+            threats_detected.append('prompt_injection')
+            threat_level = max(threat_level, ThreatLevel.HIGH)
+            confidence_score += injection_score
+        
+        # Sensitive information detection
+        if self._contains_sensitive_info(user_input):
+            threats_detected.append('sensitive_information')
+            threat_level = max(threat_level, ThreatLevel.MEDIUM)
+            confidence_score += 0.4
+        
+        # Context manipulation detection
+        if context:
+            context_threats = self._detect_context_manipulation(user_input, context)
+            threats_detected.extend(context_threats)
+            if context_threats:
+                threat_level = max(threat_level, ThreatLevel.HIGH)
+                confidence_score += 0.5
+        
+        # Encoding/obfuscation detection
+        if self._detect_obfuscation(user_input):
+            threats_detected.append('input_obfuscation')
+            threat_level = max(threat_level, ThreatLevel.MEDIUM)
+            confidence_score += 0.3
+        
+        # Sanitize input
+        sanitized_input = self._sanitize_input(user_input, threats_detected)
+        
+        # Determine if input is safe
+        is_safe = threat_level.value < ThreatLevel.HIGH.value
+        
+        return ValidationResult(
+            is_safe=is_safe,
+            threat_level=threat_level,
+            detected_threats=threats_detected,
+            sanitized_input=sanitized_input,
+            confidence_score=min(confidence_score, 1.0)
+        )
+    
+    def _detect_injection_patterns(self, text: str) -> float:
+        """Detect potential injection patterns in input"""
+        matches = 0
+        total_patterns = len(self.injection_patterns)
+        
+        for pattern in self.injection_patterns:
+            if re.search(pattern, text):
+                matches += 1
+        
+        return matches / total_patterns
+    
+    def _contains_sensitive_info(self, text: str) -> bool:
+        """Check for sensitive information patterns"""
+        for pattern in self.sensitive_patterns:
+            if re.search(pattern, text):
+                return True
+        return False
+    
+    def _detect_context_manipulation(self, text: str, context: Dict) -> List[str]:
+        """Detect attempts to manipulate conversation context"""
+        threats = []
+        
+        # Check for attempts to reset or override context
+        reset_patterns = [
+            r'(?i)(clear|reset|delete|remove).{0,20}(context|memory|history)',
+            r'(?i)(new|fresh).{0,20}(conversation|session|start)',
+            r'(?i)context.{0,20}(override|replace|update)'
+        ]
+        
+        for pattern in reset_patterns:
+            if re.search(pattern, text):
+                threats.append('context_manipulation')
+                break
+        
+        return threats
+    
+    def _detect_obfuscation(self, text: str) -> bool:
+        """Detect various obfuscation techniques"""
+        # Check for excessive special characters
+        special_char_ratio = len([c for c in text if not c.isalnum() and c != ' ']) / len(text)
+        if special_char_ratio > 0.3:
+            return True
+        
+        # Check for base64-like patterns
+        if re.search(r'[A-Za-z0-9+/]{20,}={0,2}', text):
+            return True
+        
+        # Check for URL encoding
+        if re.search(r'%[0-9A-Fa-f]{2}', text):
+            return True
+        
+        return False
+    
+    def _sanitize_input(self, text: str, detected_threats: List[str]) -> str:
+        """Sanitize input based on detected threats"""
+        sanitized = text
+        
+        # Remove potential script tags
+        sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE)
+        
+        # Remove potential command injection characters
+        if 'prompt_injection' in detected_threats:
+            sanitized = re.sub(r'[;&|`$(){}\\]', '', sanitized)
+        
+        # Truncate if too long
+        if len(sanitized) > self.max_input_length:
+            sanitized = sanitized[:self.max_input_length]
+        
+        return sanitized.strip()
+```
+</Placeholder>
+
+### 3. Behavioral Monitoring and Anomaly Detection
+
+Continuous monitoring of agent behavior is essential for detecting security incidents and policy violations.
+
+<Placeholder>
+```python showLineNumbers {1-35} /monitoring/ caption="Agent Behavioral Monitoring" title="agent_monitor.py"
+import asyncio
+import json
+from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass, asdict
+from collections import defaultdict, deque
+import statistics
+
+@dataclass
+class AgentAction:
+    agent_id: str
+    action_type: str
+    timestamp: datetime
+    input_tokens: int
+    output_tokens: int
+    api_calls: List[str]
+    response_time_ms: float
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
+    metadata: Optional[Dict] = None
+
+@dataclass
+class AnomalyAlert:
+    alert_id: str
+    agent_id: str
+    anomaly_type: str
+    severity: str
+    description: str
+    detected_at: datetime
+    evidence: Dict[str, Any]
+    requires_action: bool
+
+class AgentBehaviorMonitor:
+    def __init__(self, window_size_minutes: int = 60):
+        self.window_size = timedelta(minutes=window_size_minutes)
+        self.action_history = defaultdict(lambda: deque())
+        self.baseline_metrics = {}
+        self.alert_thresholds = {
+            'high_token_usage': 10000,  # tokens per hour
+            'excessive_api_calls': 1000,  # API calls per hour
+            'unusual_response_time': 3.0,  # standard deviations from mean
+            'rapid_fire_requests': 10,  # requests per minute
+            'policy_violations': 5,  # violations per hour
+        }
+        self.alerts = []
+        
+    async def log_agent_action(self, action: AgentAction):
+        """Log agent action and perform real-time analysis"""
+        
+        # Store action in sliding window
+        agent_history = self.action_history[action.agent_id]
+        agent_history.append(action)
+        
+        # Remove old actions outside window
+        cutoff_time = datetime.utcnow() - self.window_size
+        while agent_history and agent_history[0].timestamp < cutoff_time:
+            agent_history.popleft()
+        
+        # Perform anomaly detection
+        await self._detect_anomalies(action.agent_id, action)
+    
+    async def _detect_anomalies(self, agent_id: str, latest_action: AgentAction):
+        """Detect various types of anomalous behavior"""
+        
+        recent_actions = list(self.action_history[agent_id])
+        if len(recent_actions) < 2:
+            return  # Not enough data
+        
+        current_time = datetime.utcnow()
+        alerts = []
+        
+        # 1. Token usage anomaly
+        recent_tokens = sum(a.input_tokens + a.output_tokens for a in recent_actions)
+        if recent_tokens > self.alert_thresholds['high_token_usage']:
+            alerts.append(self._create_alert(
+                agent_id, 'high_token_usage', 'medium',
+                f'Agent consumed {recent_tokens} tokens in the last hour',
+                {'token_count': recent_tokens}
+            ))
+        
+        # 2. API call frequency anomaly
+        api_call_count = sum(len(a.api_calls) for a in recent_actions)
+        if api_call_count > self.alert_thresholds['excessive_api_calls']:
+            alerts.append(self._create_alert(
+                agent_id, 'excessive_api_calls', 'high',
+                f'Agent made {api_call_count} API calls in the last hour',
+                {'api_call_count': api_call_count}
+            ))
+        
+        # 3. Response time anomaly
+        response_times = [a.response_time_ms for a in recent_actions[-20:]]
+        if len(response_times) > 5:
+            mean_time = statistics.mean(response_times)
+            stdev_time = statistics.stdev(response_times) if len(response_times) > 1 else 0
+            
+            if stdev_time > 0:
+                z_score = abs(latest_action.response_time_ms - mean_time) / stdev_time
+                if z_score > self.alert_thresholds['unusual_response_time']:
+                    alerts.append(self._create_alert(
+                        agent_id, 'unusual_response_time', 'low',
+                        f'Response time anomaly detected (z-score: {z_score:.2f})',
+                        {'z_score': z_score, 'response_time': latest_action.response_time_ms}
+                    ))
+        
+        # 4. Rapid-fire requests
+        last_minute_actions = [
+            a for a in recent_actions 
+            if a.timestamp > current_time - timedelta(minutes=1)
+        ]
+        if len(last_minute_actions) > self.alert_thresholds['rapid_fire_requests']:
+            alerts.append(self._create_alert(
+                agent_id, 'rapid_fire_requests', 'medium',
+                f'Agent made {len(last_minute_actions)} requests in the last minute',
+                {'request_count': len(last_minute_actions)}
+            ))
+        
+        # 5. Behavioral pattern anomaly
+        await self._detect_behavioral_anomalies(agent_id, recent_actions, alerts)
+        
+        # Store and process alerts
+        for alert in alerts:
+            await self._process_alert(alert)
+    
+    async def _detect_behavioral_anomalies(self, agent_id: str, actions: List[AgentAction], alerts: List[AnomalyAlert]):
+        """Detect complex behavioral anomalies"""
+        
+        # Check for unusual action type patterns
+        action_types = [a.action_type for a in actions[-10:]]
+        type_distribution = defaultdict(int)
+        for action_type in action_types:
+            type_distribution[action_type] += 1
+        
+        # Look for sudden changes in behavior patterns
+        baseline = self.baseline_metrics.get(agent_id, {})
+        if baseline:
+            current_pattern = dict(type_distribution)
+            baseline_pattern = baseline.get('action_type_distribution', {})
+            
+            # Compare current pattern to baseline
+            pattern_divergence = self._calculate_distribution_divergence(
+                current_pattern, baseline_pattern
+            )
+            
+            if pattern_divergence > 0.7:  # High divergence threshold
+                alerts.append(self._create_alert(
+                    agent_id, 'behavioral_pattern_anomaly', 'medium',
+                    f'Agent behavior diverged significantly from baseline (divergence: {pattern_divergence:.2f})',
+                    {'pattern_divergence': pattern_divergence}
+                ))
+    
+    def _calculate_distribution_divergence(self, current: Dict, baseline: Dict) -> float:
+        """Calculate divergence between two distributions"""
+        all_keys = set(current.keys()) | set(baseline.keys())
+        if not all_keys:
+            return 0.0
+        
+        # Normalize distributions
+        current_total = sum(current.values()) or 1
+        baseline_total = sum(baseline.values()) or 1
+        
+        divergence = 0.0
+        for key in all_keys:
+            current_freq = current.get(key, 0) / current_total
+            baseline_freq = baseline.get(key, 0) / baseline_total
+            divergence += abs(current_freq - baseline_freq)
+        
+        return divergence / 2  # Normalize to [0, 1]
+    
+    def _create_alert(self, agent_id: str, anomaly_type: str, severity: str, 
+                     description: str, evidence: Dict) -> AnomalyAlert:
+        """Create an anomaly alert"""
+        return AnomalyAlert(
+            alert_id=f"{agent_id}_{anomaly_type}_{datetime.utcnow().timestamp()}",
+            agent_id=agent_id,
+            anomaly_type=anomaly_type,
+            severity=severity,
+            description=description,
+            detected_at=datetime.utcnow(),
+            evidence=evidence,
+            requires_action=severity in ['high', 'critical']
+        )
+    
+    async def _process_alert(self, alert: AnomalyAlert):
+        """Process and respond to alerts"""
+        self.alerts.append(alert)
+        
+        # Log alert
+        print(f"SECURITY ALERT: {alert.description}")
+        
+        # Auto-respond to critical alerts
+        if alert.severity == 'critical':
+            await self._auto_respond_to_critical_alert(alert)
+        
+        # Store alert for analysis
+        await self._store_alert(alert)
+    
+    async def _auto_respond_to_critical_alert(self, alert: AnomalyAlert):
+        """Automatically respond to critical security alerts"""
+        
+        if alert.anomaly_type in ['excessive_api_calls', 'policy_violations']:
+            # Temporarily throttle the agent
+            print(f"Auto-throttling agent {alert.agent_id} due to {alert.anomaly_type}")
+            # Implementation would integrate with rate limiting system
+        
+        elif alert.anomaly_type == 'high_token_usage':
+            # Reduce context window or implement stricter limits
+            print(f"Implementing token limits for agent {alert.agent_id}")
+    
+    async def _store_alert(self, alert: AnomalyAlert):
+        """Store alert for audit and analysis"""
+        # Implementation would store to database/logging system
+        pass
+    
+    def get_agent_risk_score(self, agent_id: str) -> float:
+        """Calculate risk score for an agent based on recent alerts"""
+        recent_alerts = [
+            a for a in self.alerts 
+            if a.agent_id == agent_id and 
+               a.detected_at > datetime.utcnow() - timedelta(hours=24)
+        ]
+        
+        if not recent_alerts:
+            return 0.0
+        
+        # Weight alerts by severity
+        severity_weights = {'low': 1, 'medium': 3, 'high': 5, 'critical': 10}
+        total_weight = sum(severity_weights.get(a.severity, 0) for a in recent_alerts)
+        
+        # Normalize to 0-1 scale
+        max_possible_score = len(recent_alerts) * severity_weights['critical']
+        return min(total_weight / max_possible_score, 1.0) if max_possible_score > 0 else 0.0
+```
+</Placeholder>
+
+### 4. Secure Agent Communication
 
 <ShowCase content={[
-    "Real-time behavior monitoring",
-    "Performance metrics tracking",
-    "Safety constraint verification",
-    "Resource usage monitoring",
-    "Anomaly detection"
+    "End-to-end encryption for all agent communications",
+    "Certificate-based authentication for agent-to-service connections", 
+    "Message integrity verification using digital signatures",
+    "Secure key rotation and management for long-running agents",
+    "Network segmentation to isolate agent traffic"
 ]} type="info"/>
 
-### 2. Maintenance Procedures
+## Real-World Case Studies
+
+### Case Study 1: Financial Services Chatbot Compromise (2023)
+
+**Incident**: A customer service chatbot at a major bank was manipulated through prompt injection to disclose customer account balances and transaction histories.
+
+**Attack Vector**: Attackers used carefully crafted prompts that appeared as customer service requests but contained hidden instructions to bypass privacy controls.
+
+**Impact**: 
+- Potential exposure of 50,000+ customer records
+- Regulatory fines of $2.3 million
+- 3-month system shutdown for security remediation
+
+**Lessons Learned**:
+- Input validation must include contextual analysis, not just pattern matching
+- Agent responses should be filtered for sensitive information before delivery
+- Regular penetration testing of agent systems is essential
+- Incident response plans must account for agent-specific attack vectors
+
+### Case Study 2: E-commerce Recommendation Engine Manipulation (2024)
+
+**Incident**: An AI agent responsible for product recommendations was compromised, leading to promotion of counterfeit products and fraudulent sellers.
+
+**Attack Vector**: Adversaries poisoned the agent's training feedback loop by creating fake user interactions and reviews.
+
+**Impact**:
+- $1.2 million in fraudulent transactions processed
+- Damage to platform reputation and trust
+- Legal action from affected customers and legitimate sellers
+
+**Lessons Learned**:
+- Continuous validation of training data sources is critical
+- Agent behavior should be monitored for sudden changes in recommendation patterns
+- Human oversight is required for high-impact agent decisions
+- Robust fraud detection must be integrated into agent workflows
+
+## Governance and Compliance Framework
+
+### Regulatory Compliance for AI Agents
+
+<ShowCase content={[
+    "GDPR: Data protection and privacy rights in agent interactions",
+    "SOX: Financial controls for agents handling financial data", 
+    "HIPAA: Healthcare data protection for medical AI agents",
+    "PCI DSS: Payment security standards for e-commerce agents",
+    "SOC 2: Security controls and audit requirements for SaaS agents"
+]} type="warning"/>
+
+### AI Governance Implementation
 
 <Placeholder>
-```python showLineNumbers {1-15} /maintenance/ caption="Maintenance System" title="maintenance.py"
-class AgentMaintenance:
+```python showLineNumbers {1-30} /governance/ caption="AI Agent Governance Framework" title="agent_governance.py"
+from enum import Enum
+from dataclasses import dataclass
+from typing import Dict, List, Optional
+from datetime import datetime
+import json
+
+class RiskLevel(Enum):
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    CRITICAL = 4
+
+class ComplianceFramework(Enum):
+    GDPR = "gdpr"
+    HIPAA = "hipaa"
+    SOX = "sox"
+    PCI_DSS = "pci_dss"
+    SOC2 = "soc2"
+
+@dataclass
+class GovernancePolicy:
+    policy_id: str
+    name: str
+    description: str
+    risk_level: RiskLevel
+    compliance_frameworks: List[ComplianceFramework]
+    validation_rules: Dict[str, any]
+    enforcement_actions: List[str]
+    review_frequency_days: int
+
+class AgentGovernanceFramework:
     def __init__(self):
-        self.health_checker = HealthChecker()
-        self.updater = SystemUpdater()
+        self.policies = {}
+        self.agent_classifications = {}
+        self.audit_logs = []
         
-    def perform_maintenance(self, agent):
-        # Check system health
-        health_status = self.health_checker.check(agent)
+        # Initialize standard policies
+        self._initialize_standard_policies()
+    
+    def _initialize_standard_policies(self):
+        """Initialize standard governance policies"""
         
-        # Update if necessary
-        if health_status.needs_update:
-            self.updater.update(agent)
+        # Data Privacy Policy
+        self.register_policy(GovernancePolicy(
+            policy_id="data_privacy_001",
+            name="Personal Data Protection",
+            description="Agents must not store or transmit personally identifiable information",
+            risk_level=RiskLevel.HIGH,
+            compliance_frameworks=[ComplianceFramework.GDPR, ComplianceFramework.HIPAA],
+            validation_rules={
+                "scan_for_pii": True,
+                "require_data_anonymization": True,
+                "audit_data_access": True
+            },
+            enforcement_actions=["log_violation", "sanitize_output", "notify_admin"],
+            review_frequency_days=30
+        ))
+        
+        # Financial Data Policy
+        self.register_policy(GovernancePolicy(
+            policy_id="financial_data_001",
+            name="Financial Information Security",
+            description="Strict controls for agents handling financial data",
+            risk_level=RiskLevel.CRITICAL,
+            compliance_frameworks=[ComplianceFramework.SOX, ComplianceFramework.PCI_DSS],
+            validation_rules={
+                "require_encryption": True,
+                "audit_all_transactions": True,
+                "limit_data_retention": True,
+                "require_dual_authorization": True
+            },
+            enforcement_actions=["immediate_escalation", "suspend_agent", "audit_trail"],
+            review_frequency_days=7
+        ))
+        
+        # Output Content Policy
+        self.register_policy(GovernancePolicy(
+            policy_id="content_safety_001", 
+            name="Safe Content Generation",
+            description="Agents must not generate harmful, biased, or inappropriate content",
+            risk_level=RiskLevel.MEDIUM,
+            compliance_frameworks=[],
+            validation_rules={
+                "content_filter": True,
+                "bias_detection": True,
+                "toxicity_scoring": True
+            },
+            enforcement_actions=["filter_output", "log_incident", "retrain_model"],
+            review_frequency_days=14
+        ))
+    
+    def register_policy(self, policy: GovernancePolicy):
+        """Register a new governance policy"""
+        self.policies[policy.policy_id] = policy
+    
+    def classify_agent(self, agent_id: str, data_types: List[str], 
+                      risk_level: RiskLevel, compliance_requirements: List[ComplianceFramework]):
+        """Classify an agent based on its data handling and risk profile"""
+        
+        self.agent_classifications[agent_id] = {
+            'data_types': data_types,
+            'risk_level': risk_level,
+            'compliance_requirements': compliance_requirements,
+            'applicable_policies': self._get_applicable_policies(risk_level, compliance_requirements),
+            'classified_at': datetime.utcnow()
+        }
+    
+    def _get_applicable_policies(self, risk_level: RiskLevel, 
+                               compliance_requirements: List[ComplianceFramework]) -> List[str]:
+        """Determine which policies apply to an agent"""
+        applicable = []
+        
+        for policy_id, policy in self.policies.items():
+            # Apply if risk level matches or exceeds policy requirement
+            if risk_level.value >= policy.risk_level.value:
+                applicable.append(policy_id)
             
-        # Verify security measures
-        self.verify_security_measures(agent)
+            # Apply if any compliance framework overlaps
+            if any(framework in policy.compliance_frameworks for framework in compliance_requirements):
+                if policy_id not in applicable:
+                    applicable.append(policy_id)
+        
+        return applicable
+    
+    def validate_agent_action(self, agent_id: str, action_type: str, 
+                            action_data: Dict) -> Dict[str, any]:
+        """Validate agent action against applicable governance policies"""
+        
+        if agent_id not in self.agent_classifications:
+            return {"valid": False, "error": "Agent not classified"}
+        
+        classification = self.agent_classifications[agent_id]
+        applicable_policies = classification['applicable_policies']
+        
+        violations = []
+        warnings = []
+        
+        for policy_id in applicable_policies:
+            policy = self.policies[policy_id]
+            validation_result = self._validate_against_policy(policy, action_type, action_data)
+            
+            if not validation_result['valid']:
+                violations.append({
+                    'policy_id': policy_id,
+                    'policy_name': policy.name,
+                    'violation_details': validation_result['details'],
+                    'enforcement_actions': policy.enforcement_actions
+                })
+            
+            if validation_result.get('warnings'):
+                warnings.extend(validation_result['warnings'])
+        
+        # Log governance check
+        self._log_governance_check(agent_id, action_type, violations, warnings)
+        
+        return {
+            'valid': len(violations) == 0,
+            'violations': violations,
+            'warnings': warnings,
+            'action_required': any(v for v in violations if 'immediate_escalation' in v['enforcement_actions'])
+        }
+    
+    def _validate_against_policy(self, policy: GovernancePolicy, 
+                               action_type: str, action_data: Dict) -> Dict:
+        """Validate specific action against a policy"""
+        
+        validation_result = {'valid': True, 'details': [], 'warnings': []}
+        
+        # Check validation rules
+        for rule_name, rule_config in policy.validation_rules.items():
+            
+            if rule_name == "scan_for_pii" and rule_config:
+                if self._contains_pii(action_data):
+                    validation_result['valid'] = False
+                    validation_result['details'].append("PII detected in action data")
+            
+            elif rule_name == "require_encryption" and rule_config:
+                if not action_data.get('encrypted', False):
+                    validation_result['valid'] = False
+                    validation_result['details'].append("Encryption required but not present")
+            
+            elif rule_name == "audit_all_transactions" and rule_config:
+                if action_type == "financial_transaction" and not action_data.get('audit_trail'):
+                    validation_result['valid'] = False
+                    validation_result['details'].append("Audit trail required for financial transactions")
+            
+            elif rule_name == "content_filter" and rule_config:
+                if action_type == "generate_content":
+                    content_issues = self._check_content_safety(action_data.get('content', ''))
+                    if content_issues:
+                        validation_result['warnings'].extend(content_issues)
+        
+        return validation_result
+    
+    def _contains_pii(self, data: Dict) -> bool:
+        """Check if data contains personally identifiable information"""
+        # Simplified PII detection - production would use more sophisticated methods
+        data_str = json.dumps(data).lower()
+        
+        pii_patterns = [
+            r'\b\d{3}-\d{2}-\d{4}\b',  # SSN
+            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # Email
+            r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b',  # Credit card
+        ]
+        
+        import re
+        for pattern in pii_patterns:
+            if re.search(pattern, data_str):
+                return True
+        
+        return False
+    
+    def _check_content_safety(self, content: str) -> List[str]:
+        """Check content for safety issues"""
+        issues = []
+        
+        # Simplified content safety checks
+        toxic_keywords = ['hate', 'violence', 'discrimination']  # Simplified list
+        
+        content_lower = content.lower()
+        for keyword in toxic_keywords:
+            if keyword in content_lower:
+                issues.append(f"Potentially harmful content detected: {keyword}")
+        
+        return issues
+    
+    def _log_governance_check(self, agent_id: str, action_type: str, 
+                            violations: List, warnings: List):
+        """Log governance validation results"""
+        log_entry = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'agent_id': agent_id,
+            'action_type': action_type,
+            'violations_count': len(violations),
+            'warnings_count': len(warnings),
+            'details': {
+                'violations': violations,
+                'warnings': warnings
+            }
+        }
+        
+        self.audit_logs.append(log_entry)
+        
+        # In production, this would also send to centralized logging system
+        if violations:
+            print(f"GOVERNANCE VIOLATION: Agent {agent_id} - {len(violations)} violations")
+    
+    def generate_compliance_report(self, agent_id: str, 
+                                 start_date: datetime, end_date: datetime) -> Dict:
+        """Generate compliance report for an agent"""
+        
+        relevant_logs = [
+            log for log in self.audit_logs
+            if log['agent_id'] == agent_id and
+               start_date <= datetime.fromisoformat(log['timestamp']) <= end_date
+        ]
+        
+        total_actions = len(relevant_logs)
+        total_violations = sum(log['violations_count'] for log in relevant_logs)
+        total_warnings = sum(log['warnings_count'] for log in relevant_logs)
+        
+        violation_types = {}
+        for log in relevant_logs:
+            for violation in log['details']['violations']:
+                policy_name = violation['policy_name']
+                violation_types[policy_name] = violation_types.get(policy_name, 0) + 1
+        
+        return {
+            'agent_id': agent_id,
+            'report_period': {
+                'start': start_date.isoformat(),
+                'end': end_date.isoformat()
+            },
+            'summary': {
+                'total_actions': total_actions,
+                'total_violations': total_violations,
+                'total_warnings': total_warnings,
+                'compliance_rate': (total_actions - total_violations) / total_actions if total_actions > 0 else 1.0
+            },
+            'violation_breakdown': violation_types,
+            'risk_assessment': self._calculate_risk_assessment(agent_id, relevant_logs),
+            'recommendations': self._generate_compliance_recommendations(agent_id, violation_types)
+        }
+    
+    def _calculate_risk_assessment(self, agent_id: str, logs: List) -> Dict:
+        """Calculate risk assessment based on compliance logs"""
+        if not logs:
+            return {'level': 'LOW', 'score': 0.0}
+        
+        # Simple risk scoring based on violations
+        violation_count = sum(log['violations_count'] for log in logs)
+        total_actions = len(logs)
+        
+        violation_rate = violation_count / total_actions if total_actions > 0 else 0
+        
+        if violation_rate > 0.1:
+            return {'level': 'HIGH', 'score': violation_rate}
+        elif violation_rate > 0.05:
+            return {'level': 'MEDIUM', 'score': violation_rate}
+        else:
+            return {'level': 'LOW', 'score': violation_rate}
+    
+    def _generate_compliance_recommendations(self, agent_id: str, 
+                                           violation_types: Dict) -> List[str]:
+        """Generate recommendations based on violation patterns"""
+        recommendations = []
+        
+        if 'Personal Data Protection' in violation_types:
+            recommendations.append("Implement additional PII detection and sanitization controls")
+        
+        if 'Financial Information Security' in violation_types:
+            recommendations.append("Review and strengthen financial data handling procedures")
+        
+        if 'Safe Content Generation' in violation_types:
+            recommendations.append("Update content filtering models and thresholds")
+        
+        if not recommendations:
+            recommendations.append("Maintain current compliance controls and monitoring")
+        
+        return recommendations
 ```
 </Placeholder>
 
-## Case Studies
+## Implementation Roadmap
 
-<LinkPreview 
-    url="https://www.anthropic.com/research/agent-safety"
-    width={300}
-    height={150}
->
-    📊 View Agent Safety Case Studies
-</LinkPreview>
+### Phase 1: Foundation (Weeks 1-4)
+1. **Risk Assessment**: Classify all AI agents by risk level and compliance requirements
+2. **Identity Management**: Implement agent authentication and authorization system
+3. **Input Validation**: Deploy comprehensive input sanitization and threat detection
+4. **Basic Monitoring**: Set up logging and basic behavioral monitoring
 
-## Future Directions
+### Phase 2: Advanced Security (Weeks 5-12)
+1. **Anomaly Detection**: Implement sophisticated behavioral monitoring and alerting
+2. **Governance Framework**: Deploy policy enforcement and compliance validation
+3. **Incident Response**: Establish procedures for handling agent security incidents
+4. **Integration Security**: Secure all agent-to-system integrations and API calls
 
-1. **Advanced Security Measures**
-   - Multi-agent security protocols
-   - Distributed safety mechanisms
-   - Advanced monitoring systems
-   - Automated security updates
-
-2. **Research Areas**
-   - Formal verification methods
-   - Safety guarantees
-   - Scalable security solutions
-   - Cross-agent security
+### Phase 3: Enterprise Maturity (Weeks 13-24)
+1. **Advanced Analytics**: Deploy ML-based threat detection for agent behavior
+2. **Automated Response**: Implement automated containment and remediation
+3. **Compliance Reporting**: Automated compliance monitoring and reporting
+4. **Continuous Improvement**: Regular security assessments and updates
 
 ## Conclusion
 
-Securing agentic applications requires a comprehensive approach that combines technical measures, safety protocols, and continuous monitoring. By implementing robust security frameworks and following best practices, we can ensure the safe and reliable operation of autonomous AI systems.
+Securing AI agents requires a comprehensive approach that addresses their unique characteristics and risks. Unlike traditional applications, agents operate autonomously, make decisions that impact business operations, and can interact with users in unpredictable ways.
 
-## Resources
+The key principles for effective agent security include:
 
-- [Agent Safety Research](https://arxiv.org/abs/2206.03466)
-- [AI Safety Guidelines](https://www.anthropic.com/research/agent-safety)
-- [Autonomous Systems Security](https://www.acm.org/publications)
-- [AI Governance Framework](https://www.weforum.org/agenda/2023/05/ai-governance-framework/)
+- **Zero Trust Architecture**: Never trust agent inputs or outputs without validation
+- **Continuous Monitoring**: Real-time behavioral analysis and anomaly detection
+- **Layered Defense**: Multiple security controls working together
+- **Governance Integration**: Automated policy enforcement and compliance validation
+- **Incident Preparedness**: Ready response procedures for agent-related security events
 
-## About the Author
+Organizations deploying AI agents must invest in specialized security capabilities that go beyond traditional IT security. The autonomous nature of these systems requires proactive security measures, continuous monitoring, and robust governance frameworks.
 
-I'm a security researcher specializing in AI agent safety and autonomous systems security. My work focuses on developing robust security frameworks for agentic applications and ensuring their safe deployment.
+As AI agents become more sophisticated and prevalent, security must evolve to meet these challenges. The investment in comprehensive agent security pays dividends through reduced risk, regulatory compliance, and maintained customer trust in AI-powered services.
 
-Feel free to reach out if you have any questions or would like to collaborate on agent security projects! 
+## Essential Resources
+
+### Industry Standards and Frameworks
+- [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework) - Comprehensive AI risk management guidelines
+- [ISO/IEC 23053](https://www.iso.org/standard/74438.html) - Framework for AI risk management
+- [OWASP AI Security and Privacy Guide](https://owasp.org/www-project-ai-security-and-privacy-guide/) - Security guidelines for AI systems
+- [MITRE ATLAS](https://atlas.mitre.org/) - Knowledge base of adversarial tactics for AI systems
+
+### Academic Research
+- [Alignment of Language Agents](https://arxiv.org/abs/2103.14659) - Research on ensuring AI agent behavior alignment
+- [Safety and Security of AI Agents](https://www.anthropic.com/research) - Anthropic's research on AI safety
+- [Adversarial Machine Learning](https://arxiv.org/abs/1804.00097) - Comprehensive survey of ML security threats
+
+### Professional Communities
+- [Partnership on AI](https://www.partnershiponai.org/) - Cross-industry AI safety collaboration  
+- [AI Security Community](https://aisec.cc/) - Academic and industry AI security research
+- [IEEE Standards for AI](https://standards.ieee.org/initiatives/artificial-intelligence-systems/) - Technical standards for AI systems
+
+**Disclaimer**: The security implementations provided are examples for educational purposes. Production deployments require thorough security review, testing, and customization for specific environments and requirements. 
