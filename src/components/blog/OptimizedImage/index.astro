@@ -55,7 +55,13 @@ const finalConfig = {
 
 // Check if the image is from assets or external
 const isLocalImage = !src.startsWith('http');
-const imagePromise = isLocalImage ? getImagePromise(src) : src;
+
+let imageSrc: string | ImageMetadata;
+if (isLocalImage) {
+  imageSrc = (await getImagePromise(src)).default;
+} else {
+  imageSrc = src;
+}
 
 const combinedStyle = {
   ...style,
@@ -66,7 +72,7 @@ const combinedStyle = {
 
 {isLocalImage ? (
   <Image
-    src={imagePromise}
+    src={imageSrc as ImageMetadata}
     alt={alt}
     width={finalConfig.width}
     height={finalConfig.height}
