@@ -16,11 +16,12 @@ const hashtagString = hashtags.map(tag => `#${tag}`).join(' ');
 
 // Social sharing URLs
 const shareUrls = {
-  twitter: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}&hashtags=${hashtags.join(',')}`,
-  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+  twitter: `https://twitter.com/intent/tweet?text=${encodedTitle}${description ? `%0A%0A${encodedDescription}` : ''}&url=${encodedUrl}${hashtags.length > 0 ? `&hashtags=${hashtags.join(',')}` : ''}`,
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}&title=${encodedTitle}&summary=${encodedDescription}`,
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedTitle}${description ? `%20-%20${encodedDescription}` : ''}`,
   reddit: `https://reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
   hackernews: `https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}`,
+  copy: url,
 };
 ---
 
@@ -113,16 +114,16 @@ const shareUrls = {
     <!-- Copy Link Button -->
     <button
       class="share-button share-copy"
-      aria-label="Copy link"
-      data-url={url}
+      aria-label="Copy link to clipboard"
       data-platform="copy"
+      data-url={url}
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
       </svg>
-      <span class="hidden sm:inline ml-2">Copy</span>
+      <span class="hidden sm:inline ml-2">Copy Link</span>
     </button>
-  </div>
+
 </div>
 
 <script>

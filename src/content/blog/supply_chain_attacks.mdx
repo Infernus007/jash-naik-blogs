@@ -301,8 +301,41 @@ class SBOMManager:
     def _get_license_info(self, name: str, package_type: str) -> str:
         """Retrieve license information for component"""
         
-        # In production, this would query package registries for license info
-        # Return placeholder for now
+        try:
+            if package_type == 'pip':
+                # Query PyPI API for license information
+                response = requests.get(f'https://pypi.org/pypi/{name}/json', timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    license_info = data.get('info', {}).get('license')
+                    if license_info:
+                        return license_info
+                    
+                    # Fallback to classifiers
+                    classifiers = data.get('info', {}).get('classifiers', [])
+                    for classifier in classifiers:
+                        if classifier.startswith('License ::'):
+                            return classifier.split('::')[-1].strip()
+            
+            elif package_type == 'npm':
+                # Query npm registry for license information
+                response = requests.get(f'https://registry.npmjs.org/{name}', timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    return data.get('license', 'Unknown')
+            
+            elif package_type == 'docker':
+                # Docker images typically don't have standardized license info
+                # Would need to inspect image layers
+                return 'Unknown - Image License'
+            
+            elif package_type == 'system_library':
+                # System libraries typically follow distribution licensing
+                return 'System Library'
+                
+        except requests.RequestException:
+            pass
+        
         return "Unknown"
     
     def _enrich_with_vulnerabilities(self, sbom: Dict):
@@ -751,7 +784,9 @@ class ComprehensiveDependencyScanner:
                     'name': image,
                     'type': 'container_image',
                     'vulnerabilities': [],
-                    'scan_method': 'placeholder'  # Would be actual scanner
+                    'scan_method': 'integrated_scanner',
+                    'base_os': self._detect_base_os(image),
+                    'security_scan': self._perform_basic_container_scan(image)
                 }
                 
                 report['packages'][f"container:{image}"] = image_info
@@ -763,9 +798,121 @@ class ComprehensiveDependencyScanner:
     async def _scan_binary_dependencies(self, project_path: str, report: Dict):
         """Scan binary dependencies and system libraries"""
         
-        # This would integrate with binary analysis tools
-        # For now, placeholder implementation
-        pass
+        try:
+            # Find executable files in the project
+            result = subprocess.run(
+                ['find', project_path, '-type', 'f', '-executable'],
+                capture_output=True, text=True, check=True
+            )
+            
+            executables = [exe for exe in result.stdout.strip().split('\n') if exe][:10]
+            
+            for exe in executables:
+                try:
+                    # Use ldd to find shared library dependencies
+                    ldd_result = subprocess.run(
+                        ['ldd', exe], 
+                        capture_output=True, text=True, check=True
+                    )
+                    
+                    binary_info = {
+                        'name': os.path.basename(exe),
+                        'path': exe,
+                        'type': 'binary_executable',
+                        'dependencies': [],
+                        'vulnerabilities': []
+                    }
+                    
+                    for line in ldd_result.stdout.split('\n'):
+                        if '=>' in line and 'not found' not in line:
+                            parts = line.strip().split('=>')
+                            if len(parts) == 2:
+                                lib_name = parts[0].strip()
+                                lib_path = parts[1].split('(')[0].strip()
+                                
+                                if lib_path:
+                                    binary_info['dependencies'].append({
+                                        'name': lib_name,
+                                        'path': lib_path,
+                                        'type': 'shared_library'
+                                    })
+                    
+                    # Check for known vulnerable patterns in binary names
+                    if self._check_binary_security_issues(exe, binary_info):
+                        report['vulnerable_packages'] += 1
+                    
+                    report['packages'][f"binary:{os.path.basename(exe)}"] = binary_info
+                    report['total_packages'] += 1
+                    
+                except subprocess.CalledProcessError:
+                    # Binary might be static or incompatible with ldd
+                    static_binary_info = {
+                        'name': os.path.basename(exe),
+                        'path': exe,
+                        'type': 'static_binary',
+                        'dependencies': [],
+                        'vulnerabilities': []
+                    }
+                    report['packages'][f"binary:{os.path.basename(exe)}"] = static_binary_info
+                    report['total_packages'] += 1
+            
+        except subprocess.CalledProcessError:
+            # Handle cases where find command fails
+            pass
+    
+    def _check_binary_security_issues(self, exe_path: str, binary_info: Dict) -> bool:
+        """Check binary for common security issues"""
+        
+        import os
+        vulnerabilities_found = False
+        
+        # Check for common vulnerable binary patterns
+        vulnerable_patterns = [
+            ('setuid', 'SUID binary detected - potential privilege escalation risk'),
+            ('sudo', 'Sudo-related binary - review permissions carefully'),
+            ('passwd', 'Password-related binary - high security impact'),
+            ('su', 'User switching binary - review security implications')
+        ]
+        
+        binary_name = os.path.basename(exe_path).lower()
+        
+        for pattern, message in vulnerable_patterns:
+            if pattern in binary_name:
+                binary_info['vulnerabilities'].append({
+                    'type': 'security_pattern',
+                    'severity': 'MEDIUM',
+                    'description': message,
+                    'pattern': pattern
+                })
+                vulnerabilities_found = True
+        
+        # Check file permissions for SUID/SGID
+        try:
+            stat_info = os.stat(exe_path)
+            mode = stat_info.st_mode
+            
+            if mode & 0o4000:  # SUID bit
+                binary_info['vulnerabilities'].append({
+                    'type': 'file_permission',
+                    'severity': 'HIGH',
+                    'description': 'SUID bit set - potential privilege escalation',
+                    'permission': 'SUID'
+                })
+                vulnerabilities_found = True
+            
+            if mode & 0o2000:  # SGID bit
+                binary_info['vulnerabilities'].append({
+                    'type': 'file_permission',
+                    'severity': 'MEDIUM',
+                    'description': 'SGID bit set - review group permissions',
+                    'permission': 'SGID'
+                })
+                vulnerabilities_found = True
+                
+        except OSError:
+            pass
+        
+        return vulnerabilities_found
     
     async def _apply_security_policies(self, report: Dict):
         """Apply organizational security policies to scan results"""
@@ -1104,7 +1251,92 @@ def disguised_payload():
 def generate_c2_domains(seed):
     """Generate seemingly random domains for command & control"""
     # Used DGA (Domain Generation Algorithm) for resilience
-    pass
+    
+    import hashlib
+    from datetime import datetime
+    
+    # Create seed-based domain generation
+    base_domains = ['avsvmcloud', 'digitalcollege', 'freescanonline', 'deftsecurity']
+    
+    # Generate time-based variation
+    current_time = datetime.now()
+    time_seed = f"{seed}_{current_time.strftime('%Y%m%d')}"
+    
+    # Hash-based domain selection
+    hash_obj = hashlib.md5(time_seed.encode())
+    hash_hex = hash_obj.hexdigest()
+    
+    # Select domain based on hash
+    domain_index = int(hash_hex[:2], 16) % len(base_domains)
+    selected_domain = base_domains[domain_index]
+    
+    # Add subdomain variation
+    subdomain_suffix = hash_hex[2:8]
+    full_domain = f"{subdomain_suffix}.{selected_domain}.com"
+    
+    return [full_domain]
+
+def is_safe_environment():
+    """Check if environment is safe for malicious activity"""
+    
+    import os
+    import socket
+    
+    # Check for analysis environments (simplified)
+    analysis_indicators = [
+        'vmware', 'virtualbox', 'sandbox', 'analyst',
+        'malware', 'virus', 'security', 'wireshark'
+    ]
+    
+    hostname = socket.gethostname().lower()
+    username = os.getenv('USER', '').lower()
+    
+    # Avoid execution in analysis environments
+    for indicator in analysis_indicators:
+        if indicator in hostname or indicator in username:
+            return False
+    
+    return True
+
+def target_organization_detected():
+    """Check if current environment matches target criteria"""
+    
+    import os
+    
+    # Check for high-value targets (simplified)
+    target_indicators = [
+        'gov', 'treasury', 'defense', 'energy',
+        'health', 'finance', 'critical', 'infrastructure'
+    ]
+    
+    domain = os.getenv('USERDNSDOMAIN', '').lower()
+    
+    return any(indicator in domain for indicator in target_indicators)
+
+def establish_persistence():
+    """Establish persistence mechanisms"""
+    
+    # This is a demonstration - actual malware would implement
+    # various persistence techniques like:
+    # - Registry modifications
+    # - Service creation
+    # - Scheduled tasks
+    # - DLL hijacking
+    
+    print("DEMO: Persistence mechanism would be established")
+    return True
+
+def exfiltrate_credentials():
+    """Exfiltrate stored credentials"""
+    
+    # This is a demonstration - actual malware would:
+    # - Access browser stored passwords
+    # - Extract cached domain credentials
+    # - Harvest certificates and keys
+    # - Access password managers
+    
+    print("DEMO: Credential exfiltration would occur")
+    return True
 ```
 
 **Lessons Learned:**
@@ -1344,6 +1576,226 @@ class CRAComplianceFramework:
         assessment_report['recommendations'] = self._generate_compliance_recommendations(assessment_report)
         
         return assessment_report
+    
+    def _assess_requirement(self, requirement: CRARequirement) -> Dict[str, Any]:
+        """Assess individual CRA requirement compliance"""
+        
+        assessment = {
+            'requirement_id': requirement.article,
+            'requirement_name': requirement.requirement,
+            'compliance_status': 'PENDING',
+            'evidence_found': [],
+            'missing_evidence': [],
+            'assessment_score': 0.0,
+            'recommendations': []
+        }
+        
+        # Check for required evidence
+        total_evidence = len(requirement.evidence_required)
+        found_evidence = 0
+        
+        for evidence_type in requirement.evidence_required:
+            if self._check_evidence_exists(evidence_type):
+                assessment['evidence_found'].append(evidence_type)
+                found_evidence += 1
+            else:
+                assessment['missing_evidence'].append(evidence_type)
+        
+        # Calculate compliance score
+        assessment['assessment_score'] = found_evidence / total_evidence if total_evidence > 0 else 0.0
+        
+        # Determine compliance status
+        if assessment['assessment_score'] >= 0.9:
+            assessment['compliance_status'] = 'COMPLIANT'
+        elif assessment['assessment_score'] >= 0.5:
+            assessment['compliance_status'] = 'PARTIAL'
+        else:
+            assessment['compliance_status'] = 'NON_COMPLIANT'
+        
+        # Generate specific recommendations
+        assessment['recommendations'] = self._generate_requirement_recommendations(
+            requirement, assessment
+        )
+        
+        return assessment
+    
+    def _check_evidence_exists(self, evidence_type: str) -> bool:
+        """Check if required evidence exists in the system"""
+        
+        evidence_checks = {
+            'Security-by-design documentation': self._check_security_documentation,
+            'Threat modeling reports': self._check_threat_models,
+            'Security testing results': self._check_security_testing,
+            'Vulnerability assessment reports': self._check_vulnerability_reports,
+            'Vulnerability disclosure policy': self._check_disclosure_policy,
+            'Security contact information': self._check_security_contacts,
+            'EU Declaration of Conformity': self._check_eu_declaration,
+            'Technical documentation': self._check_technical_docs,
+            'Risk assessment documentation': self._check_risk_assessments
+        }
+        
+        checker = evidence_checks.get(evidence_type)
+        if checker:
+            return checker()
+        
+        return False
+    
+    def _check_security_documentation(self) -> bool:
+        """Check for security-by-design documentation"""
+        
+        # Check for common security documentation files
+        security_docs = [
+            'SECURITY.md', 'security.md',
+            'docs/security/', 'documentation/security/',
+            'SECURITY-DESIGN.md', 'security-architecture.md'
+        ]
+        
+        import os
+        for doc_path in security_docs:
+            if os.path.exists(doc_path):
+                return True
+        
+        return False
+    
+    def _check_threat_models(self) -> bool:
+        """Check for threat modeling documentation"""
+        
+        threat_model_patterns = [
+            'threat-model', 'threat_model', 'threats.md',
+            'security-threats', 'attack-vectors'
+        ]
+        
+        # This would check for actual threat model files
+        # Simplified check for demonstration
+        return any(pattern in str(self.compliance_evidence) for pattern in threat_model_patterns)
+    
+    def _check_security_testing(self) -> bool:
+        """Check for security testing evidence"""
+        
+        # Look for security testing configurations and results
+        security_test_indicators = [
+            '.github/workflows/security.yml',
+            'security-tests/', 'test/security/',
+            'bandit.yaml', '.semgrep.yml',
+            'security-test-results.json'
+        ]
+        
+        import os
+        return any(os.path.exists(indicator) for indicator in security_test_indicators)
+    
+    def _check_vulnerability_reports(self) -> bool:
+        """Check for vulnerability assessment reports"""
+        
+        vuln_report_patterns = [
+            'vulnerability-scan', 'security-scan',
+            'audit-results', 'penetration-test'
+        ]
+        
+        # This would check for actual vulnerability reports
+        return len([p for p in vuln_report_patterns if p in str(self.compliance_evidence)]) > 0
+    
+    def _check_disclosure_policy(self) -> bool:
+        """Check for vulnerability disclosure policy"""
+        
+        disclosure_files = [
+            'SECURITY.md', '.github/SECURITY.md',
+            'VULNERABILITY-DISCLOSURE.md',
+            'docs/security/disclosure.md'
+        ]
+        
+        import os
+        return any(os.path.exists(f) for f in disclosure_files)
+    
+    def _check_security_contacts(self) -> bool:
+        """Check for security contact information"""
+        
+        # Check common locations for security contact info
+        contact_locations = [
+            'SECURITY.md', 'security.txt', '.well-known/security.txt',
+            'CONTACTS.md', 'README.md'
+        ]
+        
+        import os
+        for location in contact_locations:
+            if os.path.exists(location):
+                try:
+                    with open(location, 'r') as f:
+                        content = f.read().lower()
+                        if any(term in content for term in ['security@', 'security contact', 'report vulnerability']):
+                            return True
+                except:
+                    continue
+        
+        return False
+    
+    def _check_eu_declaration(self) -> bool:
+        """Check for EU Declaration of Conformity"""
+        
+        # This would check for formal EU compliance documentation
+        return 'eu_declaration' in self.compliance_evidence
+    
+    def _check_technical_docs(self) -> bool:
+        """Check for technical documentation"""
+        
+        doc_locations = [
+            'docs/', 'documentation/', 'README.md',
+            'ARCHITECTURE.md', 'DESIGN.md'
+        ]
+        
+        import os
+        return any(os.path.exists(loc) for loc in doc_locations)
+    
+    def _check_risk_assessments(self) -> bool:
+        """Check for risk assessment documentation"""
+        
+        risk_assessment_files = [
+            'risk-assessment', 'security-risk',
+            'risk-analysis', 'threat-assessment'
+        ]
+        
+        return any(pattern in str(self.compliance_evidence) for pattern in risk_assessment_files)
+    
+    def _generate_requirement_recommendations(self, requirement: CRARequirement, 
+                                           assessment: Dict[str, Any]) -> List[str]:
+        """Generate specific recommendations for requirement compliance"""
+        
+        recommendations = []
+        
+        if assessment['compliance_status'] == 'NON_COMPLIANT':
+            recommendations.append(f"Critical: Address {requirement.article} - {requirement.requirement}")
+            
+            for missing in assessment['missing_evidence']:
+                recommendations.append(f"Create or update: {missing}")
+        
+        elif assessment['compliance_status'] == 'PARTIAL':
+            recommendations.append(f"Improve compliance for {requirement.article}")
+            
+            for missing in assessment['missing_evidence']:
+                recommendations.append(f"Add missing: {missing}")
+        
+        return recommendations
+    
+    def _generate_compliance_recommendations(self, assessment_report: Dict[str, Any]) -> List[str]:
+        """Generate overall compliance recommendations"""
+        
+        recommendations = []
+        
+        if assessment_report['overall_status'] == 'NON_COMPLIANT':
+            recommendations.append("CRITICAL: Address non-compliant requirements immediately")
+            recommendations.append("Engage legal counsel for CRA compliance strategy")
+            recommendations.append("Implement comprehensive security documentation")
+        
+        elif assessment_report['overall_status'] == 'PARTIAL':
+            recommendations.append("Improve partial compliance areas")
+            recommendations.append("Complete missing evidence documentation")
+            recommendations.append("Regular compliance monitoring and updates")
+        
+        else:
+            recommendations.append("Maintain current compliance level")
+            recommendations.append("Regular compliance reviews and updates")
+            recommendations.append("Monitor for CRA requirement changes")
+        
+        return recommendations
 ```
 </Placeholder>
 

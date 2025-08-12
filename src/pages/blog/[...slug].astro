@@ -13,6 +13,7 @@ import { getImagePromise, resolveHeroImageUrl } from "../../utils/utils.ts";
 import { siteConfig } from '../../site.config';
 import Breadcrumb from "../../components/Breadcrumb/index.astro";
 import SocialShare from "../../components/SocialShare/index.astro";
+import StructuredData from "../../components/SEO/StructuredData.astro";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("blog");
@@ -90,6 +91,18 @@ const breadcrumbItems = [
 	tags={post.data.tags}
 	author="Jash Naik"
 >
+  <!-- Enhanced Structured Data for Articles -->
+  <StructuredData 
+    type="article"
+    title={post.data.title}
+    description={post.data.description}
+    url={new URL(Astro.url.pathname, Astro.site).toString()}
+    image={heroImageUrl}
+    publishedDate={post.data.pubDate}
+    modifiedDate={post.data.updatedDate}
+    author="Jash Naik"
+    tags={post.data.tags || []}
+  />
   <div class="mb-6 transition-all duration-300" id="header">
     <!-- Add Breadcrumbs -->
     <Breadcrumb items={breadcrumbItems} />

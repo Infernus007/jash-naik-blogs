@@ -46,7 +46,7 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
 ---
 
 <Layout description={SITE_DESCRIPTION} title={SITE_TITLE} image="/og-image.png" type="website">
-  <!-- Blog listing structured data -->
+  <!-- Enhanced Blog listing structured data -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Blog",
@@ -56,8 +56,17 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
     "author": {
       "@type": "Person",
       "name": "Jash Naik",
-      "url": "https://www.linkedin.com/in/jash-naik-7612b8162/"
+      "url": "https://www.linkedin.com/in/jash-naik-7612b8162/",
+      "jobTitle": "Full Stack Developer & AI Security Researcher",
+      "description": "Expert in cybersecurity, artificial intelligence, and secure software development",
+      "sameAs": [
+        "https://github.com/jashnaik",
+        "https://twitter.com/CodeAIShield",
+        "https://www.linkedin.com/in/jash-naik-7612b8162/"
+      ]
     },
+    "inLanguage": "en-US",
+    "keywords": "cybersecurity, artificial intelligence, AI, machine learning, ethical hacking, security, web development",
     "blogPost": latestBlogs.map(blog => ({
       "@type": "BlogPosting",
       "headline": blog.data.title,
@@ -68,7 +77,21 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
         "@type": "Person",
         "name": "Jash Naik"
       },
-      "image": blog.data.heroImage ? new URL(blog.data.heroImage.startsWith('/') ? blog.data.heroImage : `/assets/${blog.data.heroImage}`, Astro.site).toString() : new URL("/og-image.png", Astro.site).toString()
+      "publisher": {
+        "@type": "Organization",
+        "name": SITE_TITLE,
+        "logo": {
+          "@type": "ImageObject",
+          "url": new URL("/logo.svg", Astro.site).toString()
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": new URL(`/blog/${blog.slug}`, Astro.site).toString()
+      },
+      "image": blog.data.heroImage ? new URL(blog.data.heroImage.startsWith('/') ? blog.data.heroImage : `/assets/${blog.data.heroImage}`, Astro.site).toString() : new URL("/og-image.png", Astro.site).toString(),
+      "keywords": blog.data.tags ? blog.data.tags.join(", ") : blog.data.group,
+      "articleSection": blog.data.group
     }))
   })} is:inline />
   

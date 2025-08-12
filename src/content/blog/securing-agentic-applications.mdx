@@ -617,6 +617,124 @@ class AgentBehaviorMonitor:
         
         if not recent_alerts:
             return 0.0
+        last_minute_actions = [
+            a for a in recent_actions 
+            if a.timestamp > current_time - timedelta(minutes=1)
+        ]
+        if len(last_minute_actions) > self.alert_thresholds['rapid_fire_requests']:
+            alerts.append(self._create_alert(
+                agent_id, 'rapid_fire_requests', 'medium',
+                f'Agent made {len(last_minute_actions)} requests in the last minute',
+                {'request_count': len(last_minute_actions)}
+            ))
+        
+        # 5. Behavioral pattern anomaly
+        await self._detect_behavioral_anomalies(agent_id, recent_actions, alerts)
+        
+        # Store and process alerts
+        for alert in alerts:
+            await self._process_alert(alert)
+    
+    async def _detect_behavioral_anomalies(self, agent_id: str, actions: List[AgentAction], alerts: List[AnomalyAlert]):
+        """Detect complex behavioral anomalies"""
+        
+        # Check for unusual action type patterns
+        action_types = [a.action_type for a in actions[-10:]]
+        type_distribution = defaultdict(int)
+        for action_type in action_types:
+            type_distribution[action_type] += 1
+        
+        # Look for sudden changes in behavior patterns
+        baseline = self.baseline_metrics.get(agent_id, {})
+        if baseline:
+            current_pattern = dict(type_distribution)
+            baseline_pattern = baseline.get('action_type_distribution', {})
+            
+            # Compare current pattern to baseline
+            pattern_divergence = self._calculate_distribution_divergence(
+                current_pattern, baseline_pattern
+            )
+            
+            if pattern_divergence > 0.7:  # High divergence threshold
+                alerts.append(self._create_alert(
+                    agent_id, 'behavioral_pattern_anomaly', 'medium',
+                    f'Agent behavior diverged significantly from baseline (divergence: {pattern_divergence:.2f})',
+                    {'pattern_divergence': pattern_divergence}
+                ))
+    
+    def _calculate_distribution_divergence(self, current: Dict, baseline: Dict) -> float:
+        """Calculate divergence between two distributions"""
+        all_keys = set(current.keys()) | set(baseline.keys())
+        if not all_keys:
+            return 0.0
+        
+        # Normalize distributions
+        current_total = sum(current.values()) or 1
+        baseline_total = sum(baseline.values()) or 1
+        
+        divergence = 0.0
+        for key in all_keys:
+            current_freq = current.get(key, 0) / current_total
+            baseline_freq = baseline.get(key, 0) / baseline_total
+            divergence += abs(current_freq - baseline_freq)
+        
+        return divergence / 2  # Normalize to [0, 1]
+    
+    def _create_alert(self, agent_id: str, anomaly_type: str, severity: str, 
+                     description: str, evidence: Dict) -> AnomalyAlert:
+        """Create an anomaly alert"""
+        return AnomalyAlert(
+            alert_id=f"{agent_id}_{anomaly_type}_{datetime.utcnow().timestamp()}",
+            agent_id=agent_id,
+            anomaly_type=anomaly_type,
+            severity=severity,
+            description=description,
+            detected_at=datetime.utcnow(),
+            evidence=evidence,
+            requires_action=severity in ['high', 'critical']
+        )
+    
+    async def _process_alert(self, alert: AnomalyAlert):
+        """Process and respond to alerts"""
+        self.alerts.append(alert)
+        
+        # Log alert
+        print(f"SECURITY ALERT: {alert.description}")
+        
+        # Auto-respond to critical alerts
+        if alert.severity == 'critical':
+            await self._auto_respond_to_critical_alert(alert)
+        
+        # Store alert for analysis
+        await self._store_alert(alert)
+    
+    async def _auto_respond_to_critical_alert(self, alert: AnomalyAlert):
+        """Automatically respond to critical security alerts"""
+        
+        if alert.anomaly_type in ['excessive_api_calls', 'policy_violations']:
+            # Temporarily throttle the agent
+            print(f"Auto-throttling agent {alert.agent_id} due to {alert.anomaly_type}")
+            # Implementation would integrate with rate limiting system
+        
+        elif alert.anomaly_type == 'high_token_usage':
+            # Reduce context window or implement stricter limits
+            print(f"Implementing token limits for agent {alert.agent_id}")
+    
+    async def _store_alert(self, alert: AnomalyAlert):
+        """Store alert for audit and analysis"""
+        # Implementation would store to database/logging system
+        pass
+    
+    def get_agent_risk_score(self, agent_id: str) -> float:
+        """Calculate risk score for an agent based on recent alerts"""
+        recent_alerts = [
+            a for a in self.alerts 
+            if a.agent_id == agent_id and 
+               a.detected_at > datetime.utcnow() - timedelta(hours=24)
+        ]
+        
+        if not recent_alerts:
+            return 0.0
         
         # Weight alerts by severity
         severity_weights = {'low': 1, 'medium': 3, 'high': 5, 'critical': 10}
@@ -637,6 +755,833 @@ class AgentBehaviorMonitor:
     "Secure key rotation and management for long-running agents",
     "Network segmentation to isolate agent traffic"
 ]} type="info"/>
+
+<Placeholder>
+```python showLineNumbers {1-40} /secure_communication/ caption="Secure Agent Communication Framework" title="secure_communication.py"
+import ssl
+import asyncio
+import hashlib
+import hmac
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import json
+import base64
+import secrets
+
+class SecureAgentCommunicator:
+    def __init__(self, agent_id: str, private_key_path: str = None):
+        self.agent_id = agent_id
+        self.session_keys = {}
+        self.message_counter = 0
+        
+        # Generate or load RSA key pair for agent identity
+        if private_key_path:
+            with open(private_key_path, "rb") as key_file:
+                self.private_key = serialization.load_pem_private_key(
+                    key_file.read(), password=None
+                )
+        else:
+            self.private_key = rsa.generate_private_key(
+                public_exponent=65537, key_size=2048
+            )
+        
+        self.public_key = self.private_key.public_key()
+        
+        # Initialize message integrity verification
+        self.hmac_secret = secrets.token_bytes(32)
+        
+    def establish_secure_session(self, target_agent_id: str, target_public_key) -> str:
+        """Establish secure session with another agent using key exchange"""
+        
+        # Generate session key for symmetric encryption
+        session_key = Fernet.generate_key()
+        session_id = secrets.token_hex(16)
+        
+        # Encrypt session key with target agent's public key
+        encrypted_session_key = target_public_key.encrypt(
+            session_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        
+        # Store session information
+        self.session_keys[session_id] = {
+            'target_agent': target_agent_id,
+            'cipher': Fernet(session_key),
+            'established_at': datetime.utcnow(),
+            'message_count': 0,
+            'key_rotation_threshold': 1000
+        }
+        
+        return session_id, encrypted_session_key
+    
+    def encrypt_message(self, session_id: str, message: Dict[str, Any]) -> Dict[str, str]:
+        """Encrypt message for secure transmission"""
+        
+        if session_id not in self.session_keys:
+            raise ValueError(f"No active session: {session_id}")
+        
+        session = self.session_keys[session_id]
+        cipher = session['cipher']
+        
+        # Add message metadata
+        message_with_metadata = {
+            'sender': self.agent_id,
+            'timestamp': datetime.utcnow().isoformat(),
+            'sequence_number': session['message_count'],
+            'payload': message
+        }
+        
+        # Serialize and encrypt message
+        message_json = json.dumps(message_with_metadata)
+        encrypted_message = cipher.encrypt(message_json.encode())
+        
+        # Generate HMAC for integrity verification
+        message_hmac = hmac.new(
+            self.hmac_secret,
+            encrypted_message,
+            hashlib.sha256
+        ).hexdigest()
+        
+        # Update session counters
+        session['message_count'] += 1
+        
+        # Check if key rotation is needed
+        if session['message_count'] >= session['key_rotation_threshold']:
+            asyncio.create_task(self._rotate_session_key(session_id))
+        
+        return {
+            'session_id': session_id,
+            'encrypted_payload': base64.b64encode(encrypted_message).decode(),
+            'integrity_hash': message_hmac,
+            'sender_signature': self._sign_message(encrypted_message)
+        }
+    
+    def decrypt_message(self, encrypted_message: Dict[str, str]) -> Dict[str, Any]:
+        """Decrypt and verify incoming message"""
+        
+        session_id = encrypted_message['session_id']
+        if session_id not in self.session_keys:
+            raise ValueError(f"Unknown session: {session_id}")
+        
+        session = self.session_keys[session_id]
+        cipher = session['cipher']
+        
+        # Decode encrypted payload
+        encrypted_payload = base64.b64decode(encrypted_message['encrypted_payload'])
+        
+        # Verify message integrity
+        expected_hmac = hmac.new(
+            self.hmac_secret,
+            encrypted_payload,
+            hashlib.sha256
+        ).hexdigest()
+        
+        if not hmac.compare_digest(expected_hmac, encrypted_message['integrity_hash']):
+            raise ValueError("Message integrity verification failed")
+        
+        # Verify sender signature (would need sender's public key)
+        # self._verify_signature(encrypted_payload, encrypted_message['sender_signature'])
+        
+        # Decrypt message
+        decrypted_json = cipher.decrypt(encrypted_payload)
+        message_data = json.loads(decrypted_json.decode())
+        
+        # Verify message sequence to prevent replay attacks
+        if message_data['sequence_number'] <= session.get('last_sequence', -1):
+            raise ValueError("Potential replay attack detected")
+        
+        session['last_sequence'] = message_data['sequence_number']
+        
+        return message_data
+    
+    def _sign_message(self, message: bytes) -> str:
+        """Create digital signature for message authentication"""
+        signature = self.private_key.sign(
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return base64.b64encode(signature).decode()
+    
+    def _verify_signature(self, message: bytes, signature: str, public_key) -> bool:
+        """Verify digital signature"""
+        try:
+            signature_bytes = base64.b64decode(signature)
+            public_key.verify(
+                signature_bytes,
+                message,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            return True
+        except Exception:
+            return False
+    
+    async def _rotate_session_key(self, session_id: str):
+        """Rotate session key for forward secrecy"""
+        if session_id not in self.session_keys:
+            return
+        
+        # Generate new session key
+        new_key = Fernet.generate_key()
+        self.session_keys[session_id]['cipher'] = Fernet(new_key)
+        self.session_keys[session_id]['message_count'] = 0
+        self.session_keys[session_id]['key_rotated_at'] = datetime.utcnow()
+        
+        print(f"Session key rotated for session {session_id}")
+    
+    def close_session(self, session_id: str):
+        """Securely close communication session"""
+        if session_id in self.session_keys:
+            # Clear sensitive session data
+            del self.session_keys[session_id]
+            print(f"Session {session_id} closed securely")
+    
+    def get_public_key_pem(self) -> str:
+        """Export public key for sharing with other agents"""
+        pem = self.public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        return pem.decode()
+    
+    def validate_communication_channel(self, target_host: str, target_port: int) -> bool:
+        """Validate that communication channel meets security requirements"""
+        
+        # Check TLS configuration
+        context = ssl.create_default_context()
+        context.check_hostname = True
+        context.verify_mode = ssl.CERT_REQUIRED
+        
+        try:
+            with ssl.create_connection((target_host, target_port)) as sock:
+                with context.wrap_socket(sock, server_hostname=target_host) as ssock:
+                    # Verify TLS version
+                    if ssock.version < 'TLSv1.2':
+                        return False
+                    
+                    # Verify cipher strength
+                    cipher = ssock.cipher()
+                    if cipher and cipher[2] < 128:  # Key length check
+                        return False
+                    
+                    return True
+        except Exception as e:
+            print(f"TLS validation failed: {e}")
+            return False
+
+# Network Security Configuration
+class AgentNetworkSecurity:
+    def __init__(self):
+        self.allowed_domains = set()
+        self.blocked_ips = set()
+        self.rate_limits = {}
+        
+    def add_trusted_domain(self, domain: str):
+        """Add domain to allowlist for agent communications"""
+        self.allowed_domains.add(domain.lower())
+    
+    def block_ip_address(self, ip_address: str, reason: str = "Security violation"):
+        """Block IP address from agent communications"""
+        self.blocked_ips.add(ip_address)
+        print(f"Blocked IP {ip_address}: {reason}")
+    
+    def check_connection_allowed(self, target_host: str, agent_id: str) -> bool:
+        """Check if agent is allowed to connect to target"""
+        
+        # Check IP blocklist
+        if target_host in self.blocked_ips:
+            return False
+        
+        # Check domain allowlist
+        if self.allowed_domains and not any(
+            domain in target_host.lower() for domain in self.allowed_domains
+        ):
+            return False
+        
+        # Check rate limits
+        if self._is_rate_limited(agent_id):
+            return False
+        
+        return True
+    
+    def _is_rate_limited(self, agent_id: str) -> bool:
+        """Check if agent has exceeded rate limits"""
+        current_time = datetime.utcnow()
+        
+        if agent_id not in self.rate_limits:
+            self.rate_limits[agent_id] = {
+                'requests': [],
+                'limit_per_minute': 100
+            }
+        
+        agent_limits = self.rate_limits[agent_id]
+        
+        # Clean old requests
+        cutoff_time = current_time - timedelta(minutes=1)
+        agent_limits['requests'] = [
+            req_time for req_time in agent_limits['requests']
+            if req_time > cutoff_time
+        ]
+        
+        # Check current rate
+        if len(agent_limits['requests']) >= agent_limits['limit_per_minute']:
+            return True
+        
+        # Record current request
+        agent_limits['requests'].append(current_time)
+        return False
+```
+</Placeholder>
+
+## Production Deployment Security
+
+### Secure Agent Deployment Architecture
+
+<Placeholder>
+```python showLineNumbers {1-45} /deployment/ caption="Production Agent Security Setup" title="production_deployment.py"
+import os
+import logging
+from typing import Dict, Any
+import boto3
+from kubernetes import client, config
+import docker
+from dataclasses import dataclass
+
+@dataclass
+class SecurityConfiguration:
+    encryption_enabled: bool = True
+    monitoring_enabled: bool = True
+    audit_logging: bool = True
+    network_isolation: bool = True
+    secrets_management: str = "vault"  # vault, k8s-secrets, aws-secrets
+    container_scanning: bool = True
+
+class SecureAgentDeployment:
+    def __init__(self, environment: str = "production"):
+        self.environment = environment
+        self.security_config = SecurityConfiguration()
+        self.logger = self._setup_logging()
+        
+        # Initialize cloud and container clients
+        self.aws_client = boto3.client('ecs')
+        self.docker_client = docker.from_env()
+        
+    def _setup_logging(self) -> logging.Logger:
+        """Configure security-focused logging"""
+        logger = logging.getLogger(f"agent_security_{self.environment}")
+        logger.setLevel(logging.INFO)
+        
+        # Create security log handler
+        handler = logging.FileHandler(f"agent_security_{self.environment}.log")
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        
+        return logger
+    
+    def deploy_secure_agent_container(self, agent_config: Dict[str, Any]) -> str:
+        """Deploy agent in secure container with security controls"""
+        
+        # Container security configuration
+        container_config = {
+            'image': agent_config['image'],
+            'name': f"secure-agent-{agent_config['agent_id']}",
+            'environment': self._get_secure_environment_vars(agent_config),
+            'volumes': self._configure_secure_volumes(),
+            'networks': [self._get_secure_network()],
+            'security_opt': [
+                'no-new-privileges:true',  # Prevent privilege escalation
+                'apparmor:docker-default'  # Apply AppArmor profile
+            ],
+            'cap_drop': ['ALL'],  # Drop all capabilities
+            'cap_add': ['SETGID', 'SETUID'],  # Add only necessary capabilities
+            'read_only': True,  # Read-only root filesystem
+            'user': 'nobody:nogroup',  # Run as non-root user
+            'tmpfs': {'/tmp': 'noexec,nosuid,size=100m'},  # Secure tmp directory
+            'ulimits': [
+                docker.types.Ulimit(name='nofile', soft=1024, hard=2048),
+                docker.types.Ulimit(name='nproc', soft=50, hard=100)
+            ]
+        }
+        
+        # Add resource constraints
+        container_config['mem_limit'] = agent_config.get('memory_limit', '512m')
+        container_config['cpu_count'] = agent_config.get('cpu_limit', 1)
+        
+        # Deploy container
+        container = self.docker_client.containers.run(**container_config, detach=True)
+        
+        self.logger.info(f"Secure agent container deployed: {container.id}")
+        
+        # Setup monitoring and health checks
+        self._setup_container_monitoring(container, agent_config['agent_id'])
+        
+        return container.id
+    
+    def _get_secure_environment_vars(self, agent_config: Dict[str, Any]) -> Dict[str, str]:
+        """Configure secure environment variables"""
+        
+        env_vars = {
+            'AGENT_ID': agent_config['agent_id'],
+            'ENVIRONMENT': self.environment,
+            'LOG_LEVEL': 'INFO',
+            'SECURITY_MODE': 'STRICT',
+            'ENABLE_METRICS': 'true',
+        }
+        
+        # Add secrets from secure secret management
+        if self.security_config.secrets_management == "vault":
+            env_vars.update(self._get_vault_secrets(agent_config['agent_id']))
+        elif self.security_config.secrets_management == "aws-secrets":
+            env_vars.update(self._get_aws_secrets(agent_config['secret_arn']))
+        
+        return env_vars
+    
+    def _configure_secure_volumes(self) -> Dict[str, Dict]:
+        """Configure secure volume mounts"""
+        return {
+            # Read-only application data
+            '/app/config': {
+                'bind': '/opt/secure/config',
+                'mode': 'ro'
+            },
+            # Writable logs directory (with restricted permissions)
+            '/app/logs': {
+                'bind': '/var/log/agent',
+                'mode': 'rw'
+            }
+        }
+    
+    def _get_secure_network(self) -> str:
+        """Get or create secure network for agent communication"""
+        network_name = f"agent-secure-{self.environment}"
+        
+        try:
+            network = self.docker_client.networks.get(network_name)
+        except docker.errors.NotFound:
+            # Create secure network with isolation
+            network = self.docker_client.networks.create(
+                network_name,
+                driver="bridge",
+                options={
+                    "com.docker.network.bridge.enable_icc": "false",  # Disable inter-container communication
+                    "com.docker.network.bridge.enable_ip_masquerade": "true"
+                },
+                ipam=docker.types.IPAMConfig(
+                    pool_configs=[
+                        docker.types.IPAMPool(subnet="172.20.0.0/16")
+                    ]
+                )
+            )
+            
+            self.logger.info(f"Created secure network: {network_name}")
+        
+        return network_name
+    
+    def _setup_container_monitoring(self, container, agent_id: str):
+        """Setup monitoring and alerting for agent container"""
+        
+        # Container health monitoring
+        health_config = {
+            'test': ['CMD', 'curl', '-f', 'http://localhost:8080/health'],
+            'interval': 30,
+            'timeout': 10,
+            'retries': 3,
+            'start_period': 60
+        }
+        
+        # Log monitoring setup
+        self._configure_log_monitoring(container.id, agent_id)
+        
+        # Resource monitoring
+        self._setup_resource_alerts(container.id, agent_id)
+    
+    def _configure_log_monitoring(self, container_id: str, agent_id: str):
+        """Configure log monitoring and security event detection"""
+        
+        # Setup log forwarding to security monitoring system
+        log_config = {
+            'driver': 'fluentd',
+            'options': {
+                'fluentd-address': os.environ.get('FLUENTD_ADDRESS', 'localhost:24224'),
+                'fluentd-async-connect': 'true',
+                'tag': f'agent.{agent_id}.{container_id}'
+            }
+        }
+        
+        self.logger.info(f"Configured log monitoring for agent {agent_id}")
+    
+    def _setup_resource_alerts(self, container_id: str, agent_id: str):
+        """Setup resource usage monitoring and alerts"""
+        
+        # Configure CloudWatch or Prometheus metrics
+        metrics_config = {
+            'cpu_threshold': 80,  # Alert if CPU > 80%
+            'memory_threshold': 85,  # Alert if memory > 85%
+            'network_threshold': 1000,  # Alert if network traffic > 1GB/hour
+        }
+        
+        self.logger.info(f"Configured resource monitoring for agent {agent_id}")
+    
+    def _get_vault_secrets(self, agent_id: str) -> Dict[str, str]:
+        """Retrieve secrets from HashiCorp Vault"""
+        # Implementation would use hvac client to fetch secrets
+        return {
+            'API_KEY': f"vault:secret/agents/{agent_id}:api_key",
+            'DB_PASSWORD': f"vault:secret/agents/{agent_id}:db_password"
+        }
+    
+    def _get_aws_secrets(self, secret_arn: str) -> Dict[str, str]:
+        """Retrieve secrets from AWS Secrets Manager"""
+        secrets_client = boto3.client('secretsmanager')
+        try:
+            response = secrets_client.get_secret_value(SecretId=secret_arn)
+            return json.loads(response['SecretString'])
+        except Exception as e:
+            self.logger.error(f"Failed to retrieve AWS secrets: {e}")
+            return {}
+    
+    def validate_security_compliance(self, container_id: str) -> Dict[str, bool]:
+        """Validate that deployed agent meets security compliance requirements"""
+        
+        compliance_checks = {
+            'non_root_user': self._check_non_root_user(container_id),
+            'read_only_filesystem': self._check_readonly_fs(container_id),
+            'no_privileged_mode': self._check_no_privileged(container_id),
+            'resource_limits_set': self._check_resource_limits(container_id),
+            'security_profiles_applied': self._check_security_profiles(container_id),
+            'network_isolation': self._check_network_isolation(container_id)
+        }
+        
+        compliance_score = sum(compliance_checks.values()) / len(compliance_checks)
+        
+        self.logger.info(f"Security compliance score: {compliance_score:.2f}")
+        
+        if compliance_score < 0.9:
+            self.logger.warning("Security compliance below threshold!")
+        
+        return compliance_checks
+    
+    def _check_non_root_user(self, container_id: str) -> bool:
+        """Check if container is running as non-root user"""
+        try:
+            container = self.docker_client.containers.get(container_id)
+            user_info = container.attrs['Config'].get('User', '')
+            return 'root' not in user_info.lower() and user_info != ''
+        except:
+            return False
+    
+    def _check_readonly_fs(self, container_id: str) -> bool:
+        """Check if container has read-only root filesystem"""
+        try:
+            container = self.docker_client.containers.get(container_id)
+            return container.attrs['HostConfig'].get('ReadonlyRootfs', False)
+        except:
+            return False
+    
+    def _check_no_privileged(self, container_id: str) -> bool:
+        """Check if container is not running in privileged mode"""
+        try:
+            container = self.docker_client.containers.get(container_id)
+            return not container.attrs['HostConfig'].get('Privileged', False)
+        except:
+            return False
+    
+    def _check_resource_limits(self, container_id: str) -> bool:
+        """Check if resource limits are properly configured"""
+        try:
+            container = self.docker_client.containers.get(container_id)
+            host_config = container.attrs['HostConfig']
+            
+            has_memory_limit = host_config.get('Memory', 0) > 0
+            has_cpu_limit = host_config.get('CpuCount', 0) > 0
+            
+            return has_memory_limit and has_cpu_limit
+        except:
+            return False
+    
+    def _check_security_profiles(self, container_id: str) -> bool:
+        """Check if security profiles (AppArmor/SELinux) are applied"""
+        try:
+            container = self.docker_client.containers.get(container_id)
+            security_opts = container.attrs['HostConfig'].get('SecurityOpt', [])
+            
+            return any('apparmor' in opt.lower() or 'selinux' in opt.lower() 
+                      for opt in security_opts)
+        except:
+            return False
+    
+    def _check_network_isolation(self, container_id: str) -> bool:
+        """Check if container is in isolated network"""
+        try:
+            container = self.docker_client.containers.get(container_id)
+            networks = container.attrs['NetworkSettings']['Networks']
+            
+            # Check if using custom secure network
+            return any('agent-secure' in network_name 
+                      for network_name in networks.keys())
+        except:
+            return False
+```
+</Placeholder>
+
+### Kubernetes Security Deployment
+
+<Placeholder>
+```python showLineNumbers {1-30} /k8s_security/ caption="Kubernetes Agent Security Configuration" title="k8s_agent_security.py"
+from kubernetes import client, config
+from typing import Dict, Any
+import yaml
+
+class KubernetesAgentSecurity:
+    def __init__(self, namespace: str = "agent-secure"):
+        config.load_incluster_config()  # For in-cluster deployment
+        self.v1 = client.CoreV1Api()
+        self.apps_v1 = client.AppsV1Api()
+        self.rbac_v1 = client.RbacAuthorizationV1Api()
+        self.namespace = namespace
+        
+    def create_secure_deployment(self, agent_config: Dict[str, Any]) -> str:
+        """Create secure Kubernetes deployment for AI agent"""
+        
+        # Pod Security Policy
+        pod_security_context = client.V1PodSecurityContext(
+            run_as_non_root=True,
+            run_as_user=65534,  # nobody user
+            run_as_group=65534,
+            fs_group=65534,
+            seccomp_profile=client.V1SeccompProfile(type="RuntimeDefault")
+        )
+        
+        # Container Security Context
+        security_context = client.V1SecurityContext(
+            allow_privilege_escalation=False,
+            run_as_non_root=True,
+            run_as_user=65534,
+            capabilities=client.V1Capabilities(drop=["ALL"]),
+            read_only_root_filesystem=True
+        )
+        
+        # Resource limits
+        resources = client.V1ResourceRequirements(
+            limits={
+                "cpu": agent_config.get('cpu_limit', '500m'),
+                "memory": agent_config.get('memory_limit', '512Mi')
+            },
+            requests={
+                "cpu": agent_config.get('cpu_request', '100m'),
+                "memory": agent_config.get('memory_request', '128Mi')
+            }
+        )
+        
+        # Volume mounts for writable areas
+        volume_mounts = [
+            client.V1VolumeMount(
+                name="tmp-volume",
+                mount_path="/tmp"
+            ),
+            client.V1VolumeMount(
+                name="logs-volume",
+                mount_path="/app/logs"
+            )
+        ]
+        
+        # Volumes
+        volumes = [
+            client.V1Volume(
+                name="tmp-volume",
+                empty_dir=client.V1EmptyDirVolumeSource(size_limit="10Mi")
+            ),
+            client.V1Volume(
+                name="logs-volume",
+                empty_dir=client.V1EmptyDirVolumeSource(size_limit="100Mi")
+            )
+        ]
+        
+        # Container definition
+        container = client.V1Container(
+            name=f"agent-{agent_config['agent_id']}",
+            image=agent_config['image'],
+            security_context=security_context,
+            resources=resources,
+            volume_mounts=volume_mounts,
+            env=self._get_secure_env_vars(agent_config),
+            liveness_probe=client.V1Probe(
+                http_get=client.V1HTTPGetAction(
+                    path="/health",
+                    port=8080
+                ),
+                initial_delay_seconds=30,
+                period_seconds=10
+            ),
+            readiness_probe=client.V1Probe(
+                http_get=client.V1HTTPGetAction(
+                    path="/ready",
+                    port=8080
+                ),
+                initial_delay_seconds=5,
+                period_seconds=5
+            )
+        )
+        
+        # Pod template
+        pod_template = client.V1PodTemplateSpec(
+            metadata=client.V1ObjectMeta(
+                labels={
+                    "app": f"agent-{agent_config['agent_id']}",
+                    "security-level": "high",
+                    "agent-type": agent_config.get('type', 'general')
+                },
+                annotations={
+                    "container.apparmor.security.beta.kubernetes.io/agent": "runtime/default",
+                    "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+                }
+            ),
+            spec=client.V1PodSpec(
+                containers=[container],
+                security_context=pod_security_context,
+                volumes=volumes,
+                service_account_name=f"agent-{agent_config['agent_id']}-sa",
+                automount_service_account_token=False,
+                dns_policy="ClusterFirst",
+                restart_policy="Always"
+            )
+        )
+        
+        # Deployment
+        deployment = client.V1Deployment(
+            metadata=client.V1ObjectMeta(
+                name=f"agent-{agent_config['agent_id']}-deployment",
+                namespace=self.namespace
+            ),
+            spec=client.V1DeploymentSpec(
+                replicas=agent_config.get('replicas', 1),
+                selector=client.V1LabelSelector(
+                    match_labels={"app": f"agent-{agent_config['agent_id']}"}
+                ),
+                template=pod_template
+            )
+        )
+        
+        # Create deployment
+        response = self.apps_v1.create_namespaced_deployment(
+            namespace=self.namespace,
+            body=deployment
+        )
+        
+        return response.metadata.name
+    
+    def _get_secure_env_vars(self, agent_config: Dict[str, Any]) -> list:
+        """Get secure environment variables from Kubernetes secrets"""
+        
+        env_vars = [
+            client.V1EnvVar(name="AGENT_ID", value=agent_config['agent_id']),
+            client.V1EnvVar(name="SECURITY_MODE", value="STRICT"),
+            client.V1EnvVar(name="LOG_LEVEL", value="INFO")
+        ]
+        
+        # Add secrets from Kubernetes secret store
+        if 'secrets' in agent_config:
+            for secret_name, secret_key in agent_config['secrets'].items():
+                env_vars.append(
+                    client.V1EnvVar(
+                        name=secret_name.upper(),
+                        value_from=client.V1EnvVarSource(
+                            secret_key_ref=client.V1SecretKeySelector(
+                                name=f"agent-{agent_config['agent_id']}-secrets",
+                                key=secret_key
+                            )
+                        )
+                    )
+                )
+        
+        return env_vars
+    
+    def create_network_policy(self, agent_id: str) -> str:
+        """Create network policy for agent isolation"""
+        
+        network_policy = {
+            "apiVersion": "networking.k8s.io/v1",
+            "kind": "NetworkPolicy",
+            "metadata": {
+                "name": f"agent-{agent_id}-netpol",
+                "namespace": self.namespace
+            },
+            "spec": {
+                "podSelector": {
+                    "matchLabels": {
+                        "app": f"agent-{agent_id}"
+                    }
+                },
+                "policyTypes": ["Ingress", "Egress"],
+                "ingress": [
+                    {
+                        "from": [
+                            {
+                                "namespaceSelector": {
+                                    "matchLabels": {
+                                        "name": "agent-gateway"
+                                    }
+                                }
+                            }
+                        ],
+                        "ports": [
+                            {
+                                "protocol": "TCP",
+                                "port": 8080
+                            }
+                        ]
+                    }
+                ],
+                "egress": [
+                    {
+                        "to": [
+                            {
+                                "namespaceSelector": {
+                                    "matchLabels": {
+                                        "name": "external-apis"
+                                    }
+                                }
+                            }
+                        ],
+                        "ports": [
+                            {
+                                "protocol": "TCP",
+                                "port": 443
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+        
+        # Apply network policy
+        networking_v1 = client.NetworkingV1Api()
+        response = networking_v1.create_namespaced_network_policy(
+            namespace=self.namespace,
+            body=network_policy
+        )
+        
+        return response.metadata.name
+```
+</Placeholder>
 
 ## Real-World Case Studies
 
@@ -689,7 +1634,7 @@ class AgentBehaviorMonitor:
 ### AI Governance Implementation
 
 <Placeholder>
-```python showLineNumbers {1-30} /governance/ caption="AI Agent Governance Framework" title="agent_governance.py"
+```python showLineNumbers {1-45} /governance/ caption="AI Agent Governance Framework" title="agent_governance.py"
 from enum import Enum
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -699,6 +1644,361 @@ import json
 class RiskLevel(Enum):
     LOW = 1
     MEDIUM = 2
+    HIGH = 3
+    CRITICAL = 4
+
+class ComplianceFramework(Enum):
+    GDPR = "gdpr"
+    HIPAA = "hipaa"
+    SOX = "sox"
+    PCI_DSS = "pci_dss"
+    SOC2 = "soc2"
+
+@dataclass
+class GovernancePolicy:
+    policy_id: str
+    name: str
+    description: str
+    risk_level: RiskLevel
+    compliance_frameworks: List[ComplianceFramework]
+    validation_rules: Dict[str, any]
+    enforcement_actions: List[str]
+    review_frequency_days: int
+
+class AgentGovernanceFramework:
+    def __init__(self):
+        self.policies = {}
+        self.agent_classifications = {}
+        self.audit_logs = []
+        
+        # Initialize standard policies
+        self._initialize_standard_policies()
+    
+    def _initialize_standard_policies(self):
+        """Initialize standard governance policies"""
+        
+        # Data Privacy Policy
+        self.register_policy(GovernancePolicy(
+            policy_id="data_privacy_001",
+            name="Personal Data Protection",
+            description="Agents must not store or transmit personally identifiable information",
+            risk_level=RiskLevel.HIGH,
+            compliance_frameworks=[ComplianceFramework.GDPR, ComplianceFramework.HIPAA],
+            validation_rules={
+                "scan_for_pii": True,
+                "require_data_anonymization": True,
+                "audit_data_access": True
+            },
+            enforcement_actions=["log_violation", "sanitize_output", "notify_admin"],
+            review_frequency_days=30
+        ))
+        
+        # Financial Data Policy
+        self.register_policy(GovernancePolicy(
+            policy_id="financial_data_001",
+            name="Financial Information Security",
+            description="Strict controls for agents handling financial data",
+            risk_level=RiskLevel.CRITICAL,
+            compliance_frameworks=[ComplianceFramework.SOX, ComplianceFramework.PCI_DSS],
+            validation_rules={
+                "require_encryption": True,
+                "audit_all_transactions": True,
+                "limit_data_retention": True,
+                "require_dual_authorization": True
+            },
+            enforcement_actions=["immediate_escalation", "suspend_agent", "audit_trail"],
+            review_frequency_days=7
+        ))
+        
+        # Output Content Policy
+        self.register_policy(GovernancePolicy(
+            policy_id="content_safety_001", 
+            name="Safe Content Generation",
+            description="Agents must not generate harmful, biased, or inappropriate content",
+            risk_level=RiskLevel.MEDIUM,
+            compliance_frameworks=[],
+            validation_rules={
+                "content_filter": True,
+                "bias_detection": True,
+                "toxicity_scoring": True
+            },
+            enforcement_actions=["filter_output", "log_incident", "retrain_model"],
+            review_frequency_days=14
+        ))
+    
+    def register_policy(self, policy: GovernancePolicy):
+        """Register a new governance policy"""
+        self.policies[policy.policy_id] = policy
+    
+    def classify_agent(self, agent_id: str, data_types: List[str], 
+                      risk_level: RiskLevel, compliance_requirements: List[ComplianceFramework]):
+        """Classify an agent based on its data handling and risk profile"""
+        
+        self.agent_classifications[agent_id] = {
+            'data_types': data_types,
+            'risk_level': risk_level,
+            'compliance_requirements': compliance_requirements,
+            'applicable_policies': self._get_applicable_policies(risk_level, compliance_requirements),
+            'classified_at': datetime.utcnow()
+        }
+    
+    def _get_applicable_policies(self, risk_level: RiskLevel, 
+                               compliance_requirements: List[ComplianceFramework]) -> List[str]:
+        """Determine which policies apply to an agent"""
+        applicable = []
+        
+        for policy_id, policy in self.policies.items():
+            # Apply if risk level matches or exceeds policy requirement
+            if risk_level.value >= policy.risk_level.value:
+                applicable.append(policy_id)
+            
+            # Apply if any compliance framework overlaps
+            if any(framework in policy.compliance_frameworks for framework in compliance_requirements):
+                if policy_id not in applicable:
+                    applicable.append(policy_id)
+        
+        return applicable
+    
+    def validate_agent_action(self, agent_id: str, action_type: str, 
+                            action_data: Dict) -> Dict[str, any]:
+        """Validate agent action against applicable governance policies"""
+        
+        if agent_id not in self.agent_classifications:
+            return {"valid": False, "error": "Agent not classified"}
+        
+        classification = self.agent_classifications[agent_id]
+        applicable_policies = classification['applicable_policies']
+        
+        violations = []
+        warnings = []
+        
+        for policy_id in applicable_policies:
+            policy = self.policies[policy_id]
+            validation_result = self._validate_against_policy(policy, action_type, action_data)
+            
+            if not validation_result['valid']:
+                violations.append({
+                    'policy_id': policy_id,
+                    'policy_name': policy.name,
+                    'violation_details': validation_result['details'],
+                    'enforcement_actions': policy.enforcement_actions
+                })
+            
+            if validation_result.get('warnings'):
+                warnings.extend(validation_result['warnings'])
+        
+        # Log governance check
+        self._log_governance_check(agent_id, action_type, violations, warnings)
+        
+        return {
+            'valid': len(violations) == 0,
+            'violations': violations,
+            'warnings': warnings,
+            'action_required': any(v for v in violations if 'immediate_escalation' in v['enforcement_actions'])
+        }
+    
+    def _validate_against_policy(self, policy: GovernancePolicy, 
+                               action_type: str, action_data: Dict) -> Dict:
+        """Validate specific action against a policy"""
+        
+        validation_result = {'valid': True, 'details': [], 'warnings': []}
+        
+        # Check validation rules
+        for rule_name, rule_config in policy.validation_rules.items():
+            
+            if rule_name == "scan_for_pii" and rule_config:
+                if self._contains_pii(action_data):
+                    validation_result['valid'] = False
+                    validation_result['details'].append("PII detected in action data")
+            
+            elif rule_name == "require_encryption" and rule_config:
+                if not action_data.get('encrypted', False):
+                    validation_result['valid'] = False
+                    validation_result['details'].append("Encryption required but not present")
+            
+            elif rule_name == "audit_all_transactions" and rule_config:
+                if action_type == "financial_transaction" and not action_data.get('audit_trail'):
+                    validation_result['valid'] = False
+                    validation_result['details'].append("Audit trail required for financial transactions")
+            
+            elif rule_name == "content_filter" and rule_config:
+                if action_type == "generate_content":
+                    content_issues = self._check_content_safety(action_data.get('content', ''))
+                    if content_issues:
+                        validation_result['warnings'].extend(content_issues)
+        
+        return validation_result
+    
+    def _contains_pii(self, data: Dict) -> bool:
+        """Check if data contains personally identifiable information"""
+        # Simplified PII detection - production would use more sophisticated methods
+        data_str = json.dumps(data).lower()
+        
+        pii_patterns = [
+            r'\b\d{3}-\d{2}-\d{4}\b',  # SSN
+            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # Email
+            r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b',  # Credit card
+        ]
+        
+        import re
+        for pattern in pii_patterns:
+            if re.search(pattern, data_str):
+                return True
+        
+        return False
+    
+    def _check_content_safety(self, content: str) -> List[str]:
+        """Check content for safety issues"""
+        issues = []
+        
+        # Simplified content safety checks
+        toxic_keywords = ['hate', 'violence', 'discrimination']  # Simplified list
+        
+        content_lower = content.lower()
+        for keyword in toxic_keywords:
+            if keyword in content_lower:
+                issues.append(f"Potentially harmful content detected: {keyword}")
+        
+        return issues
+    
+    def _log_governance_check(self, agent_id: str, action_type: str, 
+                            violations: List, warnings: List):
+        """Log governance validation results"""
+        log_entry = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'agent_id': agent_id,
+            'action_type': action_type,
+            'violations_count': len(violations),
+            'warnings_count': len(warnings),
+            'details': {
+                'violations': violations,
+                'warnings': warnings
+            }
+        }
+        
+        self.audit_logs.append(log_entry)
+        
+        # In production, this would also send to centralized logging system
+        if violations:
+            print(f"GOVERNANCE VIOLATION: Agent {agent_id} - {len(violations)} violations")
+    
+    def generate_compliance_report(self, agent_id: str, 
+                                 start_date: datetime, end_date: datetime) -> Dict:
+        """Generate compliance report for an agent"""
+        
+        relevant_logs = [
+            log for log in self.audit_logs
+            if log['agent_id'] == agent_id and
+               start_date <= datetime.fromisoformat(log['timestamp']) <= end_date
+        ]
+        
+        total_actions = len(relevant_logs)
+        total_violations = sum(log['violations_count'] for log in relevant_logs)
+        total_warnings = sum(log['warnings_count'] for log in relevant_logs)
+        
+        violation_types = {}
+        for log in relevant_logs:
+            for violation in log['details']['violations']:
+                policy_name = violation['policy_name']
+                violation_types[policy_name] = violation_types.get(policy_name, 0) + 1
+        
+        return {
+            'agent_id': agent_id,
+            'report_period': {
+                'start': start_date.isoformat(),
+                'end': end_date.isoformat()
+            },
+            'summary': {
+                'total_actions': total_actions,
+                'total_violations': total_violations,
+                'total_warnings': total_warnings,
+                'compliance_rate': (total_actions - total_violations) / total_actions if total_actions > 0 else 1.0
+            },
+            'violation_breakdown': violation_types,
+            'risk_assessment': self._calculate_risk_assessment(agent_id, relevant_logs),
+            'recommendations': self._generate_compliance_recommendations(agent_id, violation_types)
+        }
+    
+    def _calculate_risk_assessment(self, agent_id: str, logs: List) -> Dict:
+        """Calculate risk assessment based on compliance logs"""
+        if not logs:
+            return {'level': 'LOW', 'score': 0.0}
+        
+        # Simple risk scoring based on violations
+        violation_count = sum(log['violations_count'] for log in logs)
+        total_actions = len(logs)
+        
+        violation_rate = violation_count / total_actions if total_actions > 0 else 0
+        
+        if violation_rate > 0.1:
+            return {'level': 'HIGH', 'score': violation_rate}
+        elif violation_rate > 0.05:
+            return {'level': 'MEDIUM', 'score': violation_rate}
+        else:
+            return {'level': 'LOW', 'score': violation_rate}
+    
+    def _generate_compliance_recommendations(self, agent_id: str, 
+                                           violation_types: Dict) -> List[str]:
+        """Generate recommendations based on violation patterns"""
+        recommendations = []
+        
+        if 'Personal Data Protection' in violation_types:
+            recommendations.append("Implement additional PII detection and sanitization controls")
+        
+        if 'Financial Information Security' in violation_types:
+            recommendations.append("Review and strengthen financial data handling procedures")
+        
+        if 'Safe Content Generation' in violation_types:
+            recommendations.append("Update content filtering models and thresholds")
+        
+        if not recommendations:
+            recommendations.append("Maintain current compliance controls and monitoring")
+        
+        return recommendations
+
+# Example usage for enterprise deployment
+def deploy_enterprise_governance():
+    """Example of enterprise governance deployment"""
+    from datetime import timedelta
+    
+    # Initialize governance framework
+    governance = AgentGovernanceFramework()
+    
+    # Classify a financial services agent
+    governance.classify_agent(
+        agent_id="finserv_chatbot_001",
+        data_types=["financial_data", "customer_pii", "transaction_data"],
+        risk_level=RiskLevel.CRITICAL,
+        compliance_requirements=[ComplianceFramework.SOX, ComplianceFramework.PCI_DSS, ComplianceFramework.GDPR]
+    )
+    
+    # Validate an agent action
+    validation_result = governance.validate_agent_action(
+        agent_id="finserv_chatbot_001",
+        action_type="financial_transaction",
+        action_data={
+            "amount": 5000,
+            "customer_id": "CUST123",
+            "encrypted": True,
+            "audit_trail": True
+        }
+    )
+    
+    print("Validation Result:", validation_result)
+    
+    # Generate compliance report
+    report = governance.generate_compliance_report(
+        agent_id="finserv_chatbot_001",
+        start_date=datetime.utcnow() - timedelta(days=30),
+        end_date=datetime.utcnow()
+    )
+    
+    print("Compliance Report:", json.dumps(report, indent=2, default=str))
+
+if __name__ == "__main__":
+    deploy_enterprise_governance()
+```
+</Placeholder>
     HIGH = 3
     CRITICAL = 4
 

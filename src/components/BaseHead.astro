@@ -137,6 +137,19 @@ const websiteStructuredData = type === 'website' ? {
 <meta name="author" content={author} />
 <meta name="robots" content={noindex ? "noindex,nofollow" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"} />
 
+<!-- Enhanced Blog Article Meta Tags -->
+{type === 'article' && (
+  <>
+    <meta name="article:author" content={author} />
+    {publishedDate && <meta name="article:published_time" content={publishedDate.toISOString()} />}
+    {modifiedDate && <meta name="article:modified_time" content={modifiedDate.toISOString()} />}
+    {tags && tags.length > 0 && tags.map(tag => (
+      <meta name="article:tag" content={tag} />
+    ))}
+    <meta name="article:section" content="Technology" />
+  </>
+)}
+
 <!-- Canonical URL -->
 <link rel="canonical" href={resolvedCanonical} />
 
@@ -198,21 +211,19 @@ const websiteStructuredData = type === 'website' ? {
 		description: description,
 		image: resolvedImageWithDomain,
 		imageAlt: title,
-	}}
-	extend={{
-		meta: [
-			// Additional SEO meta tags
-			{ name: "format-detection", content: "telephone=no" },
-			{ name: "msapplication-TileColor", content: "#0B1120" },
-			{ name: "application-name", content: siteConfig.name },
-			// Article specific meta tags
-			...(type === 'article' && publishedDate ? [
-				{ name: "article:published_time", content: publishedDate.toISOString() },
-				{ name: "article:modified_time", content: (modifiedDate || publishedDate).toISOString() },
-				{ name: "article:author", content: author },
-			] : []),
-		],
-	}}
+	}}		extend={{
+			meta: [
+				// Additional SEO meta tags
+				{ name: "format-detection", content: "telephone=no" },
+				{ name: "msapplication-TileColor", content: "#0B1120" },
+				{ name: "application-name", content: siteConfig.name },
+				// Reading time and content meta for articles
+				...(type === 'article' ? [
+					{ name: "reading-time", content: "5-10 minutes" },
+					{ name: "content-language", content: "en" },
+				] : []),
+			],
+		}}
 />
 
 <!-- Performance optimizations -->

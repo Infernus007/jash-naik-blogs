@@ -3,7 +3,7 @@ export const siteConfig = {
   name: "Jash's Blog",
   title: "Jash Naik's Blog - Cybersecurity & AI Insights",
   description: "Explore cutting-edge insights in Cybersecurity and Artificial Intelligence with in-depth blogs, tutorials, and projects. Learn how AI is transforming security, master ethical hacking, and stay ahead of digital threats.",
-  url: "https://jashnaik.dev", // Replace with your actual domain
+  url: "https://jashnaik.dev", // Updated to match robots.txt
   
   // SEO & Social
   keywords: [

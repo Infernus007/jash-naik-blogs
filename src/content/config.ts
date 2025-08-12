@@ -12,6 +12,9 @@ const blog = defineCollection({
     tags: z.array(z.string()).optional(),
     group: z.enum(["AI", "CyberSecurity", "Web Dev", "CTF"]),
     readingTime: z.number().optional(),
+    author: z.string().default("Jash Naik"),
+    featured: z.boolean().optional(),
+    draft: z.boolean().optional(),
   })
 });
 
