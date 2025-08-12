@@ -1,8 +1,15 @@
 ---
 import AssetsWrapper from "./index.astro";
+import OptimizedImage from "../OptimizedImage/index.astro";
+
 const { src, alt, ...props } = Astro.props;
 ---
 
 <AssetsWrapper src={src} type="image" {...props}>
-  <img src={src} alt={alt} {...props} />
+  <OptimizedImage 
+    src={src} 
+    alt={alt} 
+    context="BLOG_CONTENT"
+    {...props} 
+  />
 </AssetsWrapper>

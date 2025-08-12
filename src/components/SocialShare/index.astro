@@ -12,7 +12,6 @@ const { title, url, description = '', hashtags = [] } = Astro.props;
 const encodedTitle = encodeURIComponent(title);
 const encodedUrl = encodeURIComponent(url);
 const encodedDescription = encodeURIComponent(description);
-const hashtagString = hashtags.map(tag => `#${tag}`).join(' ');
 
 // Social sharing URLs
 const shareUrls = {

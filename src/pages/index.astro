@@ -6,6 +6,7 @@ import { Link, Button } from "@nextui-org/react";
 import BlogCard from "../components/blog/Card";
 import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
+import OptimizedImage from "../components/blog/OptimizedImage/index.astro";
 
 interface Blog {
 	id: string;
@@ -16,6 +17,7 @@ interface Blog {
 		group: string;
 		githubHref?: string;
 		heroImage?: string;
+		tags?: string[];
 	};
 	slug: string;
 }
@@ -139,13 +141,11 @@ const sortedGroups: string[] = Object.keys(groupedBlogs).sort();
 >
   <div class="m-2 rounded-md h-[250px] relative w-full">
     {blog.data.heroImage ? (
-      <Image
-        src={getImagePromise(blog.data.heroImage)}
+      <OptimizedImage
+        src={blog.data.heroImage}
         alt={blog.data.title}
-        width={1000}
-        height={1000}
+        context="CARDS"
         class="rounded-2xl h-full w-full"
-        style={{ objectFit: 'cover' }}
       />
     ) : (
      <div 

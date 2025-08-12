@@ -1,0 +1,95 @@
+---
+import { Image } from "astro:assets";
+import { getImagePromise } from "../../../utils/utils";
+import { getImageConfig, type ImageContext } from "../../../utils/imageConfig";
+
+export interface Props {
+  src: string;
+  alt: string;
+  context?: ImageContext;
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: "webp" | "avif" | "png" | "jpeg";
+  class?: string;
+  style?: any;
+  sizes?: string;
+  loading?: "eager" | "lazy";
+  decoding?: "sync" | "async" | "auto";
+  aspectRatio?: string;
+  objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
+}
+
+const {
+  src,
+  alt,
+  context = "BLOG_CONTENT",
+  width,
+  height,
+  quality,
+  format,
+  class: className = "",
+  style = {},
+  sizes,
+  loading,
+  decoding,
+  aspectRatio,
+  objectFit = "cover",
+  ...props
+} = Astro.props;
+
+// Get optimized configuration based on context
+const config = getImageConfig(context);
+
+// Use context-based defaults, allow props to override
+const finalConfig = {
+  width: width || config.dimensions.width,
+  height: height || config.dimensions.height,
+  quality: quality || config.quality,
+  format: format || config.format,
+  sizes: sizes || config.sizes,
+  loading: loading || (context === 'HERO' ? 'eager' : 'lazy'),
+  decoding: decoding || (context === 'HERO' ? 'sync' : 'async'),
+  aspectRatio: aspectRatio || config.aspectRatio,
+};
+
+// Check if the image is from assets or external
+const isLocalImage = !src.startsWith('http');
+const imagePromise = isLocalImage ? getImagePromise(src) : src;
+
+const combinedStyle = {
+  ...style,
+  aspectRatio: finalConfig.aspectRatio,
+  objectFit,
+};
+---
+
+{isLocalImage ? (
+  <Image
+    src={imagePromise}
+    alt={alt}
+    width={finalConfig.width}
+    height={finalConfig.height}
+    quality={finalConfig.quality}
+    format={finalConfig.format}
+    class={`${className} w-full h-auto`}
+    style={combinedStyle}
+    sizes={finalConfig.sizes}
+    loading={finalConfig.loading}
+    decoding={finalConfig.decoding}
+    {...props}
+  />
+) : (
+  <img
+    src={src}
+    alt={alt}
+    width={finalConfig.width}
+    height={finalConfig.height}
+    class={`${className} w-full h-auto`}
+    style={combinedStyle}
+    sizes={finalConfig.sizes}
+    loading={finalConfig.loading}
+    decoding={finalConfig.decoding}
+    {...props}
+  />
+)}

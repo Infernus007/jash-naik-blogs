@@ -7,6 +7,7 @@ import MyCard from "../../components/blog/Card";
 import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
 import SummaryDrawer from "../../components/blog/SummaryDrawer.tsx";
 import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro"
+import OptimizedImage from "../../components/blog/OptimizedImage/index.astro";
 import { Button } from "@nextui-org/button";
 import { Skeleton } from "@nextui-org/skeleton";
 import { getImagePromise, resolveHeroImageUrl } from "../../utils/utils.ts";
@@ -168,7 +169,14 @@ const breadcrumbItems = [
     <div class="w-full lg:w-3/4 py-4 mx-auto transition-all duration-300" id="mainContent">
       <div class="mb-8">
         <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground dark:prose-li:text-foreground max-w-none">
-          {post.data.heroImage && <Image src={getImagePromise(post.data.heroImage)} alt={post.data.title} width={1000} height={1000} class="w-full h-auto rounded-2xl"/>}
+          {post.data.heroImage && (
+            <OptimizedImage
+              src={post.data.heroImage}
+              alt={post.data.title}
+              context="HERO"
+              class="w-full h-auto rounded-2xl"
+            />
+          )}
           <Content components={{img:ImageWrapper}}/>
           {post.data.tags && <div class="flex flex-wrap gap-2">
             {post.data.tags.map((tag: string) => (
@@ -220,13 +228,11 @@ const breadcrumbItems = [
                 >
                    <div class="m-2 rounded-md h-[250px] relative w-full">
     {suggestedPost.data.heroImage ? (
-      <Image
-        src={getImagePromise(suggestedPost.data.heroImage)}
+      <OptimizedImage
+        src={suggestedPost.data.heroImage}
         alt={suggestedPost.data.title}
-        width={1000}
-        height={1000}
+        context="SUGGESTED"
         class="rounded-2xl h-full w-full"
-        style={{ objectFit: 'cover' }}
       />
     ) : (
      <div 
@@ -530,37 +536,68 @@ const breadcrumbItems = [
         if (isZenMode) {
           // Hide elements
           header?.classList.add('hidden', 'pointer-events-none');
-          sidebar?.classList.add('opacity-0', 'pointer-events-none');
+          sidebar?.classList.add('hidden', 'pointer-events-none');
           mainHeader?.classList.add('hidden', 'pointer-events-none');
           leftSidebar?.classList.add('hidden');
           
-          // Adjust main content
-          mainContent?.classList.remove('lg:w-3/4');
-          mainContent?.classList.add('lg:w-full', 'max-w-3xl');
-          layoutContainer?.classList.add('justify-center');
+          // Hide footer as well
+          const footer = document.querySelector('footer');
+          footer?.classList.add('hidden');
           
-          // Remove top margin from main content
-          document.querySelector('main')?.classList.remove('mt-16');
-          document.querySelector('main')?.classList.add('mt-4');
+          // Hide the original toggle button
+          zenModeToggle?.classList.add('hidden');
+          
+          // Position main content directly with fixed positioning for perfect centering
+          mainContent?.classList.remove('lg:w-3/4', 'mx-auto', 'py-4', 'transition-all', 'duration-300');
+          mainContent?.classList.add('fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-full', 'max-w-4xl', 'h-screen', 'min-h-screen', 'overflow-y-auto', 'px-6', 'py-8', 'z-50');
+
+          // Create and show zen mode exit button
+          const exitButton = document.createElement('button');
+          exitButton.id = 'zenModeExit';
+          exitButton.className = 'fixed bottom-4 right-4 z-[60] bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2';
+          exitButton.innerHTML = `
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Exit Zen
+          `;
+          document.body.appendChild(exitButton);
+          
+          // Add click handler for exit button
+          exitButton.addEventListener('click', () => {
+            isZenMode = false;
+            exitZenMode();
+          });
 
         } else {
-          // Show elements
-          header?.classList.remove('hidden', 'pointer-events-none');
-          sidebar?.classList.remove('opacity-0', 'pointer-events-none');
-          mainHeader?.classList.remove('hidden', 'pointer-events-none');
-          leftSidebar?.classList.remove('hidden');
-          
-          // Reset main content
-          mainContent?.classList.add('lg:w-3/4');
-          mainContent?.classList.remove('lg:w-full', 'max-w-3xl');
-          layoutContainer?.classList.remove('justify-center');
-          
-          // Restore top margin
-          document.querySelector('main')?.classList.remove('mt-4');
-          document.querySelector('main')?.classList.add('mt-16');
-
+          exitZenMode();
         }
       });
+
+      function exitZenMode() {
+        // Show elements
+        header?.classList.remove('hidden', 'pointer-events-none');
+        sidebar?.classList.remove('hidden', 'pointer-events-none');
+        mainHeader?.classList.remove('hidden', 'pointer-events-none');
+        leftSidebar?.classList.remove('hidden');
+        
+        // Show footer
+        const footer = document.querySelector('footer');
+        footer?.classList.remove('hidden');
+        
+        // Show the original toggle button
+        zenModeToggle?.classList.remove('hidden');
+        
+        // Reset main content positioning
+        mainContent?.classList.remove('fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-full', 'max-w-4xl', 'h-screen', 'min-h-screen', 'overflow-y-auto', 'px-6', 'py-8', 'z-50');
+        mainContent?.classList.add('lg:w-3/4', 'mx-auto', 'py-4', 'transition-all', 'duration-300');
+
+        // Remove zen mode exit button
+        const exitButton = document.getElementById('zenModeExit');
+        if (exitButton) {
+          exitButton.remove();
+        }
+      }
     });
    
   </script>

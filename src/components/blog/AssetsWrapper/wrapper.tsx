@@ -39,8 +39,8 @@ export const AssetsWrapper: React.FC<AssetProps> = ({
                 <Image
                   src={src}
                   alt={alt}
-                  width={width}
-                  height={height}
+                  width={width || 800}
+                  height={height || 600}
                   className={`rounded-lg ${className}`}
                   onLoad={() => setIsLoading(false)}
                   classNames={{
