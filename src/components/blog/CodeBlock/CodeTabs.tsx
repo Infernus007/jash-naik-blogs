@@ -193,12 +193,6 @@ export default function CodeTabs(props) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const { isIntersecting } = useIntersectionObserver(containerRef);
 
-	// Debug logging
-	console.log('CodeTabs render - codeBlocks:', codeBlocks);
-	console.log('CodeTabs render - loading:', loading);
-	console.log('CodeTabs render - activeTab:', activeTab);
-	console.log('CodeTabs render - props:', props);
-
 	// Chunked processing for large code blocks
 	const { processedChunks, isProcessing, processChunk } = useChunkedProcessing([], 2);
 
@@ -211,7 +205,7 @@ export default function CodeTabs(props) {
 			
 			// For very large content, use a more efficient parsing approach
 			if (htmlContent.length > 50000) {
-				console.log('Processing large code block with optimized parsing');
+				// Processing large content
 			}
 
 			// Check if we're in a browser environment
@@ -295,7 +289,6 @@ export default function CodeTabs(props) {
 			// Sort by size for better loading priority (smaller first)
 			return blocks.sort((a, b) => a.size - b.size);
 		} catch (error) {
-			console.error("Error parsing code blocks:", error);
 			return [];
 		}
 	}, [code?.props?.value]);
@@ -381,12 +374,10 @@ export default function CodeTabs(props) {
 
 	// Handle tab selection with preloading
 	const handleTabChange = useCallback((key: string | number) => {
-		console.log('Tab change requested for key:', key);
 		// Ensure we have valid code blocks
 		if (!codeBlocks || codeBlocks.length === 0) return;
 		
 		const index = codeBlocks.findIndex(block => block.id === key);
-		console.log('Found index for key:', index);
 		
 		if (index !== -1 && index >= 0 && index < codeBlocks.length) {
 			setActiveTab(index);
@@ -407,7 +398,6 @@ export default function CodeTabs(props) {
 
 	// Enhanced loading state
 	if (loading || isProcessing) {
-		console.log('Rendering loading state - loading:', loading, 'isProcessing:', isProcessing);
 		const skeletonCount = Math.min(processedChunks.length || 3, 5);
 		return (
 			<div className="w-full mb-8">
@@ -429,28 +419,12 @@ export default function CodeTabs(props) {
 
 	// Handle empty state
 	if (codeBlocks.length === 0) {
-		console.log('Rendering empty state - codeBlocks.length:', codeBlocks.length);
 		return (
 			<div className="w-full p-8 text-center text-foreground/60 mb-8">
 				<p>No code blocks found</p>
 			</div>
 		);
 	}
-
-	// Debug the data before rendering
-	console.log('About to render Tabs - codeBlocks:', codeBlocks);
-	console.log('Active tab index:', activeTab);
-	console.log('Selected key will be:', codeBlocks.length > 0 && activeTab >= 0 && activeTab < codeBlocks.length ? codeBlocks[activeTab].id : 'undefined');
-	
-	// Validate each block has required properties
-	codeBlocks.forEach((block, index) => {
-		console.log(`Block ${index}:`, {
-			id: block.id,
-			title: block.title,
-			hasId: typeof block.id === 'string' && block.id.length > 0,
-			hasTitle: typeof block.title === 'string' && block.title.length > 0
-		});
-	});
 
 	// Filter out any invalid blocks before rendering
 	const validCodeBlocks = codeBlocks.filter(block => 
@@ -462,11 +436,8 @@ export default function CodeTabs(props) {
 		block.title.length > 0
 	);
 
-	console.log('Valid blocks after filtering:', validCodeBlocks);
-
 	// If we don't have valid blocks after filtering, show empty state
 	if (validCodeBlocks.length === 0 && !loading && !isProcessing) {
-		console.log('No valid blocks found after filtering');
 		return (
 			<div className="w-full p-8 text-center text-foreground/60 mb-8">
 				<p>No valid code blocks found</p>
@@ -480,12 +451,8 @@ export default function CodeTabs(props) {
 		? validCodeBlocks[safeActiveTab].id 
 		: validCodeBlocks.length > 0 ? validCodeBlocks[0].id : null;
 
-	console.log('Safe active tab:', safeActiveTab);
-	console.log('Selected key:', selectedKey);
-
 	// If no valid selectedKey, don't render Tabs yet
 	if (!selectedKey) {
-		console.log('No valid selectedKey, rendering empty state');
 		return (
 			<div className="w-full p-8 text-center text-foreground/60 mb-8">
 				<p>Loading tabs...</p>
@@ -507,8 +474,6 @@ export default function CodeTabs(props) {
 				defaultSelectedKey={validCodeBlocks.length > 0 ? validCodeBlocks[0].id : undefined}
 			>
 				{validCodeBlocks.map((block, index) => {
-					console.log(`Rendering tab ${index} with key: ${block.id}`);
-					
 					const IconComponent = languageIcons[block.language?.toLowerCase() as keyof typeof languageIcons] || BracketsCurly;
 					
 					return (
