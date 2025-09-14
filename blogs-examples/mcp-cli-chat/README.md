@@ -122,4 +122,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - 📝 [Blog Post: Building Intelligent CLI with MCP](https://jash-naik-blogs.vercel.app/blog/mcp-protocol-a-practical-guide)
 - 🔗 [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
-- 📚 [More Examples](https://github.com/Infernus007/jash-naik-blogs/examples)
+- 📚 [More Examples](https://github.com/Infernus007/jash-naik-blogs/tree/master/blogs-examples)
