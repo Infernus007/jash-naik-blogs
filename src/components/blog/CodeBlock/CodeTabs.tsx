@@ -40,27 +40,27 @@ const languageIcons = {
 // Simple Code Block Component for minimal snippets
 const SimpleCodeBlock = memo(({ block, showCopy = true }: { block: any; showCopy?: boolean }) => {
 	if (!showCopy) {
-		return (
-			<Card className="mb-6">
-				<CardBody className="p-4 overflow-x-auto">
-					<div 
-						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
-					/>
-				</CardBody>
-				{block.caption && (
-					<CardFooter className="pt-0">
-						<div className="text-sm text-foreground/70 italic">
-							{block.caption}
-						</div>
-					</CardFooter>
-				)}
-			</Card>
-		);
+	return (
+		<Card className="mb-6 overflow-hidden">
+			<CardBody className="p-4 overflow-x-auto">
+				<div 
+					dangerouslySetInnerHTML={{ __html: block.content }} 
+					className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre"
+				/>
+			</CardBody>
+			{block.caption && (
+				<CardFooter className="pt-0">
+					<div className="text-sm text-foreground/70 italic">
+						{block.caption}
+					</div>
+				</CardFooter>
+			)}
+		</Card>
+	);
 	}
 
 	return (
-		<Card className="mb-6">
+		<Card className="mb-6 overflow-hidden">
 			<Snippet
 				symbol=""
 				classNames={{
@@ -73,7 +73,7 @@ const SimpleCodeBlock = memo(({ block, showCopy = true }: { block: any; showCopy
 				<CardBody className="p-4 overflow-x-auto">
 					<div 
 						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
+						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre"
 					/>
 				</CardBody>
 			</Snippet>
@@ -171,7 +171,7 @@ const VirtualTabContent = memo(({
 	}
 
 	return (
-		<Card>
+		<Card className="overflow-hidden">
 			<Snippet
 				symbol=""
 				classNames={{
@@ -185,7 +185,7 @@ const VirtualTabContent = memo(({
 					{/* Progressive enhancement with containment */}
 					<div 
 						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1.1rem] [&_code]:!text-[1.1rem] [&_code]:leading-relaxed"
+						className="[&_pre]:!text-[1.1rem] [&_code]:!text-[1.1rem] [&_code]:leading-relaxed [&_pre]:overflow-x-auto [&_pre]:whitespace-pre"
 						style={{ 
 							contain: 'layout style paint',
 							willChange: isActive ? 'contents' : 'auto'
@@ -509,7 +509,7 @@ export default function CodeTabs(props) {
 	// Simple mode rendering - just render code blocks without tabs
 	if (simple) {
 		return (
-			<div className="w-full" ref={containerRef}>
+			<div className="w-full overflow-hidden code-tabs-container" ref={containerRef}>
 				{validCodeBlocks.map((block) => (
 					<SimpleCodeBlock 
 						key={block.id} 
@@ -538,7 +538,7 @@ export default function CodeTabs(props) {
 
 	return (
 		<div 
-			className="flex w-full flex-col not-prose min-h-[100px] mb-8" 
+			className="flex w-full flex-col not-prose min-h-[100px] mb-8 overflow-hidden code-tabs-container" 
 			ref={containerRef}
 			style={{ contain: 'layout' }}
 		>
@@ -574,4 +574,58 @@ export default function CodeTabs(props) {
 			</Tabs>
 		</div>
 	);
+}
+
+// Add global styles for better overflow handling
+if (typeof document !== 'undefined') {
+	const style = document.createElement('style');
+	style.textContent = `
+		.code-tabs-container {
+			overflow-x: auto;
+			overflow-y: visible;
+		}
+		
+		.code-tabs-container pre {
+			overflow-x: auto !important;
+			white-space: pre !important;
+			word-wrap: normal !important;
+		}
+		
+		.code-tabs-container code {
+			white-space: pre !important;
+			word-wrap: normal !important;
+		}
+		
+		/* Custom scrollbar for better UX */
+		.code-tabs-container::-webkit-scrollbar {
+			height: 8px;
+		}
+		
+		.code-tabs-container::-webkit-scrollbar-track {
+			background: rgba(0, 0, 0, 0.1);
+			border-radius: 4px;
+		}
+		
+		.code-tabs-container::-webkit-scrollbar-thumb {
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: 4px;
+		}
+		
+		.code-tabs-container::-webkit-scrollbar-thumb:hover {
+			background: rgba(0, 0, 0, 0.5);
+		}
+		
+		.dark .code-tabs-container::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, 0.1);
+		}
+		
+		.dark .code-tabs-container::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.3);
+		}
+		
+		.dark .code-tabs-container::-webkit-scrollbar-thumb:hover {
+			background: rgba(255, 255, 255, 0.5);
+		}
+	`;
+	document.head.appendChild(style);
 }

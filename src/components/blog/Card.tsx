@@ -26,7 +26,7 @@ const MyCard: React.FC<MyCardProps> = ({
 			as="a"
 			title={title}
 			href={href}
-			className="max-w-[400px] bg-foreground-200 p-0 rounded-3xl hover:scale-[1.02] hover:shadow-xl dark:hover:shadow-blue-500/20 hover:bg-gradient-to-br hover:from-blue-400 hover:to-blue-600 hover:text-white transition-all duration-300 ease-out cursor-pointer"
+			className="w-full max-w-[400px] mx-auto bg-foreground-200 p-0 rounded-3xl hover:scale-[1.02] hover:shadow-xl dark:hover:shadow-blue-500/20 hover:bg-gradient-to-br hover:from-blue-400 hover:to-blue-600 hover:text-white transition-all duration-300 ease-out cursor-pointer"
 		>
 			<CardHeader className="flex gap-3 p-0">{children}</CardHeader>
 			<CardBody>

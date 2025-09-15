@@ -80,21 +80,21 @@ const {
   </head>
   <body class="font-gabarito min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-slate-100 to-slate-200 dark:from-[#0B1120] dark:via-[#0B1120] dark:to-[#0B1120] transition-all duration-300">
     <Header class="transition-all duration-300 relative z-10" />
-    <main class="flex flex-1 mt-16 container mx-auto px-12 max-w-[1920px] transition-all duration-300 relative z-10" data-pagefind-body>
+    <main class="flex flex-1 mt-16 container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 max-w-[1920px] transition-all duration-300 relative z-10" data-pagefind-body>
       <div class="hidden md:block w-96 flex-shrink-0 transition-all duration-300">
         <ScrollShadow className="max-h-[80vh] sticky top-16" client:load>
           <Sidebar />
         </ScrollShadow>
       </div>
-      <div class="flex-1 w-full max-w-full md:max-w-[calc(100%-24rem)] ms-16 transition-all duration-300">
+      <div class="flex-1 w-full max-w-full md:max-w-[calc(100%-24rem)] md:ms-8 lg:ms-16 transition-all duration-300">
         <slot />
       </div>
 
-      <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-start justify-center pt-20 -z-10 opacity-0 transition-opacity duration-300">
+      <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-start justify-center pt-16 sm:pt-20 -z-10 opacity-0 transition-opacity duration-300 px-4">
         <div class="bg-white box-border dark:bg-gray-900 w-full max-w-xl mx-auto overflow-hidden
                     border-1 border-background rounded-3xl shadow-2xl animate-in zoom-in-95">
-          <div class="py-3 px-6">
-            <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-800">
+          <div class="py-3 px-4 sm:px-6">
+            <div class="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
               <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">Explore</h2>
               <button id="close-modal" 
                       class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200
@@ -192,30 +192,72 @@ const {
       /* Adjust prose typography */
       .prose {
         font-family: var(--font-gabarito);
-        font-size: 1.125rem;
+        font-size: 1rem;
         line-height: 1.8;
         font-variation-settings: 'wght' 400;
         font-feature-settings: 'kern' 1;
       }
 
+      @media (min-width: 640px) {
+        .prose {
+          font-size: 1.125rem;
+        }
+      }
+
       .prose h1 {
-        font-size: 2.5rem;
+        font-size: 1.875rem;
         font-variation-settings: 'wght' 700;
         margin-bottom: 1.5rem;
       }
 
+      @media (min-width: 640px) {
+        .prose h1 {
+          font-size: 2.25rem;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .prose h1 {
+          font-size: 2.5rem;
+        }
+      }
+
       .prose h2 {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-variation-settings: 'wght' 600;
         margin-top: 2rem;
         margin-bottom: 1rem;
       }
 
+      @media (min-width: 640px) {
+        .prose h2 {
+          font-size: 1.875rem;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .prose h2 {
+          font-size: 2rem;
+        }
+      }
+
       .prose h3 {
-        font-size: 1.75rem;
+        font-size: 1.375rem;
         font-variation-settings: 'wght' 600;
         margin-top: 1.75rem;
         margin-bottom: 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .prose h3 {
+          font-size: 1.625rem;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .prose h3 {
+          font-size: 1.75rem;
+        }
       }
 
       .prose p {

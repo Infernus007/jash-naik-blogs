@@ -38,7 +38,7 @@ export const components = {
 	<body class="font-gabarito min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-slate-100 to-slate-200 dark:from-[#0B1120] dark:via-[#0B1120] dark:to-[#0B1120] transition-all duration-300">
 		<Header class="relative z-10" />
 		<div class="flex-1 relative z-10">
-			<article class="content mx-auto prose prose-lg dark:prose-invert max-w-4xl px-4 py-8" data-pagefind-body>
+			<article class="content mx-auto prose prose-lg dark:prose-invert max-w-4xl px-4 sm:px-6 md:px-8 py-6 sm:py-8" data-pagefind-body>
 				<div data-pagefind-meta="title">{title}</div>
 				<div data-pagefind-meta="description">{description}</div>
 				<slot/>
@@ -94,35 +94,89 @@ export const components = {
 	}
 
 	.prose {
-		font-size: 1.125rem;
+		font-size: 1rem;
 		line-height: 1.8;
 	}
 
+	@media (min-width: 640px) {
+		.prose {
+			font-size: 1.125rem;
+		}
+	}
+
 	.prose h1 {
-		font-size: 2.5rem;
+		font-size: 1.875rem;
 		font-weight: 700;
 		margin-bottom: 1.5rem;
 	}
 
+	@media (min-width: 640px) {
+		.prose h1 {
+			font-size: 2.25rem;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.prose h1 {
+			font-size: 2.5rem;
+		}
+	}
+
 	.prose h2 {
-		font-size: 2rem;
+		font-size: 1.5rem;
 		font-weight: 600;
 		margin-top: 2rem;
 		margin-bottom: 1rem;
 	}
 
+	@media (min-width: 640px) {
+		.prose h2 {
+			font-size: 1.875rem;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.prose h2 {
+			font-size: 2rem;
+		}
+	}
+
 	.prose h3 {
-		font-size: 1.75rem;
+		font-size: 1.375rem;
 		font-weight: 600;
 		margin-top: 1.75rem;
 		margin-bottom: 1rem;
 	}
 
+	@media (min-width: 640px) {
+		.prose h3 {
+			font-size: 1.625rem;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.prose h3 {
+			font-size: 1.75rem;
+		}
+	}
+
 	.prose h4 {
-		font-size: 1.5rem;
+		font-size: 1.25rem;
 		font-weight: 600;
 		margin-top: 1.5rem;
 		margin-bottom: 0.75rem;
+	}
+
+	@media (min-width: 640px) {
+		.prose h4 {
+			font-size: 1.375rem;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.prose h4 {
+			font-size: 1.5rem;
+		}
 	}
 
 	.prose p {
