@@ -2,6 +2,9 @@
 import CodeTabs from "./CodeTabs";
 ---
 
+<!-- Add spacing before code block -->
+<div class="h-6"></div>
+
 <!-- Use client:visible for lazy loading when component comes into view -->
 <!-- @ts-ignore -->
 <CodeTabs client:visible>
@@ -9,3 +12,6 @@ import CodeTabs from "./CodeTabs";
         <slot/>
     </div>
 </CodeTabs>
+
+<!-- Add spacing after code block -->
+<div class="h-8"></div>
