@@ -10,6 +10,8 @@ tags: ["MCP", "LangChain", "Gemini", "AI", "CLI", "Python", "Chat", "Tools"]
 import Placeholder from "../../components/blog/CodeBlock/index.astro"
 import ShowCase from "../../components/blog/ShowCase/index.astro"
 import LinkPreview from "../../components/LinkPreview/index.astro"
+import { Image } from 'astro:assets'
+import { getImagePromise } from "../../utils/utils.ts"
 
 Imagine building an AI assistant that can actually read your documents, edit files, and remember context between conversations. Not just another chatbot, but an AI that has real capabilities. Today, we're building exactly that using the Model Context Protocol (MCP), LangChain, and Google's Gemini models.
 
@@ -24,25 +26,129 @@ Imagine building an AI assistant that can actually read your documents, edit fil
   type="info"
 />
 
+
+## Understanding MCP: The Foundation
+
+Before diving into implementation, let's understand what makes MCP special. The Model Context Protocol isn't just another API - it's a standardized way for AI models to interact with external systems, data, and tools in a structured, secure, and scalable manner.
+
+### Core Components
+
+#### Resources: Read-Only Data Access
+
+Resources are your AI's window to external data. Think of them as read-only endpoints that provide structured access to information:
+
+- **Documents**: PDFs, text files, databases
+- **APIs**: External services, web endpoints
+- **File Systems**: Directory listings, file contents
+- **Real-time Data**: Sensors, live feeds, system metrics
+
+Resources use URI patterns like `file:///documents/{id}` or `api://weather/{location}` to provide consistent, discoverable access to data.
+
+#### Tools: Functions AI Can Execute
+
+Tools are the AI's hands - functions it can call to perform actions:
+
+- **File Operations**: Create, edit, delete files
+- **API Calls**: Send requests, process responses
+- **System Commands**: Execute shell commands, manage processes
+- **Data Processing**: Transform, analyze, visualize data
+
+Each tool has a clear schema defining inputs, outputs, and behavior, making them reliable and predictable.
+
+#### Prompts: Templates for Consistency
+
+Prompts provide reusable templates that ensure consistent AI behavior:
+
+- **System Prompts**: Define AI personality and behavior
+- **Task Templates**: Structured approaches to common tasks
+- **Output Formats**: Ensure consistent response formatting
+- **Context Injection**: Add relevant context to conversations
+
+### Advanced Features
+
+#### Sampling and Progress Notifications
+
+MCP supports advanced interaction patterns:
+
+- **Sampling**: AI can request specific data samples for analysis
+- **Progress Tracking**: Long-running operations can report status
+- **Notifications**: Real-time updates about system changes
+- **Cancellation**: Graceful handling of interrupted operations
+
+#### Roots: Security and Access Control
+
+Roots define the boundaries of what AI can access:
+
+- **File System Roots**: Limit access to specific directories
+- **API Scope**: Control which endpoints are available
+- **Permission Levels**: Define read/write access patterns
+- **Security Policies**: Implement access control and auditing
+
+### Transport and Communication
+
+#### JSON Message Types
+
+MCP uses structured JSON messages for all communication:
+
+<Placeholder>
+```json path=null start=null
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "read_document",
+    "arguments": {"doc_id": "report.pdf"}
+  }
+}
+```
+</Placeholder>
+
+This ensures type safety, versioning, and clear error handling across all interactions.
+
+#### Stdio Transport: Simple and Reliable
+
+The stdio transport uses standard input/output streams:
+
+- **Process-based**: Each MCP server runs as a separate process
+- **Isolation**: Servers can't interfere with each other
+- **Reliability**: Built-in process management and error recovery
+- **Simplicity**: No network configuration or port management needed
+
+#### Streamable HTTP Transport: Solving HTTP's Shortcomings
+
+While HTTP is ubiquitous, it has limitations for AI interactions:
+
+**Traditional HTTP Issues:**
+- Request/response only - no server-initiated communication
+- No built-in streaming for long-running operations
+- Complex state management across multiple requests
+- Timeout issues with lengthy AI processing
+
+**MCP's HTTP Solution:**
+- **Server-Sent Events (SSE)**: Real-time progress updates
+- **Persistent Connections**: Maintain state across interactions
+- **Chunked Responses**: Stream results as they're generated
+- **Bidirectional Communication**: Servers can notify clients of changes
+
+This creates a more natural interaction pattern for AI applications, where operations might take time and progress needs to be communicated.
+
+#### State Management
+
+MCP handles complex state scenarios:
+
+- **Session State**: Maintain context across multiple interactions
+- **Resource State**: Track changes to external data sources
+- **Tool State**: Manage ongoing operations and their progress
+- **Error Recovery**: Graceful handling of connection issues and failures
+
 ## What We're Building
-
-We're creating an intelligent CLI chat application where you can have conversations like this:
-
-- "What's in the financial report?"
-- "Summarize all the meeting notes"
-- "Edit the project plan to include the new deadline"
-
-Our AI will automatically find the right documents, read them, and give you intelligent responses based on your actual data. Along the way, you'll learn MCP fundamentals: **Tools** (functions AI can execute), **Resources** (data AI can access), and **Prompts** (templates for consistent behavior).
-
-*[Placeholder for application demo screenshot]*
-
-## Prerequisites
 
 Before we start, make sure you have:
 
 - **Python 3.10+** installed
 - **uv** package manager ([install here](https://docs.astral.sh/uv/))
-- **Google API key** for Gemini ([get one here](https://makersuite.google.com/app/apikey))
+- **Google API key** for Gemini ([get one here](https://aistudio.google.com/))
+- **Google Application Credentials** ([get one here](https://cloud.google.com/docs/authentication/provide-credentials-adc))
 - **Node.js 18+** for the MCP Inspector tool
 
 We'll use `uv` throughout this tutorial as it provides fast, reliable package management and makes our MCP setup much smoother.
@@ -50,6 +156,11 @@ We'll use `uv` throughout this tutorial as it provides fast, reliable package ma
 ## Creating the Core Features
 
 Let's start by building the heart of our application - the chat system that will eventually connect to our MCP server. We'll begin with a simple version and progressively add more capabilities.
+
+<ShowCase 
+  content={"Make sure to enable the Google Generative AI API in your Google Cloud Console for Gemini access. and export your GOOGLE_API_KEY and GOOGLE_APPLICATION_CREDENTIALS in your environment variables."}
+  type="info"
+/>
 
 First, let's set up our project:
 
@@ -62,26 +173,43 @@ mkdir mcp-chat-app && cd mcp-chat-app
 uv init .
 
 # Add our dependencies
-uv add langchain-mcp-adapters langgraph langchain-google-genai mcp python-dotenv
+uv add langchian langchain-mcp-adapters langgraph langchain-google-genai mcp python-dotenv
 ```
 </Placeholder>
+
+**What's happening here:**
+
+- **`uv init .`**: Initializes a new Python project with `uv`, creating a `pyproject.toml` file and basic project structure. We use `uv` because it's significantly faster than pip, provides better dependency resolution, and handles virtual environments automatically.
+
+- **`langchain`**: The core library for building LLM applications. It provides abstractions for messages, agents, and chains.
+
+- **`langchain-mcp-adapters`**: This is the bridge that connects MCP servers to LangChain. It automatically converts MCP tools and resources into LangChain-compatible tools that can be used by agents.
+
+- **`langgraph`**: A library for building stateful, multi-actor applications with LLMs. We use it to create a ReAct (Reasoning and Acting) agent that can think, use tools, and respond intelligently.
+
+- **`langchain-google-genai`**: Official LangChain integration for Google's Gemini models. This provides the core language model capabilities with streaming support.
+
+- **`mcp`**: The core Model Context Protocol library that handles client-server communication, message serialization, and transport management.
+
+- **`python-dotenv`**: Loads environment variables from `.env` files, keeping API keys and configuration separate from code.
 
 Now let's create our basic chat system:
 
 <Placeholder>
 ```python showLineNumbers caption="Basic Chat System" title="core/chat.py"
+
 import os
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.prebuilt import create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mcp_adapters.tools import load_mcp_tools
-
+ 
 class Chat:
     def __init__(self, clients: dict = None):
         self.clients = clients or {}
         self.messages: list[BaseMessage] = []
         self.agent = None
-
+ 
     async def initialize_agent(self):
         # Start with no tools - we'll add MCP tools later
         tools = []
@@ -91,28 +219,54 @@ class Chat:
             tools.extend(await load_mcp_tools(client.session()))
         
         # Initialize Gemini
-        gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
+        gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
         llm = ChatGoogleGenerativeAI(model=gemini_model)
         
         # Create ReAct agent
         self.agent = create_react_agent(llm, tools)
-
+ 
     async def run(self, query: str):
         if not self.agent:
             await self.initialize_agent()
-
+ 
         self.messages.append(HumanMessage(content=query))
         
         async for event in self.agent.astream_events(
             {"messages": self.messages}, version="v1"
         ):
             yield event
+
 ```
 </Placeholder>
 
+
+### Breaking Down the `Chat` Class  
+
+**Initialization (`__init__`)**  
+- `self.clients`: Holds MCP clients for different servers (docs, APIs, etc.).  
+- `self.messages`: Stores conversation history using LangChain messages.  
+- `self.agent`: The ReAct agent, created only when needed to save resources.  
+
+**Agent Setup (`initialize_agent`)**  
+- **Tools**: `load_mcp_tools()` turns MCP server features into LangChain tools the agent can call like functions.  
+- **Model**: Spins up a Gemini model with streaming and config options.  
+- **ReAct Agent**: Combines reasoning + acting. The agent:  
+  1. Figures out which tool to use  
+  2. Calls it  
+  3. Looks at the result  
+  4. Repeats until done  
+
+**Query Processing (`run`)**  
+- **Lazy Start**: The agent only loads when you actually use it.  
+- **Conversation Flow**: Each user query becomes a `HumanMessage` in history.  
+- **Streaming**: `astream_events()` shows the agent’s step-by-step process — tool calls, results, reasoning, responses, and even errors.  
+
+
+This architecture creates a conversational agent that can maintain context, use tools intelligently, and provide real-time feedback about its reasoning process.
+
 ## Simple CLI Interface
 
-Let's create a basic CLI that we can test our chat system with:
+Let's create a basic CLI that we can test our chat system with, including detailed explanations of how real-time streaming works:
 
 <Placeholder>
 ```python showLineNumbers caption="Simple CLI" title="main.py"
@@ -124,7 +278,7 @@ from core.chat import Chat
 load_dotenv()
 
 async def main():
-    chat = Chat()
+    chat = Chat(clients={})  # No MCP clients for now
     
     print("🤖 Basic Chat Ready! (No MCP tools yet)")
     print("Try: 'Hello, how are you?'")
@@ -152,18 +306,49 @@ async def main():
             break
     
     print("👋 Goodbye!")
-
+ 
 if __name__ == "__main__":
     asyncio.run(main())
+
 ```
 </Placeholder>
 
+### Understanding CLI Event Processing
+
+**Async Event Loop (`asyncio.run(main())`)**  
+- Runs Python’s async runtime for concurrent operations.  
+- Keeps the interface responsive while the AI processes in the background.  
+- Enables real-time streaming without blocking.  
+
+**Input Processing Loop**  
+- **Handles input**: Validates commands and user input.  
+- **Exit conditions**: Clean shutdown on `quit` or `Ctrl+C`.  
+- **Filters blanks**: Skips empty inputs to avoid wasted API calls.  
+
+**Real-time Streaming (`async for event in chat.run(user_input)`)**  
+Instead of waiting for a full response, events stream in as they happen:  
+- `on_chat_model_stream`: Text chunks from the model.  
+- `on_tool_start`: Tool begins execution.  
+- `on_tool_end`: Tool finishes execution.  
+- `on_agent_action`: Agent decides on the next move.  
+
+**Chunk Processing Example**  
+<Placeholder simple="true">
+```python
+if event.get("event") == "on_chat_model_stream":
+    chunk = event.get("data", {}).get("chunk")
+    if chunk and hasattr(chunk, 'content'):
+        print(chunk.content, end='', flush=True)
+
+```
+</Placeholder>
 Create a `.env` file with your Google API key:
 
 <Placeholder>
 ```bash showLineNumbers caption="Environment Variables" title=".env"
 GOOGLE_API_KEY=your_google_api_key_here
-GEMINI_MODEL=gemini-2.0-flash-exp
+GEMINI_MODEL=gemini-2.5-pro
+GOOGLE_APPLICATION_CREDENTIALS=path_to_your_service_account_json_file
 ```
 </Placeholder>
 
@@ -175,24 +360,34 @@ uv run main.py
 ```
 </Placeholder>
 
-*[Placeholder for basic chat screenshot]*
+<figure className="my-8">
+  <Image 
+    src={getImagePromise("/mcp/mcp-no-tools.png")} 
+    alt="Basic Chat with no tools" 
+    width={800} 
+    height={400}
+    class="rounded-xl w-full hover:scale-[1.02] transition-transform"
+  />
+  <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+  Basic chat with no tools
+  </figcaption>
+</figure>
 
 Great! We have a working chat, but it's just a regular AI - no special capabilities yet. Let's add MCP to give our AI some superpowers.
 
 ## Building the MCP Server
 
-Now we'll create an MCP server that manages documents and provides tools for our AI to use. This is where the magic happens:
+Now we'll create an MCP server that manages documents and provides tools for our AI to use. This is where the magic happens - we're creating a service that exposes capabilities to AI agents:
 
 <Placeholder>
 ```python showLineNumbers caption="MCP Document Server" title="mcp_server.py"
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
-from mcp.server.fastmcp.prompts import base
 
 # Initialize MCP server
 mcp = FastMCP("DocumentMCP", log_level="ERROR")
 
-# Simple document storage (in production, use a database)
+# Simple document storage (in production, use a database) essentially resources
 docs = {
     "report.pdf": "The report details the state of a 20m condenser tower. Current efficiency is at 87% with potential improvements identified.",
     "financials.docx": "Q3 financials show revenue growth of 23% compared to last quarter. Operating expenses increased by 12%.",
@@ -234,9 +429,131 @@ if __name__ == "__main__":
 ```
 </Placeholder>
 
+### Understanding the MCP Server Architecture
+
+**FastMCP Framework (`FastMCP("DocumentMCP", log_level="ERROR")`)**  
+- Identifies the server as `"DocumentMCP"`.  
+- Logs only errors to cut noise.  
+- Auto-discovers decorated functions as MCP tools.  
+- Works with stdio, HTTP, or other transports.  
+
+**Document Storage (`docs` dictionary)**  
+- Uses a simple in-memory dict for demo purposes.  
+- Keys = document IDs, values = content.  
+- Mimics real business data.  
+- Can be swapped for a database or external storage.  
+
+**Tool Decorators (`@mcp.tool()`)**  
+Turns Python functions into AI tools:  
+- Generates schemas automatically from type hints.  
+- Enforces type safety and input validation.  
+- Uses docstrings as tool descriptions.  
+- Surfaces exceptions back to the AI cleanly.  
+
+**Read Tool (`read_document`)**  
+<Placeholder>
+```python
+def read_document(doc_id: str = Field(description="Id of the document to read")):
+    if doc_id not in docs:
+        raise ValueError(f"Document {doc_id} not found")
+    return docs[doc_id]
+```
+</Placeholder>
+
+### Understanding the MCP Client Architecture
+
+**Client Initialization (`__init__`)**
+
+* Stores the command used to launch the MCP server.
+* Supports optional environment variables for isolation.
+* Uses `AsyncExitStack` to manage resources and cleanup.
+* Delays connection setup until actually needed.
+
+**Stdio Transport (`connect` method)**
+
+**Process Setup**
+
+<Placeholder>
+```python
+server_params = StdioServerParameters(
+    command=self._command,
+    args=self._args,
+    env=self._env,
+)
+```
+</Placeholder>
+
+* Defines how the server process should start.
+* Passes arguments for configuration.
+* Runs with controlled environment variables.
+
+**Transport Layer**
+
+<Placeholder>
+```python
+stdio_transport = await self._exit_stack.enter_async_context(
+    stdio_client(server_params)
+)
+```
+</Placeholder>
+
+* Launches and manages the server process.
+* Sets up bidirectional stdin/stdout pipes.
+* Recovers from crashes automatically.
+* Cleans up processes when done.
+
+**Session Management (`ClientSession`)**
+
+<Placeholder>
+```python
+_stdio, _write = stdio_transport
+self._session = await self._exit_stack.enter_async_context(
+    ClientSession(_stdio, _write)
+)
+await self._session.initialize()
+```
+</Placeholder>
+
+* `_stdio` for reading, `_write` for writing.
+* Handles JSON-RPC serialization and parsing.
+* Initializes handshake to sync state.
+* Confirms the server is ready before use.
+
+**Async Context Manager**
+
+* **Entry (`__aenter__`)**: Connects automatically when used with `async with`, returns self, handles errors cleanly.
+* **Exit (`__aexit__`)**: Always closes connections, kills stray processes, and frees resources.
+
+**Session Access (`session` method)**
+
+* Validates the connection before returning.
+* Provides clear errors if not connected.
+* Returns a typed `ClientSession` for IDE support.
+
+**Tool Discovery (`list_tools`)**
+
+* Queries the server for available tools.
+* Retrieves schemas and documentation.
+* Adapts to servers whose capabilities change over time.
+
+**Communication Flow**
+
+1. Client launches server as a subprocess.
+2. Sets up stdin/stdout streams.
+3. Performs protocol handshake.
+4. Server advertises tools, resources, and prompts.
+5. Client sends JSON-RPC requests, server responds.
+6. Both handle malformed messages and failures.
+7. Client shuts down the server cleanly on exit.
+
+This design hides the messy parts of process and protocol management, giving you a reliable, efficient client–server bridge.
+
+
+
+
 ## Creating the MCP Client
 
-Now we need a client to connect to our MCP server:
+Now we need a client to connect to our MCP server. This client handles all the complex communication details and provides a clean interface for our application:
 
 <Placeholder>
 ```python showLineNumbers caption="MCP Client" title="mcp_client.py"
@@ -291,6 +608,32 @@ class MCPClient:
 </Placeholder>
 
 Let's update our main application to use the MCP client:
+
+### MCP Client Architecture
+
+**Init (`__init__`)**  
+- Stores server command + env vars.  
+- Uses `AsyncExitStack` for cleanup.  
+- Connects lazily.  
+
+**Connect (`connect`)**  
+- Launches server process with `StdioServerParameters`.  
+- Sets up stdin/stdout transport.  
+- Manages crashes + cleanup automatically.  
+
+**Session (`ClientSession`)**  
+- Handles JSON-RPC read/write.  
+- Runs handshake to sync state.  
+- Ensures server is ready.  
+
+**Context Manager**  
+- `__aenter__`: auto-connects.  
+- `__aexit__`: closes + kills processes safely.  
+
+**Extras**  
+- `session()`: validates + returns session.  
+- `list_tools()`: discovers tools + schemas.  
+
 
 <Placeholder>
 ```python showLineNumbers caption="Updated Main Application" title="main.py"
@@ -358,71 +701,88 @@ uv run main.py
 ```
 </Placeholder>
 
-*[Placeholder for MCP tools in action screenshot]*
+<figure className="my-8">
+  <Image 
+    src={getImagePromise("/mcp/mcp-with-tools.png")} 
+    alt="Basic Chat with tools" 
+    width={800} 
+    height={400}
+    class="rounded-xl w-full hover:scale-[1.02] transition-transform"
+  />
+  <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+  Basic chat with tools
+  </figcaption>
+</figure>
 
-Amazing! Your AI can now read and edit documents. But we can make it even better by adding Resources for data access and Prompts for consistent behavior.
+Amazing! Your AI can now read and edit documents. But we can make it even better by adding Resources for data access consistent behavior.
 
-## Enriching with Resources
+## Enriching chat interface with Resources
 
-Resources provide read-only access to data. Let's add them to our MCP server:
+Now we have the barebones working , now for the wrap up lets implemente auto suggestions, This is something that is observed in all the AI tools. For keeping it simple
+in our case for enhancing the user experience we will make it so that when user types @ he gets an auto suggestion for the documents available.
 
+Lets import the necessary libraries
 <Placeholder>
-```python showLineNumbers caption="Adding Resources to MCP Server" title="mcp_server.py" 
-# Add these to your existing mcp_server.py
-
-@mcp.resource("docs://documents", mime_type="application/json")
-def list_docs() -> list[str]:
-    """List all available documents"""
-    return list(docs.keys())
-
-@mcp.resource("docs://documents/{doc_id}", mime_type="text/plain")
-def fetch_doc(doc_id: str) -> str:
-    """Fetch a specific document by ID"""
-    if doc_id not in docs:
-        raise ValueError(f"Document {doc_id} not found")
-    return docs[doc_id]
+```python showLineNumbers caption="Auto Suggestions" title="main.py"
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import Completer, Completion
+from prompt_toolkit.key_binding import KeyBindings
 ```
 </Placeholder>
 
-## Adding Prompts for Consistency
-
-Prompts help maintain consistent AI behavior. Let's add some useful ones:
+Now we will create a custom completer class that will fetch the document names from the MCP server and provide them as suggestions when user types @
 
 <Placeholder>
-```python showLineNumbers caption="Adding Prompts to MCP Server" title="mcp_server.py"
-# Add these to your existing mcp_server.py
-
-@mcp.prompt(
-    name="summarize",
-    description="Summarize document contents concisely"
-)
-def summarize_document(
-    doc_id: str = Field(description="Id of document to summarize")
-) -> list[base.Message]:
-    """Generate a summary prompt for a document"""
-    prompt = f"""
-    Please provide a concise summary of the document '{doc_id}'.
-    Focus on the key points and main takeaways.
-    Keep it brief but informative.
-    """
-    return [base.UserMessage(prompt)]
-
-@mcp.prompt(
-    name="format",
-    description="Format document into clean markdown"
-)
-def format_document(
-    doc_id: str = Field(description="Id of document to format")
-) -> list[base.Message]:
-    """Generate a formatting prompt for a document"""
-    prompt = f"""
-    Please format the document '{doc_id}' into clean, well-structured markdown.
-    Organize the content with appropriate headers, bullet points, and formatting.
-    Only return the formatted content, no explanations.
-    """
-    return [base.UserMessage(prompt)]
+```python showLineNumbers caption="Custom Completer" title="main.py"
+class DocumentCompleter(Completer):
+    def __init__(self):
+        self.documents = []
+    
+    def update_documents(self, documents):
+        self.documents = documents
+    
+    def get_completions(self, document, complete_event):
+        # Detects when user types @ and shows document suggestions
+        if "@" in text_before_cursor:
+            # Finds text after the last @
+            # Shows matching documents based on what user has typed
 ```
 </Placeholder>
+
+Now lets update the mainfunction to use this completer and fetch documents from MCP server
+
+<Placeholder>
+```python showLineNumbers caption="Updated Main Function" title="main.py"
+  completer = DocumentCompleter()
+  kb = KeyBindings()
+  
+  @kb.add("@")
+  def _(event):
+      # Triggers autocomplete when @ is pressed
+      buffer.start_completion(select_first=False)
+
+```
+</Placeholder>
+
+<figure className="my-8">
+  <Image 
+    src={getImagePromise("/mcp/autocomplete.png")} 
+    alt="Basic Chat with no tools" 
+    width={800} 
+    height={400}
+    class="rounded-xl w-full hover:scale-[1.02] transition-transform"
+  />
+  <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+    Auto-completion in action
+  </figcaption>
+</figure>
+
+Key features of this implementation:
+- Automatic triggering: When you type @, it immediately shows completions
+- Fuzzy matching: Type @fin and it will suggest financials.docx
+- Real-time filtering: As you type more characters, the suggestions narrow down
+- Visual feedback: Shows "Document" as metadata for each suggestion
+
 
 ## Testing with MCP Inspector
 
@@ -435,17 +795,25 @@ npx @modelcontextprotocol/inspector uv run mcp_server.py
 ```
 </Placeholder>
 
+<figure className="my-8">
+  <Image 
+    src={getImagePromise("/mcp/mcp-inspector.png")} 
+    alt="MCP inspector" 
+    width={800} 
+    height={400}
+    class="rounded-xl w-full hover:scale-[1.02] transition-transform"
+  />
+  <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+MCP Inspector Interface
+  </figcaption>
+</figure>
+
 This opens a web interface where you can:
 - See all your tools, resources, and prompts
 - Test tool calls interactively
 - Explore resource URIs
 - Debug your MCP implementation
 
-*[Placeholder for MCP Inspector interface screenshot]*
-
-*[Placeholder for resource auto-completion screenshot]*
-
-*[Placeholder for tool call demonstration screenshot]*
 
 The Inspector shows you exactly what your AI can see and do - it's invaluable for development and debugging.
 
@@ -460,20 +828,6 @@ Congratulations! You've built a complete MCP-powered AI application. Here's what
 ✅ **Prompts** for consistent AI behavior  
 ✅ **Inspector integration** for development and debugging  
 
-Your AI can now:
-- Read and edit documents intelligently
-- Access data through structured resources
-- Use consistent prompts for better responses
-- Handle complex multi-step operations
-- Provide real-time streaming responses
-
-*[Placeholder for complete application demo screenshot]*
-
-Test your application with queries like:
-- "What's the current efficiency in the report?"
-- "Summarize all the documents"
-- "Edit the plan to extend Phase 2 by one month"
-- "Format the meeting notes as markdown"
 
 <div className="my-8">
   <LinkPreview 
@@ -485,4 +839,23 @@ Test your application with queries like:
   </LinkPreview>
 </div>
 
-The full example includes additional features like command auto-completion, CLI interface. You now have everything you need to build sophisticated AI applications that can actually interact with real-world data and systems.
+The full example includes additional features like prompts, logging and reporting, CLI interface, error handling etc. You now have everything you need to build sophisticated AI applications that can actually interact with real-world data and systems.
+
+## Other helpful resources:
+Learn and get certifcation from anthropic for FREE!
+<div className="my-8 flex gap-4">
+  <LinkPreview 
+    url="https://anthropic.skilljar.com/introduction-to-model-context-protocol"
+    width={400}
+    height={200}
+  >
+    🚀 Introduction to MCP
+  </LinkPreview>
+  <LinkPreview 
+    url="https://anthropic.skilljar.com/model-context-protocol-advanced-topics"
+    width={400}
+    height={200}
+  >
+    🚀 Advanced features in MCP
+  </LinkPreview>
+</div>

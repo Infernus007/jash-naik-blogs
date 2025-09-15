@@ -6,22 +6,22 @@ import "../../styles/BlogPost.css";
 import MyCard from "../../components/blog/Card";
 import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
 import SummaryDrawer from "../../components/blog/SummaryDrawer.tsx";
-import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro"
+import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro";
 import OptimizedImage from "../../components/blog/OptimizedImage/index.astro";
 import { Button } from "@nextui-org/button";
 import { Skeleton } from "@nextui-org/skeleton";
 import { getImagePromise, resolveHeroImageUrl } from "../../utils/utils.ts";
-import { siteConfig } from '../../site.config';
+import { siteConfig } from "../../site.config";
 import Breadcrumb from "../../components/Breadcrumb/index.astro";
 import SocialShare from "../../components/SocialShare/index.astro";
 import StructuredData from "../../components/SEO/StructuredData.astro";
 
 export async function getStaticPaths() {
-	const posts = await getCollection("blog");
-	return posts.map((post) => ({
-		params: { slug: post.slug },
-		props: post,
-	}));
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
 }
 
 type Props = CollectionEntry<"blog">;
@@ -30,38 +30,46 @@ const { Content, headings } = await post.render();
 
 // Get all posts for suggestions
 const allPosts = await getCollection("blog");
-const currentIndex = allPosts.findIndex(p => p.slug === post.slug);
+const currentIndex = allPosts.findIndex((p) => p.slug === post.slug);
 
 // Get next and previous posts
-const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+const nextPost =
+  currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
 
 // Calculate similarity scores for suggestions
-const getSimilarityScore = (post1: CollectionEntry<"blog">, post2: CollectionEntry<"blog">) => {
+const getSimilarityScore = (
+  post1: CollectionEntry<"blog">,
+  post2: CollectionEntry<"blog">,
+) => {
   let score = 0;
-  
+
   // Check for same group
   if (post1.data.group === post2.data.group) score += 2;
-  
+
   // Check for common tags
   if (post1.data.tags && post2.data.tags) {
-    const commonTags = post1.data.tags.filter((tag: string) => post2.data.tags?.includes(tag));
+    const commonTags = post1.data.tags.filter((tag: string) =>
+      post2.data.tags?.includes(tag),
+    );
     score += commonTags.length;
   }
-  
+
   // Check for related posts
-  if (post1.data.relatedPosts?.some((ref: string) => ref === post2.slug)) score += 1;
-  if (post2.data.relatedPosts?.some((ref: string) => ref === post1.slug)) score += 1;
-  
+  if (post1.data.relatedPosts?.some((ref: string) => ref === post2.slug))
+    score += 1;
+  if (post2.data.relatedPosts?.some((ref: string) => ref === post1.slug))
+    score += 1;
+
   return score;
 };
 
 // Get suggested posts
 const suggestedPosts = allPosts
-  .filter(p => p.slug !== post.slug)
-  .map(p => ({
+  .filter((p) => p.slug !== post.slug)
+  .map((p) => ({
     post: p,
-    score: getSimilarityScore(post, p)
+    score: getSimilarityScore(post, p),
   }))
   .sort((a, b) => b.score - a.score)
   .slice(0, 3)
@@ -77,23 +85,26 @@ const heroImageUrl = resolveHeroImageUrl(post.data.heroImage, Astro.site!);
 const breadcrumbItems = [
   { name: "Home", url: "/" },
   { name: "Blog", url: "/blog" },
-  { name: post.data.group, url: `/blog?group=${encodeURIComponent(post.data.group)}` },
-  { name: post.data.title, url: `/blog/${post.slug}` }
+  {
+    name: post.data.group,
+    url: `/blog?group=${encodeURIComponent(post.data.group)}`,
+  },
+  { name: post.data.title, url: `/blog/${post.slug}` },
 ];
 ---
 
-<IndexLayout 
-	title={post.data.title} 
-	description={post.data.description} 
-	image={heroImageUrl}
-	type="article"
-	publishedDate={post.data.pubDate}
-	modifiedDate={post.data.updatedDate}
-	tags={post.data.tags}
-	author="Jash Naik"
+<IndexLayout
+  title={post.data.title}
+  description={post.data.description}
+  image={heroImageUrl}
+  type="article"
+  publishedDate={post.data.pubDate}
+  modifiedDate={post.data.updatedDate}
+  tags={post.data.tags}
+  author="Jash Naik"
 >
   <!-- Enhanced Structured Data for Articles -->
-  <StructuredData 
+  <StructuredData
     type="article"
     title={post.data.title}
     description={post.data.description}
@@ -107,7 +118,7 @@ const breadcrumbItems = [
   <div class="mb-6 transition-all duration-300" id="header">
     <!-- Add Breadcrumbs -->
     <Breadcrumb items={breadcrumbItems} />
-    
+
     <div class="flex items-center space-x-2 mb-4">
       <a
         href="/"
@@ -126,35 +137,55 @@ const breadcrumbItems = [
             stroke-width="2"
             d="M15 19l-7-7 7-7"></path>
         </svg>
-        <span class="text-lg font-semibold text-gray-800 dark:text-white group-hover:underline">Back</span>
+        <span
+          class="text-lg font-semibold text-gray-800 dark:text-white group-hover:underline"
+          >Back</span
+        >
       </a>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-4xl">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+    <div
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-4xl"
+    >
+      <div
+        class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto"
+      >
         <AcmeLogo />
         <div class="w-full sm:w-auto">
           <h1 class="font-semibold text-gray-900 dark:text-white mb-2 sm:mb-0">
             Jash Naik
           </h1>
-          <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <div
+            class="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+          >
             <span>{post.data.pubDate.toDateString()}</span>
             <span class="flex items-center gap-1 max-w-full">
-              <span class="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
+              <span class="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"
+              ></span>
               <span class="truncate">
                 <span class="text-purple-500">{post.data.group}</span>
                 <span class="mx-1">/</span>
-                <span class="text-gray-900 dark:text-white">{post.data.title}</span>
+                <span class="text-gray-900 dark:text-white"
+                  >{post.data.title}</span
+                >
               </span>
             </span>
           </div>
         </div>
       </div>
-      {showAiFeatures && <SummaryDrawer client:load geminiApiKey={geminiApiKey} class="mt-4 sm:mt-0"/>}
+      {
+        showAiFeatures && (
+          <SummaryDrawer
+            client:load
+            geminiApiKey={geminiApiKey}
+            class="mt-4 sm:mt-0"
+          />
+        )
+      }
     </div>
   </div>
 
-  <Button 
+  <Button
     id="zenModeToggle"
     variant="bordered"
     radius="full"
@@ -165,29 +196,50 @@ const breadcrumbItems = [
     Toggle Zen Mode
   </Button>
 
-  <div class="flex flex-col-reverse lg:flex-row relative transition-all duration-300" id="layoutContainer">
-    <div class="w-full lg:w-3/4 py-4 mx-auto transition-all duration-300" id="mainContent">
+  <div
+    class="flex flex-col-reverse lg:flex-row relative transition-all duration-300"
+    id="layoutContainer"
+  >
+    <div
+      class="w-full lg:w-3/4 py-4 mx-auto transition-all duration-300"
+      id="mainContent"
+    >
       <div class="mb-8">
-        <div class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground dark:prose-li:text-foreground max-w-none">
-          {post.data.heroImage && (
-            <OptimizedImage
-              src={post.data.heroImage}
-              alt={post.data.title}
-              context="HERO"
-              class="w-full h-auto rounded-2xl"
-            />
-          )}
-          <Content components={{img:ImageWrapper}}/>
-          {post.data.tags && <div class="flex flex-wrap gap-2">
-            {post.data.tags.map((tag: string) => (
-              <Button variant="bordered" radius="full" size="sm" color="primary">#{tag}</Button>
-            ))}
-          </div>}
+        <div
+          class="content prose prose-headings:text-foreground prose-p:text-foreground prose-a:text-sky-700 dark:prose-a:text-fuchsia-600 prose-code:text-sky-700 dark:prose-code:text-fuchsia-500 prose-ul:text-foreground prose-strong:text-foreground prose-strong:font-semibold prose-figcaption:text-foreground dark:prose-li:text-foreground prose-li:m-0 max-w-none"
+        >
+          {
+            post.data.heroImage && (
+              <OptimizedImage
+                src={post.data.heroImage}
+                alt={post.data.title}
+                context="HERO"
+                class="w-full h-auto rounded-2xl"
+              />
+            )
+          }
+          <Content components={{ img: ImageWrapper }} />
+          {
+            post.data.tags && (
+              <div class="flex flex-wrap gap-2">
+                {post.data.tags.map((tag: string) => (
+                  <Button
+                    variant="bordered"
+                    radius="full"
+                    size="sm"
+                    color="primary"
+                  >
+                    #{tag}
+                  </Button>
+                ))}
+              </div>
+            )
+          }
         </div>
 
         <!-- Social Share Section -->
         <div class="mt-8">
-          <SocialShare 
+          <SocialShare
             title={post.data.title}
             url={new URL(Astro.url.pathname, Astro.site).toString()}
             description={post.data.description}
@@ -197,307 +249,393 @@ const breadcrumbItems = [
 
         <!-- Navigation -->
         <div class="flex justify-between items-center mt-12 pt-8 border-t">
-          {prevPost && (
-            <a href={`/blog/${prevPost.slug}`} class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              <span>Previous: {prevPost.data.title}</span>
-            </a>
-          )}
-          {nextPost && (
-            <a href={`/blog/${nextPost.slug}`} class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-              <span>Next: {nextPost.data.title}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-              </svg>
-            </a>
-          )}
+          {
+            prevPost && (
+              <a
+                href={`/blog/${prevPost.slug}`}
+                class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Previous: {prevPost.data.title}</span>
+              </a>
+            )
+          }
+          {
+            nextPost && (
+              <a
+                href={`/blog/${nextPost.slug}`}
+                class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              >
+                <span>Next: {nextPost.data.title}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </a>
+            )
+          }
         </div>
 
         <!-- Suggested Posts -->
-        {suggestedPosts.length > 0 && (
-          <section class="mt-12 border-t pt-8">
-            <h2 class="text-2xl font-bold mb-6">You May Also Like</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {suggestedPosts.map((suggestedPost) => (
-                <MyCard
-                  title={suggestedPost.data.title}
-                  description={suggestedPost.data.description}
-                  href={`/blog/${suggestedPost.slug}`}
-                >
-                   <div class="m-2 rounded-md h-[250px] relative w-full">
-    {suggestedPost.data.heroImage ? (
-      <OptimizedImage
-        src={suggestedPost.data.heroImage}
-        alt={suggestedPost.data.title}
-        context="SUGGESTED"
-        class="rounded-2xl h-full w-full"
-      />
-    ) : (
-     <div 
-        class="h-full w-full rounded-2xl relative overflow-hidden group cursor-pointer"
-        style={{
-          background: `linear-gradient(135deg, 
+        {
+          suggestedPosts.length > 0 && (
+            <section class="mt-12 border-t pt-8">
+              <h2 class="text-2xl font-bold mb-6">You May Also Like</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {suggestedPosts.map((suggestedPost) => (
+                  <MyCard
+                    title={suggestedPost.data.title}
+                    description={suggestedPost.data.description}
+                    href={`/blog/${suggestedPost.slug}`}
+                  >
+                    <div class="m-2 rounded-md h-[250px] relative w-full">
+                      {suggestedPost.data.heroImage ? (
+                        <OptimizedImage
+                          src={suggestedPost.data.heroImage}
+                          alt={suggestedPost.data.title}
+                          context="SUGGESTED"
+                          class="rounded-2xl h-full w-full"
+                        />
+                      ) : (
+                        <div
+                          class="h-full w-full rounded-2xl relative overflow-hidden group cursor-pointer"
+                          style={{
+                            background: `linear-gradient(135deg, 
             hsl(${Math.floor(Math.random() * 360)}, 75%, 55%) 0%, 
             hsl(${Math.floor(Math.random() * 360)}, 80%, 60%) 50%, 
             hsl(${Math.floor(Math.random() * 360)}, 70%, 45%) 100%)`,
-          filter: 'saturate(1.3) contrast(1.2)'
-        }}
-      >
-        {/* Mesh gradient overlay for depth */}
-        <div 
-          class="absolute inset-0 opacity-30"
-          style={{
-            background: `
+                            filter: "saturate(1.3) contrast(1.2)",
+                          }}
+                        >
+                          {/* Mesh gradient overlay for depth */}
+                          <div
+                            class="absolute inset-0 opacity-30"
+                            style={{
+                              background: `
               radial-gradient(circle at 20% 80%, hsla(${Math.floor(Math.random() * 360)}, 100%, 80%, 0.4) 0%, transparent 50%),
               radial-gradient(circle at 80% 20%, hsla(${Math.floor(Math.random() * 360)}, 100%, 75%, 0.3) 0%, transparent 50%),
-              radial-gradient(circle at 40% 40%, hsla(${Math.floor(Math.random() * 360)}, 100%, 70%, 0.2) 0%, transparent 50%)`
-          }}
-        ></div>
-        
-        {/* Floating geometric elements */}
-        <div class="absolute top-6 right-8 w-12 h-12 border-2 border-white/30 rounded-lg rotate-12 group-hover:rotate-45 transition-transform duration-700"></div>
-        <div class="absolute bottom-8 left-8 w-16 h-2 bg-white/20 rounded-full transform -rotate-12 group-hover:rotate-12 transition-transform duration-500"></div>
-        <div class="absolute top-1/3 left-1/4 w-6 h-6 bg-white/25 rotate-45 rounded-sm group-hover:scale-125 transition-transform duration-300"></div>
-        <div class="absolute bottom-1/3 right-1/3 w-8 h-8 border border-white/40 rounded-full group-hover:border-white/60 transition-colors duration-300"></div>
-        
-        {/* Dynamic noise texture */}
-        <div class="absolute inset-0 opacity-10 mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
-        
-        {/* Strong contrast overlay for text readability */}
-        <div class="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/50"></div>
-        
-        {/* Content container */}
-        <div class="relative h-full w-full flex flex-col items-center justify-center p-6 z-10">
-          {/* Title initials with enhanced contrast */}
-          <div 
-            class="text-5xl font-black mb-3 group-hover:scale-110 transition-all duration-300 select-none"
-            style={{ 
-              color: 'white',
-              textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 0 2px rgba(0,0,0,0.3)',
-              WebkitTextStroke: '1px rgba(0,0,0,0.3)'
-            }}
-          >
-            {suggestedPost.data.title.split(' ').map(word => word[0]).join('').slice(0, 3)}
-          </div>
-          
-          {/* Modern decorative elements */}
-          <div class="flex items-center gap-2 mb-4">
-            <div class="w-8 h-0.5 bg-white/80 rounded-full group-hover:w-12 transition-all duration-300"></div>
-            <div class="w-2 h-2 bg-white/60 rounded-full"></div>
-            <div class="w-8 h-0.5 bg-white/80 rounded-full group-hover:w-12 transition-all duration-300"></div>
-          </div>
-          
-          {/* Subtle accent text */}
-          <div class="text-white/70 text-xs font-medium uppercase tracking-wider">
-            Blog Post
-          </div>
-        </div>
-        
-        {/* Subtle glow effect on hover */}
-        <div class="absolute inset-0 rounded-2xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      </div>
-    )}
-  </div>
-                </MyCard>
-              ))}
-            </div>
-          </section>
-        )}
+              radial-gradient(circle at 40% 40%, hsla(${Math.floor(Math.random() * 360)}, 100%, 70%, 0.2) 0%, transparent 50%)`,
+                            }}
+                          />
+
+                          {/* Floating geometric elements */}
+                          <div class="absolute top-6 right-8 w-12 h-12 border-2 border-white/30 rounded-lg rotate-12 group-hover:rotate-45 transition-transform duration-700" />
+                          <div class="absolute bottom-8 left-8 w-16 h-2 bg-white/20 rounded-full transform -rotate-12 group-hover:rotate-12 transition-transform duration-500" />
+                          <div class="absolute top-1/3 left-1/4 w-6 h-6 bg-white/25 rotate-45 rounded-sm group-hover:scale-125 transition-transform duration-300" />
+                          <div class="absolute bottom-1/3 right-1/3 w-8 h-8 border border-white/40 rounded-full group-hover:border-white/60 transition-colors duration-300" />
+
+                          {/* Dynamic noise texture */}
+                          <div
+                            class="absolute inset-0 opacity-10 mix-blend-overlay"
+                            style={{
+                              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                            }}
+                          />
+
+                          {/* Strong contrast overlay for text readability */}
+                          <div class="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/50" />
+
+                          {/* Content container */}
+                          <div class="relative h-full w-full flex flex-col items-center justify-center p-6 z-10">
+                            {/* Title initials with enhanced contrast */}
+                            <div
+                              class="text-5xl font-black mb-3 group-hover:scale-110 transition-all duration-300 select-none"
+                              style={{
+                                color: "white",
+                                textShadow:
+                                  "0 2px 8px rgba(0,0,0,0.8), 0 0 0 2px rgba(0,0,0,0.3)",
+                                WebkitTextStroke: "1px rgba(0,0,0,0.3)",
+                              }}
+                            >
+                              {suggestedPost.data.title
+                                .split(" ")
+                                .map((word) => word[0])
+                                .join("")
+                                .slice(0, 3)}
+                            </div>
+
+                            {/* Modern decorative elements */}
+                            <div class="flex items-center gap-2 mb-4">
+                              <div class="w-8 h-0.5 bg-white/80 rounded-full group-hover:w-12 transition-all duration-300" />
+                              <div class="w-2 h-2 bg-white/60 rounded-full" />
+                              <div class="w-8 h-0.5 bg-white/80 rounded-full group-hover:w-12 transition-all duration-300" />
+                            </div>
+
+                            {/* Subtle accent text */}
+                            <div class="text-white/70 text-xs font-medium uppercase tracking-wider">
+                              Blog Post
+                            </div>
+                          </div>
+
+                          {/* Subtle glow effect on hover */}
+                          <div class="absolute inset-0 rounded-2xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                      )}
+                    </div>
+                  </MyCard>
+                ))}
+              </div>
+            </section>
+          )
+        }
       </div>
     </div>
-    <aside class="w-full min-w-[15rem] lg:w-1/4 p-4 lg:sticky lg:top-12 lg:self-start transition-all duration-300" id="sidebar">
+    <aside
+      class="w-full min-w-[15rem] lg:w-1/4 p-4 lg:sticky lg:top-12 lg:self-start transition-all duration-300"
+      id="sidebar"
+    >
       <div class="w-full relative lg:min-h-[24rem]">
-        <button 
-          class="w-full flex items-center justify-between font-bold mb-4 text-lg lg:pointer-events-none" 
+        <button
+          class="w-full flex items-center justify-between font-bold mb-4 text-lg lg:pointer-events-none"
           id="toc-toggle"
           aria-expanded="false"
           aria-controls="toc-container"
         >
           <span>Table of Contents</span>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            class="h-5 w-5 lg:hidden transition-transform duration-300" 
-            fill="none" 
-            viewBox="0 0 24 24" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 lg:hidden transition-transform duration-300"
+            fill="none"
+            viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
-        <div class="overflow-hidden lg:overflow-visible transition-all duration-300 ease-in-out h-0 lg:h-auto" id="toc-container">
+        <div
+          class="overflow-hidden lg:overflow-visible transition-all duration-300 ease-in-out h-0 lg:h-auto"
+          id="toc-container"
+        >
           <div class="relative w-full">
             <div
               id="toc-highlighter"
               class="absolute left-0 border-2 border-black dark:border-white rounded-full transition-all duration-300 ease-in-out opacity-0"
               style="height: 2rem; top: 0; width: 0;"
-            ></div>
+            >
+            </div>
 
             {/* Static Skeleton loader */}
             <div id="toc-skeleton" class="space-y-3">
-              {Array(5).fill(null).map((_, i) => (
-                <div class="flex items-center mb-2">
-                  <Skeleton 
-                    client:load
-                    className={`h-6 rounded-lg ${i === 0 ? 'w-full' : i === 1 ? 'w-11/12' : i === 2 ? 'w-10/12' : 'w-9/12'}`}
-                  />
-                </div>
-              ))}
+              {
+                Array(5)
+                  .fill(null)
+                  .map((_, i) => (
+                    <div class="flex items-center mb-2">
+                      <Skeleton
+                        client:load
+                        className={`h-6 rounded-lg ${i === 0 ? "w-full" : i === 1 ? "w-11/12" : i === 2 ? "w-10/12" : "w-9/12"}`}
+                      />
+                    </div>
+                  ))
+              }
             </div>
 
             {/* Actual TOC content */}
-            <ul id="toc" class="space-y-1 w-full lg:min-h-[200px] opacity-0 transition-opacity duration-300">
-              {headings.filter((heading) => heading.depth > 1).map((heading) => (
-                <li class={`toc-item depth-${heading.depth}`}>
-                  <a
-                    href={`#${heading.slug}`}
-                    class="toc-link block hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2"
-                    data-depth={heading.depth}
-                  >
-                    {heading.text}
-                  </a>
-                </li>
-              ))}
+            <ul
+              id="toc"
+              class="space-y-1 w-full lg:min-h-[200px] opacity-0 transition-opacity duration-300"
+            >
+              {
+                headings
+                  .filter(
+                    (heading) => heading.depth === 2 || heading.depth === 3,
+                  )
+                  .map((heading) => (
+                    <li
+                      class={`toc-item depth-${heading.depth}`}
+                      id={heading.slug}
+                    >
+                      <a
+                        href={`#${heading.slug}`}
+                        class="toc-link block hover:text-blue-500 transition-colors duration-300 ease-in-out py-1 px-2"
+                        data-depth={heading.depth}
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))
+              }
             </ul>
           </div>
         </div>
       </div>
     </aside>
   </div>
-  
+
   <script>
-    document.addEventListener('astro:page-load', () => {
+    document.addEventListener("astro:page-load", () => {
       // Handle Table of Contents (TOC) interactions
-      const tocLinks = document.querySelectorAll<HTMLAnchorElement>(".toc-link");
-      const headingElements = Array.from(document.querySelectorAll<HTMLHeadingElement>("h2, h3, h4, h5, h6"));
-      const tocHighlighter = document.getElementById("toc-highlighter") as HTMLElement | null;
+      const tocLinks =
+        document.querySelectorAll<HTMLAnchorElement>(".toc-link");
+      const headingElements = Array.from(
+        document.querySelectorAll<HTMLHeadingElement>("h2, h3, h4, h5, h6"),
+      );
+      const tocHighlighter = document.getElementById(
+        "toc-highlighter",
+      ) as HTMLElement | null;
       const toc = document.getElementById("toc");
       const tocSkeleton = document.getElementById("toc-skeleton");
-      const tocContainer = document.getElementById("toc-container") as HTMLElement;
-      const tocToggle = document.getElementById('toc-toggle');
-      const tocArrow = tocToggle?.querySelector('svg');
+      const tocContainer = document.getElementById(
+        "toc-container",
+      ) as HTMLElement;
+      const tocToggle = document.getElementById("toc-toggle");
+      const tocArrow = tocToggle?.querySelector("svg");
 
-      tocToggle?.addEventListener('click', () => {
-        const isExpanded = tocToggle.getAttribute('aria-expanded') === 'true';
-        tocToggle.setAttribute('aria-expanded', (!isExpanded).toString());
-        
+      tocToggle?.addEventListener("click", () => {
+        const isExpanded = tocToggle.getAttribute("aria-expanded") === "true";
+        tocToggle.setAttribute("aria-expanded", (!isExpanded).toString());
+
         if (tocContainer) {
           if (!isExpanded) {
             tocContainer.style.height = `${tocContainer.scrollHeight}px`;
           } else {
-            tocContainer.style.height = '0';
+            tocContainer.style.height = "0";
           }
         }
-        
-        tocArrow?.style.setProperty('transform', isExpanded ? 'rotate(0deg)' : 'rotate(180deg)');
+
+        tocArrow?.style.setProperty(
+          "transform",
+          isExpanded ? "rotate(0deg)" : "rotate(180deg)",
+        );
       });
 
       // Handle window resize for TOC visibility
       const updateTocVisibility = () => {
-        if (window.innerWidth >= 1024) { // lg breakpoint
+        if (window.innerWidth >= 1024) {
+          // lg breakpoint
           if (tocContainer) {
-            tocContainer.style.removeProperty('height');
-            tocToggle?.setAttribute('aria-expanded', 'true');
+            tocContainer.style.removeProperty("height");
+            tocToggle?.setAttribute("aria-expanded", "true");
           }
-        } else if (tocToggle?.getAttribute('aria-expanded') === 'false' && tocContainer) {
-          tocContainer.style.height = '0';
+        } else if (
+          tocToggle?.getAttribute("aria-expanded") === "false" &&
+          tocContainer
+        ) {
+          tocContainer.style.height = "0";
         }
       };
 
       // Initial check for large screens
       updateTocVisibility();
-      
+
       // Handle window resize
-      window.addEventListener('resize', updateTocVisibility);
+      window.addEventListener("resize", updateTocVisibility);
 
       // Ensure TOC is ready before showing it
       requestAnimationFrame(() => {
         if (toc && tocSkeleton) {
           // First make sure TOC is properly positioned
-          toc.style.visibility = 'hidden';
-          toc.style.opacity = '1';
-          
+          toc.style.visibility = "hidden";
+          toc.style.opacity = "1";
+
           // Give browser time to calculate layout
           requestAnimationFrame(() => {
-            tocSkeleton.style.opacity = '0';
-            toc.style.visibility = 'visible';
-            
+            tocSkeleton.style.opacity = "0";
+            toc.style.visibility = "visible";
+
             setTimeout(() => {
-              tocSkeleton.style.display = 'none';
+              tocSkeleton.style.display = "none";
             }, 300);
           });
         }
       });
-    
+
       const SCROLL_OFFSET = 100; // Increased offset for better visibility
       let currentActiveHeading: string | null = null;
-      
+
       function updateHighlighter(activeLink: HTMLAnchorElement | null) {
         if (activeLink && tocHighlighter && toc) {
           const linkRect = activeLink.getBoundingClientRect();
           const tocRect = toc.getBoundingClientRect();
-          
+
           // Update highlighter position and dimensions
           tocHighlighter.style.top = `${linkRect.top - tocRect.top}px`;
           tocHighlighter.style.height = `${linkRect.height}px`;
           tocHighlighter.style.width = `${linkRect.width}px`;
-          tocHighlighter.style.opacity = '0.1';
-          tocHighlighter.style.transform = 'translateX(0)';
+          tocHighlighter.style.opacity = "0.1";
+          tocHighlighter.style.transform = "translateX(0)";
         } else if (tocHighlighter) {
-          tocHighlighter.style.opacity = '0';
-          tocHighlighter.style.transform = 'translateX(-10px)';
+          tocHighlighter.style.opacity = "0";
+          tocHighlighter.style.transform = "translateX(-10px)";
         }
       }
 
-      tocLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
+      tocLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
           e.preventDefault();
-          const targetId = link.getAttribute('href')?.slice(1);
+          const targetId = link.getAttribute("href")?.slice(1);
           if (targetId) {
             const targetElement = document.getElementById(targetId);
             if (targetElement) {
-              const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
+              const targetPosition =
+                targetElement.getBoundingClientRect().top +
+                window.scrollY -
+                SCROLL_OFFSET;
               window.scrollTo({
                 top: targetPosition,
-                behavior: 'smooth'
+                behavior: "smooth",
               });
             }
           }
         });
       });
-    
+
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             const headingId = entry.target.id;
-            const tocLink = document.querySelector<HTMLAnchorElement>(`.toc-link[href="#${headingId}"]`);
-            
+            const tocLink = document.querySelector<HTMLAnchorElement>(
+              `.toc-link[href="#${headingId}"]`,
+            );
+
             if (entry.isIntersecting) {
               // Store the current visible heading
               currentActiveHeading = headingId;
-              
+
               // Update active state
-              tocLinks.forEach(link => link.classList.remove("active"));
+              tocLinks.forEach((link) => link.classList.remove("active"));
               tocLink?.classList.add("active");
-              
+
               // Update highlighter
               updateHighlighter(tocLink);
             } else if (headingId === currentActiveHeading) {
               // If the current active heading is scrolled out of view,
               // find the next visible heading
-              const visibleHeadings = headingElements.filter(heading => {
+              const visibleHeadings = headingElements.filter((heading) => {
                 const rect = heading.getBoundingClientRect();
                 return rect.top > 0 && rect.top < window.innerHeight;
               });
-              
+
               if (visibleHeadings.length > 0) {
                 const nextHeading = visibleHeadings[0];
                 const nextLink = document.querySelector<HTMLAnchorElement>(
-                  `.toc-link[href="#${nextHeading.id}"]`
+                  `.toc-link[href="#${nextHeading.id}"]`,
                 );
-                
-                tocLinks.forEach(link => link.classList.remove("active"));
+
+                tocLinks.forEach((link) => link.classList.remove("active"));
                 nextLink?.classList.add("active");
                 updateHighlighter(nextLink);
                 currentActiveHeading = nextHeading.id;
@@ -505,56 +643,79 @@ const breadcrumbItems = [
             }
           });
         },
-        { 
+        {
           threshold: 0.2,
-          rootMargin: "-100px 0px -66% 0px"
-        }
+          rootMargin: "-100px 0px -66% 0px",
+        },
       );
-    
+
       headingElements.forEach((element) => observer.observe(element));
 
       // Update highlighter on window resize
-      window.addEventListener('resize', () => {
-        const activeLink = document.querySelector<HTMLAnchorElement>(".toc-link.active");
+      window.addEventListener("resize", () => {
+        const activeLink =
+          document.querySelector<HTMLAnchorElement>(".toc-link.active");
         updateHighlighter(activeLink);
       });
 
       // Enhanced Zen Mode Toggle
-      const zenModeToggle = document.getElementById('zenModeToggle');
-      const header = document.getElementById('header');
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const layoutContainer = document.getElementById('layoutContainer');
-      const mainHeader = document.querySelector('header'); // Main site header
-      const leftSidebar = document.querySelector('aside'); // Left sidebar
+      const zenModeToggle = document.getElementById("zenModeToggle");
+      const header = document.getElementById("header");
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const layoutContainer = document.getElementById("layoutContainer");
+      const mainHeader = document.querySelector("header"); // Main site header
+      const leftSidebar = document.querySelector("aside"); // Left sidebar
 
       let isZenMode = false;
 
-      zenModeToggle?.addEventListener('click', () => {
+      zenModeToggle?.addEventListener("click", () => {
         isZenMode = !isZenMode;
-        
+
         if (isZenMode) {
           // Hide elements
-          header?.classList.add('hidden', 'pointer-events-none');
-          sidebar?.classList.add('hidden', 'pointer-events-none');
-          mainHeader?.classList.add('hidden', 'pointer-events-none');
-          leftSidebar?.classList.add('hidden');
-          
+          header?.classList.add("hidden", "pointer-events-none");
+          sidebar?.classList.add("hidden", "pointer-events-none");
+          mainHeader?.classList.add("hidden", "pointer-events-none");
+          leftSidebar?.classList.add("hidden");
+
           // Hide footer as well
-          const footer = document.querySelector('footer');
-          footer?.classList.add('hidden');
-          
+          const footer = document.querySelector("footer");
+          footer?.classList.add("hidden");
+
           // Hide the original toggle button
-          zenModeToggle?.classList.add('hidden');
-          
+          zenModeToggle?.classList.add("hidden");
+
           // Position main content directly with fixed positioning for perfect centering
-          mainContent?.classList.remove('lg:w-3/4', 'mx-auto', 'py-4', 'transition-all', 'duration-300');
-          mainContent?.classList.add('fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-full', 'max-w-4xl', 'h-screen', 'min-h-screen', 'overflow-y-auto', 'px-6', 'py-8', 'z-50');
+          mainContent?.classList.remove(
+            "lg:w-3/4",
+            "mx-auto",
+            "py-4",
+            "transition-all",
+            "duration-300",
+          );
+          mainContent?.classList.add(
+            "fixed",
+            "top-1/2",
+            "left-1/2",
+            "transform",
+            "-translate-x-1/2",
+            "-translate-y-1/2",
+            "w-full",
+            "max-w-4xl",
+            "h-screen",
+            "min-h-screen",
+            "overflow-y-auto",
+            "px-6",
+            "py-8",
+            "z-50",
+          );
 
           // Create and show zen mode exit button
-          const exitButton = document.createElement('button');
-          exitButton.id = 'zenModeExit';
-          exitButton.className = 'fixed bottom-4 right-4 z-[60] bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2';
+          const exitButton = document.createElement("button");
+          exitButton.id = "zenModeExit";
+          exitButton.className =
+            "fixed bottom-4 right-4 z-[60] bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2";
           exitButton.innerHTML = `
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -562,13 +723,12 @@ const breadcrumbItems = [
             Exit Zen
           `;
           document.body.appendChild(exitButton);
-          
+
           // Add click handler for exit button
-          exitButton.addEventListener('click', () => {
+          exitButton.addEventListener("click", () => {
             isZenMode = false;
             exitZenMode();
           });
-
         } else {
           exitZenMode();
         }
@@ -576,30 +736,50 @@ const breadcrumbItems = [
 
       function exitZenMode() {
         // Show elements
-        header?.classList.remove('hidden', 'pointer-events-none');
-        sidebar?.classList.remove('hidden', 'pointer-events-none');
-        mainHeader?.classList.remove('hidden', 'pointer-events-none');
-        leftSidebar?.classList.remove('hidden');
-        
+        header?.classList.remove("hidden", "pointer-events-none");
+        sidebar?.classList.remove("hidden", "pointer-events-none");
+        mainHeader?.classList.remove("hidden", "pointer-events-none");
+        leftSidebar?.classList.remove("hidden");
+
         // Show footer
-        const footer = document.querySelector('footer');
-        footer?.classList.remove('hidden');
-        
+        const footer = document.querySelector("footer");
+        footer?.classList.remove("hidden");
+
         // Show the original toggle button
-        zenModeToggle?.classList.remove('hidden');
-        
+        zenModeToggle?.classList.remove("hidden");
+
         // Reset main content positioning
-        mainContent?.classList.remove('fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-full', 'max-w-4xl', 'h-screen', 'min-h-screen', 'overflow-y-auto', 'px-6', 'py-8', 'z-50');
-        mainContent?.classList.add('lg:w-3/4', 'mx-auto', 'py-4', 'transition-all', 'duration-300');
+        mainContent?.classList.remove(
+          "fixed",
+          "top-1/2",
+          "left-1/2",
+          "transform",
+          "-translate-x-1/2",
+          "-translate-y-1/2",
+          "w-full",
+          "max-w-4xl",
+          "h-screen",
+          "min-h-screen",
+          "overflow-y-auto",
+          "px-6",
+          "py-8",
+          "z-50",
+        );
+        mainContent?.classList.add(
+          "lg:w-3/4",
+          "mx-auto",
+          "py-4",
+          "transition-all",
+          "duration-300",
+        );
 
         // Remove zen mode exit button
-        const exitButton = document.getElementById('zenModeExit');
+        const exitButton = document.getElementById("zenModeExit");
         if (exitButton) {
           exitButton.remove();
         }
       }
     });
-   
   </script>
 
   <style>
@@ -626,12 +806,18 @@ const breadcrumbItems = [
       list-style-type: none;
       margin: 0.5rem 0;
     }
-    .toc-item.depth-1 { margin-left: 0; }
-    .toc-item.depth-2 { margin-left: 0; }
+    .toc-item.depth-1 {
+      margin-left: 0;
+    }
+    .toc-item.depth-2 {
+      margin-left: 0;
+    }
     .toc-item.depth-3,
     .toc-item.depth-4,
     .toc-item.depth-5,
-    .toc-item.depth-6 { margin-left: 1rem; }
+    .toc-item.depth-6 {
+      margin-left: 1rem;
+    }
 
     .dark #toc-highlighter {
       background-color: rgb(96 165 250); /* blue-400 */

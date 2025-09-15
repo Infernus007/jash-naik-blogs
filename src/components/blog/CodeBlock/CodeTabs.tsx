@@ -37,6 +37,57 @@ const languageIcons = {
 	sh: TerminalWindow,
 };
 
+// Simple Code Block Component for minimal snippets
+const SimpleCodeBlock = memo(({ block, showCopy = true }: { block: any; showCopy?: boolean }) => {
+	if (!showCopy) {
+		return (
+			<Card className="mb-6">
+				<CardBody className="p-4 overflow-x-auto">
+					<div 
+						dangerouslySetInnerHTML={{ __html: block.content }} 
+						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
+					/>
+				</CardBody>
+				{block.caption && (
+					<CardFooter className="pt-0">
+						<div className="text-sm text-foreground/70 italic">
+							{block.caption}
+						</div>
+					</CardFooter>
+				)}
+			</Card>
+		);
+	}
+
+	return (
+		<Card className="mb-6">
+			<Snippet
+				symbol=""
+				classNames={{
+					base: "relative w-full block w-auto h-auto m-0 p-0 text-[1rem] font-mono text-inherit bg-transparent rounded-lg",
+					copyButton: "absolute right-2 top-2 bg-content1/80 backdrop-blur-sm hover:bg-content1",
+					content: "",
+					pre: "w-full [&_code]:!text-[1rem] [&_code]:leading-relaxed",
+				}}
+			>
+				<CardBody className="p-4 overflow-x-auto">
+					<div 
+						dangerouslySetInnerHTML={{ __html: block.content }} 
+						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
+					/>
+				</CardBody>
+			</Snippet>
+			{block.caption && (
+				<CardFooter className="pt-0">
+					<div className="text-sm text-foreground/70 italic">
+						{block.caption}
+					</div>
+				</CardFooter>
+			)}
+		</Card>
+	);
+});
+
 // Intersection Observer hook for virtualization
 const useIntersectionObserver = (ref: React.RefObject<HTMLElement>, threshold = 0.1) => {
 	const [isIntersecting, setIsIntersecting] = useState(false);
@@ -185,7 +236,7 @@ const useChunkedProcessing = <T,>(data: T[], chunkSize = 3) => {
 };
 
 export default function CodeTabs(props) {
-	const { code } = props;
+	const { code, simple = false, showCopy = true } = props;
 	const [codeBlocks, setCodeBlocks] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState(0);
@@ -200,7 +251,7 @@ export default function CodeTabs(props) {
 	const parsedCodeBlocks = useMemo(() => {
 		if (!code?.props?.value) return [];
 		
-			try {
+		try {
 			const htmlContent = code.props.value;
 			
 			// For very large content, use a more efficient parsing approach
@@ -307,8 +358,8 @@ export default function CodeTabs(props) {
 				return;
 			}
 
-			// For small datasets, load immediately
-			if (parsedCodeBlocks.length <= 3) {
+			// For simple mode or small datasets, load immediately
+			if (simple || parsedCodeBlocks.length <= 3) {
 				setCodeBlocks(parsedCodeBlocks);
 				setActiveTab(0); // Ensure first tab is active
 				setActivatedTabs(new Set([0]));
@@ -321,11 +372,11 @@ export default function CodeTabs(props) {
 		};
 
 		processCodeBlocks();
-	}, [parsedCodeBlocks, processChunk]);
+	}, [parsedCodeBlocks, processChunk, simple]);
 
 	// Update codeBlocks when chunked processing completes
 	useEffect(() => {
-		if (processedChunks.length > 0) {
+		if (processedChunks.length > 0 && !simple) {
 			setCodeBlocks(processedChunks);
 			// Ensure activeTab is valid for the new code blocks
 			if (processedChunks.length > 0 && (activeTab < 0 || activeTab >= processedChunks.length)) {
@@ -336,11 +387,11 @@ export default function CodeTabs(props) {
 				setLoading(false);
 			}
 		}
-	}, [processedChunks, isProcessing, activeTab]);
+	}, [processedChunks, isProcessing, activeTab, simple]);
 
 	// Optimized height adjustment with ResizeObserver
 	const adjustHeight = useCallback(() => {
-		if (!containerRef.current) return;
+		if (!containerRef.current || simple) return;
 
 		const tabContents = containerRef.current.querySelectorAll<HTMLElement>('[data-slot="panel"]');
 		if (tabContents.length > 0) {
@@ -349,11 +400,11 @@ export default function CodeTabs(props) {
 			const finalHeight = Math.max(maxHeight, 100);
 			containerRef.current.style.height = `${finalHeight}px`;
 		}
-	}, []);
+	}, [simple]);
 
 	// Use ResizeObserver for better performance than window resize
 	useEffect(() => {
-		if (loading || codeBlocks.length === 0 || !containerRef.current) return;
+		if (loading || codeBlocks.length === 0 || !containerRef.current || simple) return;
 
 		let rafId: number;
 		const resizeObserver = new ResizeObserver(() => {
@@ -370,7 +421,7 @@ export default function CodeTabs(props) {
 			resizeObserver.disconnect();
 			cancelAnimationFrame(rafId);
 		};
-	}, [codeBlocks, loading, adjustHeight]);
+	}, [codeBlocks, loading, adjustHeight, simple]);
 
 	// Handle tab selection with preloading
 	const handleTabChange = useCallback((key: string | number) => {
@@ -393,11 +444,21 @@ export default function CodeTabs(props) {
 
 	const handleContentLoad = useCallback(() => {
 		// Trigger height adjustment when content loads
-		requestAnimationFrame(adjustHeight);
-	}, [adjustHeight]);
+		if (!simple) {
+			requestAnimationFrame(adjustHeight);
+		}
+	}, [adjustHeight, simple]);
 
 	// Enhanced loading state
 	if (loading || isProcessing) {
+		if (simple) {
+			return (
+				<div className="w-full mb-6">
+					<Skeleton className="w-full h-32 rounded-lg" />
+				</div>
+			);
+		}
+
 		const skeletonCount = Math.min(processedChunks.length || 3, 5);
 		return (
 			<div className="w-full mb-8">
@@ -441,6 +502,21 @@ export default function CodeTabs(props) {
 		return (
 			<div className="w-full p-8 text-center text-foreground/60 mb-8">
 				<p>No valid code blocks found</p>
+			</div>
+		);
+	}
+
+	// Simple mode rendering - just render code blocks without tabs
+	if (simple) {
+		return (
+			<div className="w-full" ref={containerRef}>
+				{validCodeBlocks.map((block) => (
+					<SimpleCodeBlock 
+						key={block.id} 
+						block={block} 
+						showCopy={showCopy}
+					/>
+				))}
 			</div>
 		);
 	}
