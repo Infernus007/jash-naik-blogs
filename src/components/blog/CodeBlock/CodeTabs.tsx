@@ -8,6 +8,7 @@ import {
 	CardFooter,
 	Snippet,
 	Skeleton,
+	ScrollShadow,
 } from "@nextui-org/react";
 import {
 	FileJs,
@@ -37,48 +38,61 @@ const languageIcons = {
 	sh: TerminalWindow,
 };
 
+
 // Simple Code Block Component for minimal snippets
 const SimpleCodeBlock = memo(({ block, showCopy = true }: { block: any; showCopy?: boolean }) => {
+
 	if (!showCopy) {
-		return (
-			<Card className="mb-6">
-				<CardBody className="p-4 overflow-x-auto">
+	return (
+		<Card className="mb-6 relative">
+			<ScrollShadow className="max-h-80">
+				<CardBody ref={containerRef} className="p-4 overflow-y-auto scrollbar-hide">
 					<div 
 						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
+						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-hidden [&_pre]:whitespace-pre [&_pre]:scrollbar-hide"
 					/>
 				</CardBody>
-				{block.caption && (
-					<CardFooter className="pt-0">
-						<div className="text-sm text-foreground/70 italic">
-							{block.caption}
-						</div>
-					</CardFooter>
-				)}
-			</Card>
-		);
+			</ScrollShadow>
+			{block.caption && (
+				<CardFooter className="pt-0 pb-2">
+					<div className="text-sm text-foreground/70 italic">
+						{block.caption}
+					</div>
+				</CardFooter>
+			)}
+		</Card>
+	);
 	}
 
 	return (
-		<Card className="mb-6">
-			<Snippet
-				symbol=""
-				classNames={{
-					base: "relative w-full block w-auto h-auto m-0 p-0 text-[1rem] font-mono text-inherit bg-transparent rounded-lg",
-					copyButton: "absolute right-2 top-2 bg-content1/80 backdrop-blur-sm hover:bg-content1",
-					content: "",
-					pre: "w-full [&_code]:!text-[1rem] [&_code]:leading-relaxed",
+		<Card className="mb-6 relative">
+			{/* Simple copy button positioned outside scroll area */}
+			<button
+				onClick={() => {
+					const textContent = containerRef.current?.textContent || '';
+					navigator.clipboard.writeText(textContent);
 				}}
+				className="copy-button hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-all duration-200 hover:scale-105"
+				title="Copy code"
 			>
-				<CardBody className="p-4 overflow-x-auto">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+				</svg>
+			</button>
+			<ScrollShadow className="max-h-80">
+				<CardBody ref={containerRef} className="p-4 overflow-y-auto scrollbar-hide">
 					<div 
 						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
+						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_pre]:scrollbar-hide"
 					/>
 				</CardBody>
-			</Snippet>
+			</ScrollShadow>
+			
+			{/* Original conditional carets - disabled for now */}
+			
 			{block.caption && (
-				<CardFooter className="pt-0">
+				<CardFooter className="pt-0 pb-2">
 					<div className="text-sm text-foreground/70 italic">
 						{block.caption}
 					</div>
@@ -114,6 +128,7 @@ const useIntersectionObserver = (ref: React.RefObject<HTMLElement>, threshold = 
 	return { isIntersecting, hasIntersected };
 };
 
+
 // Virtual Tab Content Component - Only renders when visible
 const VirtualTabContent = memo(({ 
 	block, 
@@ -127,6 +142,7 @@ const VirtualTabContent = memo(({
 	onContentLoad: () => void;
 }) => {
 	const contentRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 	const { hasIntersected } = useIntersectionObserver(contentRef);
 	const [contentLoaded, setContentLoaded] = useState(false);
 
@@ -171,28 +187,37 @@ const VirtualTabContent = memo(({
 	}
 
 	return (
-		<Card>
-			<Snippet
-				symbol=""
-				classNames={{
-					base: "relative w-full block w-auto h-auto m-0 p-0 text-[1.1rem] font-mono text-inherit bg-transparent rounded-none",
-					copyButton: "absolute right-1 top-1 bg-content1",
-					content: "",
-					pre: "w-full [&_code]:!text-[1.1rem] [&_code]:leading-relaxed",
+		<Card className="relative">
+			{/* Simple copy button positioned outside scroll area */}
+			<button
+				onClick={() => {
+					const textContent = containerRef.current?.textContent || '';
+					navigator.clipboard.writeText(textContent);
 				}}
+				className="copy-button hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-all duration-200 hover:scale-105"
+				title="Copy code"
 			>
-				<CardBody className="p-4 overflow-x-auto">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+				</svg>
+			</button>
+			<ScrollShadow className="max-h-80 overflow-x-auto">
+				<CardBody ref={containerRef} className="p-4 overflow-y-auto scrollbar-hide">
 					{/* Progressive enhancement with containment */}
 					<div 
 						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1.1rem] [&_code]:!text-[1.1rem] [&_code]:leading-relaxed"
+						className="[&_pre]:!text-[1.1rem] [&_code]:!text-[1.1rem] [&_code]:leading-relaxed [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_pre]:scrollbar-hide"
 						style={{ 
 							contain: 'layout style paint',
 							willChange: isActive ? 'contents' : 'auto'
 						}}
 					/>
 				</CardBody>
-			</Snippet>
+			</ScrollShadow>
+			
+			{/* Original conditional carets - disabled for now */}
+			
 			{block.caption && (
 				<CardFooter>
 					<div className="mb-2 text-sm text-foreground/80">
@@ -509,7 +534,7 @@ export default function CodeTabs(props) {
 	// Simple mode rendering - just render code blocks without tabs
 	if (simple) {
 		return (
-			<div className="w-full" ref={containerRef}>
+			<div className="w-full overflow-hidden code-tabs-container" ref={containerRef}>
 				{validCodeBlocks.map((block) => (
 					<SimpleCodeBlock 
 						key={block.id} 
@@ -538,7 +563,7 @@ export default function CodeTabs(props) {
 
 	return (
 		<div 
-			className="flex w-full flex-col not-prose min-h-[100px] mb-8" 
+			className="flex w-full flex-col not-prose min-h-[100px] mb-8  code-tabs-container" 
 			ref={containerRef}
 			style={{ contain: 'layout' }}
 		>
@@ -575,3 +600,114 @@ export default function CodeTabs(props) {
 		</div>
 	);
 }
+
+// Add global styles for better overflow handling
+if (typeof document !== 'undefined') {
+	const style = document.createElement('style');
+	style.textContent = `
+
+		
+		.code-tabs-container pre {
+			white-space: pre !important;
+			word-wrap: normal !important;
+			overflow-x: auto !important;
+		}
+		
+		.code-tabs-container code {
+			white-space: pre !important;
+			word-wrap: normal !important;
+			overflow-x: auto !important;
+		}
+		
+		/* Hide scrollbars but keep functionality */
+		.scrollbar-hide {
+			-ms-overflow-style: none !important;  /* Internet Explorer 10+ */
+			scrollbar-width: none !important;  /* Firefox */
+		}
+		
+		.scrollbar-hide::-webkit-scrollbar {
+			display: none !important;  /* Safari and Chrome */
+		}
+		
+		/* Hide scrollbars on all elements within code blocks */
+		.scrollbar-hide pre,
+		.scrollbar-hide code,
+		.scrollbar-hide div {
+			-ms-overflow-style: none !important;
+			scrollbar-width: none !important;
+		}
+		
+		.scrollbar-hide pre::-webkit-scrollbar,
+		.scrollbar-hide code::-webkit-scrollbar,
+		.scrollbar-hide div::-webkit-scrollbar {
+			display: none !important;
+		}
+		
+		/* Ensure ScrollShadow works properly */
+		.max-h-80 {
+			max-height: 20rem; /* 320px */
+		}
+		
+		.max-h-96 {
+			max-height: 24rem; /* 384px */
+		}
+		
+		/* Force hide all scrollbars in code blocks */
+		* {
+			scrollbar-width: none !important;
+			-ms-overflow-style: none !important;
+		}
+		
+		*::-webkit-scrollbar {
+			display: none !important;
+		}
+		
+		/* Custom scrollbar for code-tabs-container only */
+		.code-tabs-container::-webkit-scrollbar {
+			height: 8px;
+		}
+		
+		.code-tabs-container::-webkit-scrollbar-track {
+			background: rgba(0, 0, 0, 0.1);
+			border-radius: 4px;
+		}
+		
+		.code-tabs-container::-webkit-scrollbar-thumb {
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: 4px;
+		}
+		
+		.code-tabs-container::-webkit-scrollbar-thumb:hover {
+			background: rgba(0, 0, 0, 0.5);
+		}
+		
+		.dark .code-tabs-container::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, 0.1);
+		}
+		
+		.dark .code-tabs-container::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.3);
+		}
+		
+		.dark .code-tabs-container::-webkit-scrollbar-thumb:hover {
+			background: rgba(255, 255, 255, 0.5);
+		}
+		
+		/* Simple copy button styles - positioned outside scroll area */
+		.code-tabs-container .copy-button {
+			position: absolute !important;
+			top: 0.5rem !important;
+			right: 0.5rem !important;
+			z-index: 50 !important;
+		}
+		
+		/* Mobile responsive copy button */
+		@media (max-width: 768px) {
+			.code-tabs-container .copy-button {
+				top: 0.375rem !important;
+				right: 0.375rem !important;
+			}
+		}
+	`;
+	document.head.appendChild(style);
+}		
