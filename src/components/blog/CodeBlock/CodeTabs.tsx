@@ -88,9 +88,9 @@ const SimpleCodeBlock = memo(({ block, showCopy = true }: { block: any; showCopy
 					/>
 				</CardBody>
 			</ScrollShadow>
-			
+
 			{/* Original conditional carets - disabled for now */}
-			
+
 			{block.caption && (
 				<CardFooter className="pt-0 pb-2">
 					<div className="text-sm text-foreground/70 italic">
@@ -215,9 +215,9 @@ const VirtualTabContent = memo(({
 					/>
 				</CardBody>
 			</ScrollShadow>
-			
+
 			{/* Original conditional carets - disabled for now */}
-			
+
 			{block.caption && (
 				<CardFooter>
 					<div className="mb-2 text-sm text-foreground/80">
