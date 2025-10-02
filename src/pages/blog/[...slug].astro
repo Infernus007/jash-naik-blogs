@@ -115,7 +115,10 @@ const breadcrumbItems = [
     author="Jash Naik"
     tags={post.data.tags || []}
   />
-  <div class="mb-6 transition-all duration-300 px-4 sm:px-6 lg:px-8" id="header">
+  <div
+    class="mb-6 transition-all duration-300 px-4 sm:px-6 lg:px-8"
+    id="header"
+  >
     <!-- Add Breadcrumbs -->
     <Breadcrumb items={breadcrumbItems} />
 
@@ -241,7 +244,7 @@ const breadcrumbItems = [
         <div class="mt-8">
           <SocialShare
             title={post.data.title}
-            url={new URL(Astro.url.pathname, Astro.site).toString()}
+            url={Astro.url.href}
             description={post.data.description}
             hashtags={post.data.tags || []}
           />
