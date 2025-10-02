@@ -8,6 +8,7 @@ import {
 	CardFooter,
 	Snippet,
 	Skeleton,
+	ScrollShadow,
 } from "@nextui-org/react";
 import {
 	FileJs,
@@ -37,48 +38,61 @@ const languageIcons = {
 	sh: TerminalWindow,
 };
 
+
 // Simple Code Block Component for minimal snippets
 const SimpleCodeBlock = memo(({ block, showCopy = true }: { block: any; showCopy?: boolean }) => {
+
 	if (!showCopy) {
-	return (
-		<Card className="mb-6 overflow-hidden">
-			<CardBody className="p-4 overflow-x-auto">
-				<div 
-					dangerouslySetInnerHTML={{ __html: block.content }} 
-					className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre"
-				/>
-			</CardBody>
-			{block.caption && (
-				<CardFooter className="pt-0">
-					<div className="text-sm text-foreground/70 italic">
-						{block.caption}
-					</div>
-				</CardFooter>
-			)}
-		</Card>
-	);
+		return (
+			<Card className="mb-6 relative">
+				<ScrollShadow className="max-h-80">
+					<CardBody ref={containerRef} className="p-4 overflow-y-auto scrollbar-hide">
+						<div
+							dangerouslySetInnerHTML={{ __html: block.content }}
+							className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-hidden [&_pre]:whitespace-pre [&_pre]:scrollbar-hide"
+						/>
+					</CardBody>
+				</ScrollShadow>
+				{block.caption && (
+					<CardFooter className="pt-0 pb-2">
+						<div className="text-sm text-foreground/70 italic">
+							{block.caption}
+						</div>
+					</CardFooter>
+				)}
+			</Card>
+		);
 	}
 
 	return (
-		<Card className="mb-6 overflow-hidden">
-			<Snippet
-				symbol=""
-				classNames={{
-					base: "relative w-full block w-auto h-auto m-0 p-0 text-[1rem] font-mono text-inherit bg-transparent rounded-lg",
-					copyButton: "absolute right-2 top-2 bg-content1/80 backdrop-blur-sm hover:bg-content1",
-					content: "",
-					pre: "w-full [&_code]:!text-[1rem] [&_code]:leading-relaxed",
+		<Card className="mb-6 relative">
+			{/* Simple copy button positioned outside scroll area */}
+			<button
+				onClick={() => {
+					const textContent = containerRef.current?.textContent || '';
+					navigator.clipboard.writeText(textContent);
 				}}
+				className="copy-button hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-all duration-200 hover:scale-105"
+				title="Copy code"
 			>
-				<CardBody className="p-4 overflow-x-auto">
-					<div 
-						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre"
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+				</svg>
+			</button>
+			<ScrollShadow className="max-h-80">
+				<CardBody ref={containerRef} className="p-4 overflow-y-auto scrollbar-hide">
+					<div
+						dangerouslySetInnerHTML={{ __html: block.content }}
+						className="[&_pre]:!text-[1rem] [&_code]:!text-[1rem] [&_code]:leading-relaxed [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_pre]:scrollbar-hide"
 					/>
 				</CardBody>
-			</Snippet>
+			</ScrollShadow>
+
+			{/* Original conditional carets - disabled for now */}
+
 			{block.caption && (
-				<CardFooter className="pt-0">
+				<CardFooter className="pt-0 pb-2">
 					<div className="text-sm text-foreground/70 italic">
 						{block.caption}
 					</div>
@@ -114,19 +128,21 @@ const useIntersectionObserver = (ref: React.RefObject<HTMLElement>, threshold = 
 	return { isIntersecting, hasIntersected };
 };
 
+
 // Virtual Tab Content Component - Only renders when visible
-const VirtualTabContent = memo(({ 
-	block, 
-	isActive, 
+const VirtualTabContent = memo(({
+	block,
+	isActive,
 	hasBeenActive,
-	onContentLoad 
-}: { 
-	block: any; 
-	isActive: boolean; 
+	onContentLoad
+}: {
+	block: any;
+	isActive: boolean;
 	hasBeenActive: boolean;
 	onContentLoad: () => void;
 }) => {
 	const contentRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 	const { hasIntersected } = useIntersectionObserver(contentRef);
 	const [contentLoaded, setContentLoaded] = useState(false);
 
@@ -151,7 +167,7 @@ const VirtualTabContent = memo(({
 
 	if (!shouldRenderContent) {
 		return (
-			<div 
+			<div
 				ref={contentRef}
 				className="w-full h-64 flex items-center justify-center text-foreground/60"
 			>
@@ -171,28 +187,37 @@ const VirtualTabContent = memo(({
 	}
 
 	return (
-		<Card className="overflow-hidden">
-			<Snippet
-				symbol=""
-				classNames={{
-					base: "relative w-full block w-auto h-auto m-0 p-0 text-[1.1rem] font-mono text-inherit bg-transparent rounded-none",
-					copyButton: "absolute right-1 top-1 bg-content1",
-					content: "",
-					pre: "w-full [&_code]:!text-[1.1rem] [&_code]:leading-relaxed",
+		<Card className="relative">
+			{/* Simple copy button positioned outside scroll area */}
+			<button
+				onClick={() => {
+					const textContent = containerRef.current?.textContent || '';
+					navigator.clipboard.writeText(textContent);
 				}}
+				className="copy-button hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-all duration-200 hover:scale-105"
+				title="Copy code"
 			>
-				<CardBody className="p-4 overflow-x-auto">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+				</svg>
+			</button>
+			<ScrollShadow className="max-h-80 overflow-x-auto">
+				<CardBody ref={containerRef} className="p-4 overflow-y-auto scrollbar-hide">
 					{/* Progressive enhancement with containment */}
-					<div 
-						dangerouslySetInnerHTML={{ __html: block.content }} 
-						className="[&_pre]:!text-[1.1rem] [&_code]:!text-[1.1rem] [&_code]:leading-relaxed [&_pre]:overflow-x-auto [&_pre]:whitespace-pre"
-						style={{ 
+					<div
+						dangerouslySetInnerHTML={{ __html: block.content }}
+						className="[&_pre]:!text-[1.1rem] [&_code]:!text-[1.1rem] [&_code]:leading-relaxed [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_pre]:scrollbar-hide"
+						style={{
 							contain: 'layout style paint',
 							willChange: isActive ? 'contents' : 'auto'
 						}}
 					/>
 				</CardBody>
-			</Snippet>
+			</ScrollShadow>
+
+			{/* Original conditional carets - disabled for now */}
+
 			{block.caption && (
 				<CardFooter>
 					<div className="mb-2 text-sm text-foreground/80">
@@ -211,7 +236,7 @@ const useChunkedProcessing = <T,>(data: T[], chunkSize = 3) => {
 
 	const processChunk = useCallback(async (items: T[], startIndex = 0) => {
 		setIsProcessing(true);
-		
+
 		const processNextChunk = (index: number) => {
 			const chunk = items.slice(index, index + chunkSize);
 			if (chunk.length === 0) {
@@ -250,10 +275,10 @@ export default function CodeTabs(props) {
 	// Memoize the parsing logic with web workers for large content
 	const parsedCodeBlocks = useMemo(() => {
 		if (!code?.props?.value) return [];
-		
+
 		try {
 			const htmlContent = code.props.value;
-			
+
 			// For very large content, use a more efficient parsing approach
 			if (htmlContent.length > 50000) {
 				// Processing large content
@@ -266,29 +291,29 @@ export default function CodeTabs(props) {
 				const blocks = [];
 				let match;
 				let index = 0;
-				
+
 				while ((match = figureRegex.exec(htmlContent)) !== null) {
 					const figureContent = match[1];
-					
+
 					// Extract title
 					const titleMatch = figureContent.match(/data-rehype-pretty-code-title[^>]*>([^<]*)</);
 					const languageMatch = figureContent.match(/data-language="([^"]*)"/) || figureContent.match(/language-(\w+)/);
 					const preMatch = figureContent.match(/<pre[^>]*>[\s\S]*?<\/pre>/);
 					const captionMatch = figureContent.match(/<figcaption[^>]*>([^<]*)<\/figcaption>/);
-					
+
 					let title = titleMatch?.[1] || "";
 					const language = languageMatch?.[1] || null;
-					
+
 					if (!title) {
 						title = language
 							? language.charAt(0).toUpperCase() + language.slice(1)
 							: `Code ${index + 1}`;
 					}
-					
+
 					const content = preMatch?.[0] || "";
 					const caption = captionMatch?.[1];
 					const finalCaption = caption && caption !== title ? caption : "";
-					
+
 					blocks.push({
 						title,
 						language,
@@ -299,7 +324,7 @@ export default function CodeTabs(props) {
 					});
 					index++;
 				}
-				
+
 				return blocks;
 			}
 
@@ -315,7 +340,7 @@ export default function CodeTabs(props) {
 
 				let title = titleElement?.textContent || "";
 				const language = preElement?.getAttribute("data-language") || null;
-				
+
 				if (!title) {
 					title = language
 						? language.charAt(0).toUpperCase() + language.slice(1)
@@ -327,10 +352,10 @@ export default function CodeTabs(props) {
 					? captionElement.textContent === title ? "" : captionElement.textContent
 					: "";
 
-				return { 
-					title, 
-					content, 
-					language, 
+				return {
+					title,
+					content,
+					language,
 					caption,
 					id: `${language}-${index}-${Date.now()}`, // More unique ID
 					size: content.length // Track content size for optimization
@@ -351,7 +376,7 @@ export default function CodeTabs(props) {
 			setCodeBlocks([]);
 			setActiveTab(0); // Reset active tab
 			setActivatedTabs(new Set([0]));
-			
+
 			if (parsedCodeBlocks.length === 0) {
 				setLoading(false);
 				setActiveTab(-1); // Set to -1 when no blocks
@@ -427,13 +452,13 @@ export default function CodeTabs(props) {
 	const handleTabChange = useCallback((key: string | number) => {
 		// Ensure we have valid code blocks
 		if (!codeBlocks || codeBlocks.length === 0) return;
-		
+
 		const index = codeBlocks.findIndex(block => block.id === key);
-		
+
 		if (index !== -1 && index >= 0 && index < codeBlocks.length) {
 			setActiveTab(index);
 			setActivatedTabs(prev => new Set([...prev, index]));
-			
+
 			// Preload adjacent tabs
 			const preloadIndices = [index - 1, index + 1].filter(i => i >= 0 && i < codeBlocks.length);
 			preloadIndices.forEach(i => {
@@ -488,12 +513,12 @@ export default function CodeTabs(props) {
 	}
 
 	// Filter out any invalid blocks before rendering
-	const validCodeBlocks = codeBlocks.filter(block => 
-		block && 
-		typeof block === 'object' && 
-		typeof block.id === 'string' && 
+	const validCodeBlocks = codeBlocks.filter(block =>
+		block &&
+		typeof block === 'object' &&
+		typeof block.id === 'string' &&
 		block.id.length > 0 &&
-		typeof block.title === 'string' && 
+		typeof block.title === 'string' &&
 		block.title.length > 0
 	);
 
@@ -511,9 +536,9 @@ export default function CodeTabs(props) {
 		return (
 			<div className="w-full overflow-hidden code-tabs-container" ref={containerRef}>
 				{validCodeBlocks.map((block) => (
-					<SimpleCodeBlock 
-						key={block.id} 
-						block={block} 
+					<SimpleCodeBlock
+						key={block.id}
+						block={block}
 						showCopy={showCopy}
 					/>
 				))}
@@ -523,8 +548,8 @@ export default function CodeTabs(props) {
 
 	// Ensure activeTab is within bounds of valid blocks
 	const safeActiveTab = Math.max(0, Math.min(activeTab, validCodeBlocks.length - 1));
-	const selectedKey = validCodeBlocks.length > 0 && safeActiveTab >= 0 && safeActiveTab < validCodeBlocks.length 
-		? validCodeBlocks[safeActiveTab].id 
+	const selectedKey = validCodeBlocks.length > 0 && safeActiveTab >= 0 && safeActiveTab < validCodeBlocks.length
+		? validCodeBlocks[safeActiveTab].id
 		: validCodeBlocks.length > 0 ? validCodeBlocks[0].id : null;
 
 	// If no valid selectedKey, don't render Tabs yet
@@ -537,12 +562,12 @@ export default function CodeTabs(props) {
 	}
 
 	return (
-		<div 
-			className="flex w-full flex-col not-prose min-h-[100px] mb-8 overflow-hidden code-tabs-container" 
+		<div
+			className="flex w-full flex-col not-prose min-h-[100px] mb-8  code-tabs-container"
 			ref={containerRef}
 			style={{ contain: 'layout' }}
 		>
-			<Tabs 
+			<Tabs
 				aria-label="Code examples"
 				selectedKey={selectedKey}
 				onSelectionChange={handleTabChange}
@@ -551,7 +576,7 @@ export default function CodeTabs(props) {
 			>
 				{validCodeBlocks.map((block, index) => {
 					const IconComponent = languageIcons[block.language?.toLowerCase() as keyof typeof languageIcons] || BracketsCurly;
-					
+
 					return (
 						<Tab
 							key={block.id}
@@ -580,23 +605,64 @@ export default function CodeTabs(props) {
 if (typeof document !== 'undefined') {
 	const style = document.createElement('style');
 	style.textContent = `
-		.code-tabs-container {
-			overflow-x: auto;
-			overflow-y: visible;
-		}
+
 		
 		.code-tabs-container pre {
-			overflow-x: auto !important;
 			white-space: pre !important;
 			word-wrap: normal !important;
+			overflow-x: auto !important;
 		}
 		
 		.code-tabs-container code {
 			white-space: pre !important;
 			word-wrap: normal !important;
+			overflow-x: auto !important;
 		}
 		
-		/* Custom scrollbar for better UX */
+		/* Hide scrollbars but keep functionality */
+		.scrollbar-hide {
+			-ms-overflow-style: none !important;  /* Internet Explorer 10+ */
+			scrollbar-width: none !important;  /* Firefox */
+		}
+		
+		.scrollbar-hide::-webkit-scrollbar {
+			display: none !important;  /* Safari and Chrome */
+		}
+		
+		/* Hide scrollbars on all elements within code blocks */
+		.scrollbar-hide pre,
+		.scrollbar-hide code,
+		.scrollbar-hide div {
+			-ms-overflow-style: none !important;
+			scrollbar-width: none !important;
+		}
+		
+		.scrollbar-hide pre::-webkit-scrollbar,
+		.scrollbar-hide code::-webkit-scrollbar,
+		.scrollbar-hide div::-webkit-scrollbar {
+			display: none !important;
+		}
+		
+		/* Ensure ScrollShadow works properly */
+		.max-h-80 {
+			max-height: 20rem; /* 320px */
+		}
+		
+		.max-h-96 {
+			max-height: 24rem; /* 384px */
+		}
+		
+		/* Force hide all scrollbars in code blocks */
+		* {
+			scrollbar-width: none !important;
+			-ms-overflow-style: none !important;
+		}
+		
+		*::-webkit-scrollbar {
+			display: none !important;
+		}
+		
+		/* Custom scrollbar for code-tabs-container only */
 		.code-tabs-container::-webkit-scrollbar {
 			height: 8px;
 		}
@@ -626,6 +692,22 @@ if (typeof document !== 'undefined') {
 		.dark .code-tabs-container::-webkit-scrollbar-thumb:hover {
 			background: rgba(255, 255, 255, 0.5);
 		}
+		
+		/* Simple copy button styles - positioned outside scroll area */
+		.code-tabs-container .copy-button {
+			position: absolute !important;
+			top: 0.5rem !important;
+			right: 0.5rem !important;
+			z-index: 50 !important;
+		}
+		
+		/* Mobile responsive copy button */
+		@media (max-width: 768px) {
+			.code-tabs-container .copy-button {
+				top: 0.375rem !important;
+				right: 0.375rem !important;
+			}
+		}
 	`;
 	document.head.appendChild(style);
-}
+}		
