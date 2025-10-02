@@ -11,7 +11,6 @@ const { title, url, description = "", hashtags = [] } = Astro.props;
 // Encode URLs and text for sharing
 const encodedTitle = encodeURIComponent(title);
 const encodedUrl = encodeURIComponent(url);
-const encodedDescription = encodeURIComponent(description);
 
 // Create a pre-written LinkedIn message with hashtags
 const linkedinMessage = `Check out this article: **${title}**\n\n${description}\n\n${hashtags.length > 0 ? hashtags.map((tag) => `#${tag.replace(/\s+/g, "")}`).join(" ") : ""}\n\n${url}`;
@@ -201,7 +200,7 @@ const shareUrls = {
 
 <script>
   // Helper functions for copy functionality
-  function showCopySuccess(button) {
+  function showCopySuccess(button: HTMLElement) {
     const originalText = button.innerHTML;
     button.innerHTML = `
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +213,7 @@ const shareUrls = {
     }, 2000);
   }
 
-  function fallbackCopyTextToClipboard(text, button) {
+  function fallbackCopyTextToClipboard(text: string, button: HTMLElement) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
     textArea.style.position = "fixed";
@@ -251,20 +250,21 @@ const shareUrls = {
           e.preventDefault();
           const url = button.getAttribute("data-url");
           if (url) {
+            const buttonElement = button as HTMLElement;
             // Try modern clipboard API first
             if (navigator.clipboard && window.isSecureContext) {
               navigator.clipboard
                 .writeText(url)
                 .then(() => {
-                  showCopySuccess(button);
+                  showCopySuccess(buttonElement);
                 })
                 .catch(() => {
                   // Fallback to older method
-                  fallbackCopyTextToClipboard(url, button);
+                  fallbackCopyTextToClipboard(url, buttonElement);
                 });
             } else {
               // Fallback for older browsers or non-secure contexts
-              fallbackCopyTextToClipboard(url, button);
+              fallbackCopyTextToClipboard(url, buttonElement);
             }
           }
         }
