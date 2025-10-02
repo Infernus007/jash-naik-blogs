@@ -17,8 +17,6 @@ import { getImagePromise } from "../../utils/utils.ts"
 
 # AG-UI Protocol: The Missing Piece in AI Application Development
 
-## TL;DR
-
 <ShowCase 
   content={[
     "Standardizes how AI agents communicate with user interfaces",
@@ -90,8 +88,6 @@ class CustomAIIntegration {
 ```
 </Placeholder>
 
-## Enter AG-UI: The Solution You Didn't Know You Needed
-
 AG-UI (Agent-User Interaction Protocol) is an open standard that solves these problems by providing a complete framework for building AI applications. Think of it as the missing layer between your AI agent and your user interface.
 
 Instead of building custom WebSocket handlers and state management from scratch, AG-UI gives you standardized communication between AI agents and UIs, built-in state management that handles complex scenarios automatically, human-in-the-loop workflows with seamless interruption and resumption, and multi-agent coordination for sophisticated AI systems.
@@ -132,160 +128,43 @@ class DocumentAnalysisApp {
 
 The key insight is that AG-UI handles all the complex plumbing—state synchronization, event handling, tool coordination, and UI updates—so you can focus on building the actual AI logic.
 
-## The Technical Magic Behind AG-UI
+## Why AG-UI Changes Everything
 
-Now that you understand the problem AG-UI solves, let's dive into the sophisticated technical solutions that make it work. These aren't just features—they're carefully designed architectural patterns that solve real production challenges.
+Let's look at the actual problems developers face and how AG-UI solves them with concrete advantages:
 
-### Smart State Management That Actually Works
+**Traditional Approach Problems:**
+- **Manual WebSocket management** with custom event handling
+- **Lost state** when users refresh or switch tabs  
+- **No interruption handling** - users can't stop or redirect AI mid-task
+- **Security nightmares** - agents have unrestricted access to everything
+- **Impossible debugging** when multiple agents conflict
+- **Custom UI updates** for every tool call and state change
 
-The biggest challenge in AI applications is keeping state synchronized between the AI agent and the user interface. Traditional approaches break when users have multiple tabs open, network connections drop, or when multiple agents try to modify the same data. AG-UI solves this with event-sourced state management:
+**AG-UI Solutions:**
+- **Automatic state synchronization** across tabs and network issues
+- **Seamless human interruptions** with full context preservation
+- **Secure agent permissions** with scoped access controls
+- **Built-in conflict resolution** when multiple agents modify the same data
+- **Real-time tool streaming** with automatic UI rendering
+- **Event-sourced state** for perfect debugging and replay
 
-<Placeholder>
-```typescript showLineNumbers caption="AG-UI Event-Sourced State Management" title="ag-ui-state.ts"
-// AG-UI's sophisticated state management
-interface StateEvent {
-  type: 'STATE_DELTA' | 'STATE_SNAPSHOT';
-  threadId: string;
-  delta: StateDelta;
-  conflictResolution?: ConflictResolution;
-}
+## Key AG-UI Advantages
 
-interface StateDelta {
-  path: string[];           // JSONPath to the changed field
-  operation: 'SET' | 'DELETE' | 'MERGE';
-  value: any;
-  version: number;          // For conflict detection
-}
+**State Management**: Event-sourced state with automatic persistence and conflict resolution. Never lose user context again.
 
-class AGUIStateManager {
-  private state: Map<string, any> = new Map();
-  private eventLog: StateEvent[] = [];
-  
-  async applyDelta(event: StateEvent) {
-    const currentVersion = this.getVersion(event.path);
-    
-    if (event.delta.version <= currentVersion) {
-      await this.resolveConflict(event);
-    }
-    
-    this.state.set(event.path.join('.'), event.delta.value);
-    this.eventLog.push(event);
-  }
-  
-  // Rebuild state from event log (event sourcing)
-  rebuildState() {
-    this.state.clear();
-    for (const event of this.eventLog) {
-      this.applyDelta(event);
-    }
-  }
-}
-```
-</Placeholder>
+**Human Interruptions**: Built-in interruption system with full state preservation. Stop, edit, and resume seamlessly.
 
-### AI Agents That Can Actually Build UIs
+**Multi-Agent Coordination**: Secure sub-agent composition with permission scoping. Complex AI systems made simple.
 
-One of AG-UI's most innovative features is letting AI agents propose UI components that your application can safely render. This isn't just about displaying text—it's about AI agents that can create interactive interfaces on the fly.
+**Real-Time Tools**: Streaming tool outputs with automatic UI rendering. Users see what's happening.
 
-<Placeholder>
-```typescript showLineNumbers caption="AG-UI Declarative UI System" title="ag-ui-ui.ts"
-// AG-UI's declarative UI language
-interface DeclarativeUI {
-  type: 'DECLARATIVE_UI';
-  threadId: string;
-  uiTree: UITreeNode;
-  constraints: UIConstraints;
-}
+**Event-Driven Architecture**: 16 standardized event types for seamless agent-frontend communication.
 
-interface UITreeNode {
-  component: string;           // 'button', 'form', 'chart', etc.
-  props: Record<string, any>;
-  children?: UITreeNode[];
-  constraints: {
-    required?: boolean;
-    maxLength?: number;
-    validation?: string;       // Regex or validation function
-  };
-}
+**Transport Agnostic**: Works with SSE, WebSockets, webhooks, and more - choose what fits your architecture.
 
-// Application validates and renders agent-proposed UI
-class AGUIUIManager {
-  async handleDeclarativeUI(ui: DeclarativeUI) {
-    // 1. Validate against constraints
-    const validation = await this.validateUI(ui);
-    if (!validation.valid) {
-      throw new Error(`UI validation failed: ${validation.errors}`);
-    }
-    
-    // 2. Security check - ensure agent can't render dangerous components
-    if (!this.isComponentAllowed(ui.uiTree.component)) {
-      throw new Error(`Component ${ui.uiTree.component} not allowed`);
-    }
-    
-    // 3. Render the validated UI
-    return await this.renderComponent(ui.uiTree);
-  }
-}
-```
-</Placeholder>
+**Framework Integrations**: Ready-to-use connectors for LangGraph, CrewAI, Mastra, and other popular agent frameworks.
 
-### Seamless Human-AI Collaboration
-
-The most challenging part of building AI applications is handling human interruptions gracefully. Users need to be able to stop the AI, ask questions, make changes, and resume without losing context. AG-UI's interruption system is more sophisticated than simple pause/resume—it maintains full state across interruptions:
-
-<Placeholder>
-```typescript showLineNumbers caption="AG-UI Human-in-the-Loop System" title="ag-ui-interrupts.ts"
-// AG-UI's sophisticated interruption system
-interface InterruptEvent {
-  type: 'INTERRUPT_REQUEST' | 'INTERRUPT_APPROVED' | 'INTERRUPT_REJECTED';
-  threadId: string;
-  interruptType: 'PAUSE' | 'EDIT' | 'APPROVE' | 'ESCALATE';
-  checkpoint: AgentCheckpoint;
-  userInput?: UserInput;
-}
-
-interface AgentCheckpoint {
-  state: AgentState;
-  context: ConversationContext;
-  toolCalls: ToolCall[];
-  uiState: UIState;
-  timestamp: number;
-}
-
-class AGUIInterruptManager {
-  private checkpoints: Map<string, AgentCheckpoint> = new Map();
-  
-  async requestInterrupt(threadId: string, interruptType: string) {
-    // Create checkpoint of current agent state
-    const checkpoint = await this.createCheckpoint(threadId);
-    this.checkpoints.set(threadId, checkpoint);
-    
-    // Pause agent execution while maintaining state
-    await this.pauseAgent(threadId);
-    
-    // Emit interrupt event to UI
-    this.emit('INTERRUPT_REQUEST', { threadId, interruptType, checkpoint });
-  }
-  
-  async resumeFromInterrupt(threadId: string, userInput?: UserInput) {
-    const checkpoint = this.checkpoints.get(threadId);
-    if (!checkpoint) throw new Error('No checkpoint found');
-    
-    // Restore agent state from checkpoint
-    await this.restoreAgentState(threadId, checkpoint);
-    
-    // Apply any user modifications and resume
-    if (userInput) {
-      await this.applyUserModifications(threadId, userInput);
-    }
-    
-    await this.resumeAgent(threadId);
-  }
-}
-```
-</Placeholder>
-
-### Protocol Architecture
+**Design Principles**: Built on open standards, transport-agnostic, and framework-agnostic for maximum flexibility and adoption.
 
 <figure className="my-8">
   <Image
@@ -300,386 +179,63 @@ class AGUIInterruptManager {
   </figcaption>
 </figure>
 
-## Building Complex AI Systems Made Simple
+## Core Architecture & SDK
 
-As your AI applications grow more sophisticated, you'll need multiple AI agents working together. A research assistant might need a web search agent, a document analysis agent, and a synthesis agent all working in coordination. AG-UI's sub-agent system makes this surprisingly straightforward:
+**Protocol Layer**: Standardized HTTP client with 16 event types for agent-frontend communication.
 
-<Placeholder>
-```typescript showLineNumbers caption="AG-UI Sub-Agent Composition" title="ag-ui-composition.ts"
-// AG-UI's sophisticated sub-agent system
-interface SubAgentRequest {
-  type: 'SUB_AGENT_CREATE';
-  parentThreadId: string;
-  subAgentId: string;
-  task: AgentTask;
-  scope: StateScope;
-  permissions: AgentPermissions;
-}
+**Message Types**: Structured message format with `thread_id`, `run_id`, and `event_type` for reliable communication.
 
-interface StateScope {
-  readAccess: string[];      // Which state paths the sub-agent can read
-  writeAccess: string[];     // Which state paths the sub-agent can modify
-  isolation: boolean;        // Whether sub-agent state is isolated
-}
+**Running Agents**: Built-in support for agent lifecycle management with start, pause, resume, and cancel operations.
 
-class AGUICompositionManager {
-  private subAgents: Map<string, SubAgent> = new Map();
-  
-  async createSubAgent(request: SubAgentRequest) {
-    // Create isolated state scope for sub-agent
-    const subAgentState = await this.createScopedState(
-      request.parentThreadId,
-      request.scope
-    );
-    
-    // Create sub-agent with limited permissions
-    const subAgent = new SubAgent({
-      id: request.subAgentId,
-      parentId: request.parentThreadId,
-      state: subAgentState,
-      permissions: request.permissions,
-      task: request.task
-    });
-    
-    // Set up cancellation propagation
-    subAgent.on('cancelled', () => {
-      this.cancelSubAgent(request.subAgentId);
-    });
-    
-    this.subAgents.set(request.subAgentId, subAgent);
-    return subAgent;
-  }
-}
-```
-</Placeholder>
+**Tools and Handoff**: Seamless tool execution with real-time streaming and automatic UI rendering.
 
-### Real-Time Tool Execution That Users Actually See
+**Events**: Comprehensive event system covering state changes, tool calls, interruptions, and user interactions.
 
-When your AI agent calls tools (like web searches, file processing, or API calls), users want to see what's happening in real-time. Traditional approaches either show nothing or just a loading spinner. AG-UI's tool system provides real-time streaming of tool outputs with automatic UI rendering:
+**SDK Support**: 
+- **@ag-ui/core**: TypeScript definitions and runtime schemas
+- **@ag-ui/sdk**: Complete SDK for agent integration
+- **Framework Connectors**: LangGraph, CrewAI, Mastra integrations
+- **Transport Options**: SSE, WebSockets, webhooks, and custom transports
 
-<Placeholder>
-```typescript showLineNumbers caption="AG-UI Tool Output Streaming" title="ag-ui-tools.ts"
-// AG-UI's sophisticated tool system
-interface ToolCallEvent {
-  type: 'TOOL_CALL_START' | 'TOOL_CALL_PROGRESS' | 'TOOL_CALL_COMPLETE';
-  toolId: string;
-  toolName: string;
-  parameters: Record<string, any>;
-  output?: ToolOutput;
-  progress?: ToolProgress;
-}
+## Real-World Impact
 
-interface ToolOutput {
-  type: 'TEXT' | 'IMAGE' | 'DATA' | 'UI_COMPONENT';
-  content: any;
-  metadata: {
-    mimeType?: string;
-    size?: number;
-    dimensions?: { width: number; height: number };
-  };
-}
+**Before AG-UI**: 3-6 months to build basic AI apps with constant debugging, security vulnerabilities, and poor user experience.
 
-class AGUIToolManager {
-  async executeTool(toolCall: ToolCallEvent) {
-    const tool = this.getTool(toolCall.toolName);
-    
-    // Start tool execution
-    this.emit('TOOL_CALL_START', toolCall);
-    
-    // Stream progress updates
-    const progressStream = tool.execute(toolCall.parameters);
-    for await (const progress of progressStream) {
-      this.emit('TOOL_CALL_PROGRESS', { ...toolCall, progress });
-      
-      // Render intermediate results in UI
-      if (progress.intermediateResults) {
-        await this.renderToolOutput(progress.intermediateResults);
-      }
-    }
-    
-    // Complete tool execution
-    this.emit('TOOL_CALL_COMPLETE', { ...toolCall, output: progress.finalResult });
-  }
-}
-```
-</Placeholder>
+**With AG-UI**: 1-2 weeks to build sophisticated multi-agent AI applications with zero state management code, built-in security, and seamless user experience.
 
-### Guiding AI Agents in Real-Time
-
-Sometimes users need to redirect the AI agent's behavior mid-conversation. Maybe the AI is going down the wrong path, or the user wants to change the focus of the analysis. AG-UI's steering system allows real-time redirection of agent behavior without losing context:
-
-<Placeholder>
-```typescript showLineNumbers caption="AG-UI Agent Steering" title="ag-ui-steering.ts"
-// AG-UI's agent steering system
-interface SteeringEvent {
-  type: 'STEERING_REQUEST' | 'STEERING_APPLIED';
-  threadId: string;
-  steeringType: 'REDIRECT' | 'PRIORITIZE' | 'CONSTRAIN' | 'ENHANCE';
-  parameters: SteeringParameters;
-  context: SteeringContext;
-}
-
-interface SteeringParameters {
-  newGoal?: string;
-  constraints?: string[];
-  priorities?: string[];
-  enhancements?: string[];
-}
-
-class AGUISteeringManager {
-  async applySteering(event: SteeringEvent) {
-    const agent = this.getAgent(event.threadId);
-    
-    switch (event.steeringType) {
-      case 'REDIRECT':
-        await this.redirectAgent(agent, event.parameters.newGoal);
-        break;
-      case 'PRIORITIZE':
-        await this.reprioritizeAgent(agent, event.parameters.priorities);
-        break;
-      case 'CONSTRAIN':
-        await this.constrainAgent(agent, event.parameters.constraints);
-        break;
-      case 'ENHANCE':
-        await this.enhanceAgent(agent, event.parameters.enhancements);
-        break;
-    }
-    
-    this.emit('STEERING_APPLIED', event);
-  }
-  
-  private async redirectAgent(agent: Agent, newGoal: string) {
-    // Update agent's goal without losing current context
-    agent.updateGoal(newGoal);
-    
-    // Adjust agent's plan based on new goal
-    const newPlan = await agent.replan();
-    
-    // Update UI to reflect new direction
-    await this.updateUIWithNewPlan(newPlan);
-  }
-}
-```
-</Placeholder>
-
-## Real-World Examples: How AG-UI Solves Actual Problems
-
-Let's see how AG-UI handles a real production scenario—a document analysis tool that needs to process large documents, call external APIs, and allow user interaction:
-
-<Placeholder>
-```typescript showLineNumbers caption="Production Document Analysis Agent" title="document-analysis-agent.ts"
-// Real-world production scenario using AG-UI
-class DocumentAnalysisAgent {
-  private aguiClient: AGUIClient;
-  
-  async analyzeDocument(document: Document) {
-    // 1. Create analysis session with persistent state
-    const session = await this.aguiClient.createSession({
-      threadId: `analysis-${document.id}`,
-      capabilities: ['streaming', 'multimodal', 'tools', 'composition', 'interrupts']
-    });
-    
-    // 2. Set up real-time progress streaming
-    session.on('progress', (event) => {
-      this.updateProgressUI(event.percentage, event.stage);
-    });
-    
-    // 3. Handle human-in-the-loop interruptions
-    session.on('interrupt_request', async (event) => {
-      const userDecision = await this.promptUserForDecision(event.context);
-      if (userDecision.approved) {
-        await session.resumeFromInterrupt(event.threadId, userDecision.modifications);
-      } else {
-        await session.cancelAnalysis(event.threadId);
-      }
-    });
-    
-    // 4. Create specialized sub-agents for different analysis tasks
-    const textAnalysisAgent = await session.createSubAgent({
-      task: 'extract_key_insights',
-      scope: { readAccess: ['document.content'], writeAccess: ['analysis.insights'] },
-      permissions: { canCallTools: ['nlp_analyzer', 'sentiment_analyzer'] }
-    });
-    
-    const imageAnalysisAgent = await session.createSubAgent({
-      task: 'analyze_diagrams',
-      scope: { readAccess: ['document.images'], writeAccess: ['analysis.diagrams'] },
-      permissions: { canCallTools: ['ocr_engine', 'diagram_parser'] }
-    });
-    
-    // 5. Execute parallel analysis with real-time UI updates
-    const [textResults, imageResults] = await Promise.all([
-      this.executeTextAnalysis(textAnalysisAgent, document),
-      this.executeImageAnalysis(imageAnalysisAgent, document)
-    ]);
-    
-    // 6. Generate dynamic UI based on analysis results
-    const summaryUI = await this.generateSummaryUI(textResults, imageResults);
-    await session.renderDeclarativeUI(summaryUI);
-    
-    return session.getFinalResults();
-  }
-}
-```
-</Placeholder>
-
-For more complex applications, you might need multiple AI agents working together. Here's how AG-UI handles a research assistant that uses different specialized agents:
-
-<Placeholder>
-```typescript showLineNumbers caption="Multi-Agent Collaboration with AG-UI" title="multi-agent-collaboration.ts"
-// Complex multi-agent system using AG-UI's composition features
-class ResearchCollaborationSystem {
-  private aguiClient: AGUIClient;
-  
-  async conductResearch(researchQuery: string) {
-    const session = await this.aguiClient.createSession({
-      threadId: `research-${Date.now()}`,
-      capabilities: ['composition', 'steering', 'interrupts', 'tools']
-    });
-    
-    // Create specialized research agents
-    const webResearchAgent = await session.createSubAgent({
-      task: 'web_research',
-      scope: { readAccess: ['query'], writeAccess: ['research.web_results'] },
-      permissions: { canCallTools: ['web_search', 'url_scraper', 'content_analyzer'] }
-    });
-    
-    const academicAgent = await session.createSubAgent({
-      task: 'academic_research',
-      scope: { readAccess: ['query'], writeAccess: ['research.academic_results'] },
-      permissions: { canCallTools: ['academic_database', 'citation_analyzer', 'paper_parser'] }
-    });
-    
-    const synthesisAgent = await session.createSubAgent({
-      task: 'synthesis',
-      scope: { 
-        readAccess: ['research.web_results', 'research.academic_results'],
-        writeAccess: ['research.synthesis', 'research.recommendations']
-      },
-      permissions: { canCallTools: ['text_synthesizer', 'recommendation_engine'] }
-    });
-    
-    // Execute with real-time coordination
-    const results = await this.executeResearchPipeline({
-      agents: [webResearchAgent, academicAgent, synthesisAgent],
-      query: researchQuery,
-      session
-    });
-    
-    return results;
-  }
-}
-```
-</Placeholder>
-
-<figure className="my-8">
-  <Image 
-    src={getImagePromise("/agui/workflow.png")} 
-    alt="AG-UI Protocol Ecosystem" 
-    width={800} 
-    height={400}
-    class="rounded-xl w-full hover:scale-[1.02] transition-transform shadow-lg"
-  />
-  <figcaption className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
-    AG-UI's integration with complementary protocols and technologies
-  </figcaption>
-</figure>
-
-
-## Why AG-UI Matters: The Hidden Costs of Building Without It
-
-If you've ever built a production AI application, you know the hidden costs that don't show up in demos:
-
-- **The State Management Nightmare**: You spend weeks building custom state synchronization, only to discover it breaks when users have multiple tabs open or when network connections drop
-- **The Tool Integration Trap**: Every tool your AI uses requires custom WebSocket handlers, error recovery logic, and progress tracking. What starts as "just a simple API call" becomes hundreds of lines of complex code
-- **The Interruption Problem**: Users want to interrupt the AI, ask questions, and resume. Without proper checkpointing, you either lose context or build complex state management that's prone to bugs
-- **The Multi-Agent Chaos**: When you need multiple AI agents working together, you end up building custom orchestration layers that are impossible to debug when things go wrong
-
-Many teams start with what seems like a simple approach—basic WebSocket connections or REST APIs for agent communication. This leads to inconsistent state across different parts of your application, lost user context when connections drop or agents restart, no way to handle complex workflows that require multiple agents, security vulnerabilities from agents having unrestricted access to application state, and impossible debugging when things go wrong in production.
-
-AG-UI solves these problems with battle-tested architectural patterns:
-
-<Placeholder>
-```typescript showLineNumbers caption="AG-UI Production Benefits" title="ag-ui-production-benefits.ts"
-// What AG-UI provides out of the box
-class ProductionBenefits {
-  // ✅ Event-sourced state with automatic conflict resolution
-  async handleStateConflicts() {
-    return await this.aguiClient.resolveStateConflicts({
-      strategy: 'USER_DECISION', // or 'LAST_WRITE_WINS', 'MERGE'
-      conflicts: detectedConflicts
-    });
-  }
-  
-  // ✅ Automatic checkpointing for human-in-the-loop workflows
-  async handleUserInterruption() {
-    const checkpoint = await this.aguiClient.createCheckpoint();
-    await this.pauseForUserInput();
-    // ... user makes changes ...
-    await this.aguiClient.resumeFromCheckpoint(checkpoint, userModifications);
-  }
-  
-  // ✅ Secure sub-agent composition with permission scoping
-  async createSecureSubAgent() {
-    return await this.aguiClient.createSubAgent({
-      permissions: {
-        readAccess: ['user.profile'],      // Can only read user profile
-        writeAccess: ['analysis.results'], // Can only write to analysis results
-        toolAccess: ['data_analyzer']    // Can only use specific tools
-      }
-    });
-  }
-  
-  // ✅ Real-time tool output streaming with UI rendering
-  async streamToolOutputs() {
-    for await (const output of this.aguiClient.streamToolExecution(toolCall)) {
-      await this.renderToolOutput(output); // Automatic UI updates
-    }
-  }
-}
-```
-</Placeholder>
-
-## The Bottom Line: Why AG-UI Changes Everything
+## The Bottom Line
 
 AG-UI isn't just another protocol—it's the missing foundation that makes production AI applications actually work. By handling the complex plumbing of state management, real-time communication, and multi-agent coordination, AG-UI lets you focus on building the AI logic that matters.
 
-You can either build everything from scratch and spend months solving problems that AG-UI already solves, or use AG-UI and focus on building the AI features that make your application unique. The teams choosing AG-UI are shipping production AI applications while others are still debugging WebSocket connections and state synchronization issues.
+**What You Get Out of the Box:**
+- **Event-sourced state** with automatic conflict resolution
+- **Human-in-the-loop workflows** with seamless interruption and resumption  
+- **Secure sub-agent composition** with permission scoping
+- **Real-time tool streaming** with automatic UI rendering
+- **Agent steering** for dynamic behavior redirection
+- **Multimodal support** for files, images, audio, and more
+- **16 standardized event types** for reliable agent-frontend communication
+- **Transport-agnostic architecture** supporting SSE, WebSockets, and webhooks
+- **Framework connectors** for LangGraph, CrewAI, Mastra, and more
+- **Complete SDK** with TypeScript definitions and runtime schemas
 
-If you're building AI applications that need to handle real user interactions beyond simple chat, support complex workflows with multiple steps, allow users to interrupt and redirect the AI, coordinate multiple AI agents, and maintain state across long conversations, then AG-UI isn't just helpful—it's essential. It's the difference between a demo that works in controlled conditions and a production system that works reliably for real users.
+**What You Stop Worrying About:**
+- ❌ Manual WebSocket management
+- ❌ State synchronization across tabs
+- ❌ Security vulnerabilities from agent access
+- ❌ Debugging complex agent interactions
+- ❌ Building custom UI update mechanisms
+- ❌ Handling network failures and reconnections
 
-The question isn't whether AG-UI is worth learning—it's whether you can afford to build AI applications without it.
+## Ready to Build Production AI Applications?
 
-## Further Resources
+AG-UI transforms the way you build AI applications. Instead of spending months on infrastructure, you can focus on the AI logic that actually matters. The protocol handles all the complex plumbing so you can build sophisticated, production-ready AI applications in days, not months.
 
-<div className="my-8 flex gap-4">
-  <LinkPreview 
-    url="https://docs.ag-ui.com/introduction" 
-    imageSrc={getImagePromise("/agui/thumbnail.png")} 
-    width={300} 
-    height={150}
-  >
-📚 Browse the Official Documentation
-  </LinkPreview>  
+**Get Started Today:**
+- **Documentation**: [AG-UI Protocol Guide](https://docs.ag-ui.com/introduction)
+- **SDK & Core**: [@ag-ui/core](https://www.npmjs.com/package/@ag-ui/core) and [@ag-ui/sdk](https://www.npmjs.com/package/@ag-ui/sdk)
+- **GitHub**: [Open source implementation](https://dojo.ag-ui.com/adk-middleware)
+- **Framework Connectors**: [LangGraph](https://docs.ag-ui.com/integrations/langgraph), [CrewAI](https://docs.ag-ui.com/integrations/crewai), [Mastra](https://docs.ag-ui.com/integrations/mastra)
+- **Community**: Join developers building the future of AI applications
 
-  <LinkPreview 
-    url="https://github.com/ag-ui-protocol/ag-ui"
-    imageSrc={getImagePromise("/agui/thumbnail.png")}
-    width={300}
-    height={150}
-  >
-    💻 Explore the GitHub Repository
-  </LinkPreview>
-
-  <LinkPreview 
-    url="https://www.copilotkit.ai/ag-ui"
-    imageSrc={getImagePromise("/agui/demo-preview.png")}
-    width={300}
-    height={150}
-  >
-    🚀 Try CopilotKit with AG-UI
-  </LinkPreview>
-</div>
-
-
-
+The future of AI applications is here. AG-UI makes it accessible to every developer.
