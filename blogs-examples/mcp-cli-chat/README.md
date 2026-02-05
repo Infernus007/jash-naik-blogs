@@ -29,7 +29,7 @@ The application demonstrates MCP's three core concepts:
 
 1. **Install dependencies:**
    ```bash
-   uv install
+   uv pip install
    ```
 
 2. **Set up environment:**
