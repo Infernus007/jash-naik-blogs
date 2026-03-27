@@ -1,0 +1,191 @@
+---
+title: 'Determinism vs Intelligence: How to Build Reliable AI-Powered Security Products'
+description: 'Explore the fundamental conflict between deterministic execution and intelligent reasoning in AI-powered security products, and learn how to build reliable systems using Open Policy Agent (OPA) and model ablation.'
+pubDate: 'Mar 27 2026'
+group: "CyberSecurity"
+tags: ["AI Security", "Deterministic AI", "Intelligence", "VAPT", "Open Policy Agent", "Heretic", "LLM", "Cybersecurity", "Security Products"]
+---
+
+import Placeholder from "../../components/blog/CodeBlock/index.astro"
+import ShowCase from "../../components/blog/ShowCase/index.astro"
+import LinkPreview  from "../../components/LinkPreview/index.astro"
+
+# Determinism vs Intelligence: How to Build Reliable AI-Powered Security Products
+
+<ShowCase 
+  content={[
+    "AI security products must balance deterministic execution with intelligent reasoning",
+    "Over-reliance on system prompts leads to unreliable and stochastic behavior",
+    "A three-tier architecture (Deterministic, Constrained, Creative) is the path forward",
+    "Open Policy Agent (OPA) provides external, hard-coded policy enforcement",
+    "Model ablation with tools like Heretic can safely remove refusal layers for security tasks"
+  ]} 
+  type="info"
+/>
+
+There is a basic conflict at the core of every single AI-powered security product that is being developed right now. You want it to be deterministic – to follow a process, to stay within budget, not to hallucinate a CVE that does not actually exist. But you also want it to be intelligent – to reason through a novel attack chain, to pivot when something unexpected shows up, to connect dots like a good security pen tester would.
+
+Push either one of these aspects too far and you'll damage the other. Get this wrong and you'll end up with either a very expensive rule engine or a completely untrustworthy agent that consumes tokens and hallucinates results.
+
+This is the determinism vs. intelligence problem. I do not know how to solve this problem. I do know how to frame it.
+
+---
+
+## The False Promise of the System Prompt
+
+The most common technique that people use when creating AI security tools is to write a highly detailed markdown document – a system prompt – that specifies exactly how the model is supposed to work. It's like writing a recipe for a cake. You tell it to follow OWASP guidelines. You tell it to use this methodology. You tell it to output JSON. You tell it to not do anything outside of this prompt.
+
+It works. Until it does not.
+
+The problem is that language models are not actually deterministic state machines. They are stochastic function approximators that tend to deviate over time. Give the same model the same prompt and it will behave slightly differently every single time. In a multi-step VAPT model – recon, enumeration, vulnerability triage, exploitation, reporting – this means that by step six you'll find yourself in a completely unexpected place.
+
+So the real answer is: a markdown file by itself is not policy enforcement. It's a suggestion, not a contract.
+
+---
+
+## What Humans Actually Do in Security Work
+
+The one thing that gets forgotten in the "AI vs human" debate in security is: **human pentesters are not that creative either, in the moment.**
+
+When a senior pentester performs a VAPT engagement, what are they really doing? They're using a framework: OWASP, PTES, MITRE ATT&CK. They're using `amass`, `nmap`, triaging by severity, chaining vulnerabilities based on patterns learned from previous engagements. The creativity in this process is not in the methodology. The creativity is in the unexpected pivot, adapting to the environment, making decisions when the evidence is ambiguous.
+
+This is a very specific, very narrow form of creativity. One which maps very closely to the actual areas where AI helps, versus the areas where determinism should be used.
+
+---
+
+## The Real Architecture: Where You Need What
+
+When you accept this as the real question, the answer becomes obvious. Not "how deterministic should my AI be?" but rather: **what parts of the workflow need intelligence, and what parts need hard guarantees?**
+
+You should think in three tiers:
+
+**Tier 1 – Deterministic Skeleton**: The overall workflow structure, including the phases that run in what order, what tools are invoked, what information is transferred between steps, the format of the output, etc. This should be implemented in code, not AI. LangGraph, a state machine, a Python orchestrator, etc. The AI isn't making the decision to bypass the recon phase. It isn't making the decision to run Metasploit against a live production environment.
+
+**Tier 2 - Constrained Intelligence**: Triage decisions, tool selection within a phase, understanding nmap output, mapping a finding to a CVE or ATT&CK technique, writing a recommendation. Here is where the AI is present but constrained. Token budgets, output schema, approval flows for anything destructive.
+
+**Tier 3 - Creative Reasoning**: Novel attack chain detection, ambiguous pivot points, explaining a complex finding to a non-technical stakeholder. Here is where you want maximum intelligence from your model and least constraint. It is also a relatively small percentage of your total process than you might think.
+
+The biggest bug in AI-based security tools is that people are using unconstrained agents for Tier 2 and Tier 3 and calling Tier 1 the "system prompt."
+
+## Fine-Tuning Is Usually the Wrong Answer
+
+The most common reaction to issues with reliability of an existing model is to fine-tune. Train it to your methodology. Make it output the correct format. Make it stop rejecting security-related prompts.
+
+The problem is that fine-tuning is expensive and takes a lot of time. You will lose your investment if a new version of a base model comes out. For a security product that has to keep up with new CVEs, new attack techniques, and new OWASP recommendations, fine-tuning a static model is a maintenance nightmare.
+
+The right solution is to run an open-source model and change its behavior at the architecture level.
+
+## Open Policy Agent: Policy as Code for Your AI Pipeline
+
+The piece of the puzzle that most AI security tool builders are missing is a good policy engine between your AI agent and your execution layer.
+
+<div className="my-8">
+  <LinkPreview 
+    url="https://www.openpolicyagent.org/"
+    width={400}
+    height={200}
+  >
+    🚀 Open Policy Agent (OPA)
+  </LinkPreview>
+</div>
+
+**Open Policy Agent (OPA)** is a CNCF graduated open-source project providing a general-purpose policy engine. It offers a high-level declarative language called Rego and simple APIs to make policy decisions outside your application. The key insight here, as outlined in the docs, is "decoupling": you don't have to make policy decisions embedded in your application; instead, you integrate with OPA by executing queries to make policy decisions.
+
+This is really powerful in an AI security model. An example might be making a decision to run an exploit on a target. You don't want to make that decision in a prompt; you want to make it in a Rego policy that can be updated independently of your model.
+
+<Placeholder>
+```rego showLineNumbers caption="Enforcing exploit policy with OPA" title="vapt_policy.rego"
+package vapt.actions
+
+default allow_exploit := false
+
+allow_exploit if {
+    input.target.scope == "authorized"
+    input.target.environment != "production"
+    input.approval.human_confirmed == true
+    not input.target.ip in data.excluded_ranges
+}
+```
+</Placeholder>
+
+The Open Policy Agent accepts a policy, input, and query to generate a response based on the rules defined in the policy. The agent proposes an action. The action is evaluated based on the policy. The action either happens or doesn't happen. The model doesn't have any say in the matter.
+
+This model is much different from attempting to influence the model through prompting. The key here is "decoupling." You're decoupling policy decisions from your application. You can now change your policies to meet changing regulatory requirements. You're not changing your model.
+
+For a VAPT product in particular, OPA can assist with scope enforcement (the agent can't touch IPs outside the scope of the engagement), rate limiting destructive actions, output validation (findings have to map to a known CWE), human-in-the-loop approval gates for things above a certain severity level, and audit logging of each and every policy decision.
+
+### Heretic: Removing the Other Kind of Constraint
+
+On the other end of the spectrum — the model being *too* constrained — there's a new tool that's been getting some attention in the security community.
+
+Most commercial and open-source models have safety alignment built in. While this is well and good for the general consumer, in the realm of a security tool that has to discuss exploitation vectors, malware analysis, and the like, this alignment is actually a hindrance. A model that refuses to discuss how SQL injection works is of no use in a penetration test.
+
+The traditional workarounds of prompt engineering, role-playing, and jailbreak prompts are all untrustworthy and finicky. They don't work across model versions and don't work well in agentic loops.
+
+<div className="my-8">
+  <LinkPreview 
+    url="https://github.com/p-e-w/heretic"
+    width={400}
+    height={200}
+  >
+    🚀 Heretic: AI Model Decensoring
+  </LinkPreview>
+</div>
+
+**Heretic** is a different beast altogether. Heretic is a tool that can remove censorship from transformer-based language models without the need for expensive and cumbersome retraining. It does this through an advanced directional ablation algorithm in tandem with a TPE parameter optimizer using Optuna.
+
+In practical terms, the Llama-3.1-8B ablation takes around 45 minutes with the default settings on an RTX 3090 GPU. The end result is a model that does not refuse security-related queries but still has the original model's ability to reason. Heretic discovers high-quality abliteration parameters by co-minimizing refusal count and KL divergence to the original model, effectively creating a decensored model that has as much of the original model's intelligence as possible.
+
+Something worth noting: There is some legitimate skepticism in the ML community about the theoretical underpinnings of Heretic. Some people believe that the refusal behavior simply cannot be present in the model at all, that it's a property of the model as a whole rather than something that could be located in a single layer. However, the results the ML community has produced so far have been positive, but it's worth noting that the community has viewed it as a practical tool rather than a theoretically well-supported technique.
+
+As a security product, the overall stack that Heretic makes possible is actually viable: take an open-source 9 billion parameter model (like Llama, Qwen, or Gemma), run it through Heretic to remove the refusal layer for security-related topics, and then run it through OPA to actually determine the behavioral constraints. You end up with a completely unconstrained reasoning layer and deterministic policy enforcement externally. You could discuss attack techniques freely, but the OPA determines what actions the model is actually allowed to take.
+
+## The Decision Framework: When to Use AI at All
+
+Before getting into the actual tuning of the balance between refusal and intelligence, there's a question that's worth being honest about: **Does this even need AI at all?**
+
+The answer isn't always yes. Pattern matching against known vulnerability signatures? Implement a heuristic engine. Parsing nmap XML into a structured format? Implement a parser. Checking if a port is open? Don't even think about sending that through a language model.
+
+AI finds its place in the workflow if you have a decision to make where there are just too many variables to solve with static rules, or where the result depends on context-based reasoning not easily expressed in rules. Identifying novel attack chains. Interpreting ambiguous results. Determining if two vulnerabilities chain together in a specific environment. Creating a recommendation where you have to take into account the tech stack and risk profile of the target.
+
+You have a cybersecurity assessment agent to build where you have to outline attack vectors – legal work. But "attack" has a very different meaning to "refusal." That's where model-level constraints are a problem for you and where OPA-level constraints are where the work really needs to be done.
+
+You're building an API where AI in the workflow might not be a bad thing if you're just adding AI to a workflow where better code would have worked just as well. The cost of API calls might be low, the latency might not be a problem, and "it works" might be good enough. But if you're building something where you need to scale or you need to audit, adding AI to a deterministic problem just creates maintenance surface area for you with no added benefit.
+
+## Practical Balance: A Working Heuristic
+
+A good mental model for where to draw the line:
+
+* **Use deterministic code** where you know the right thing to do can be expressed as a rule or condition, and where you need a certainty – not a probability – that you're making the right decision.
+
+* **Use AI with constraints** where there are just too many variables to solve with rules, but you know the result has to fall within certain boundaries. That's where you'll spend most of your VAPT workflow.
+
+* **Unconstrained AI**: For tasks that can genuinely benefit from unconstrained reasoning, such as novel attack surface, report narrative, or unusual pivot reasoning. These should be unconstrained by prompt limits, too.
+
+* **OPA**: For enforcing boundary conditions on all three tiers, regardless of what the model "wants" to do.
+
+The goal is not to make the AI "compliant" or "obedient." It is to give it the right amount of "surface" and make all else deterministic by design.
+
+---
+
+## The Stack in Practice
+
+To make this more concrete, a functional open-source stack for a self-hosted VAPT agent could be:
+
+* **Model**: Qwen3 8B or Llama3.1 8B, Heretic for security-relevant model processing
+* **Orchestration**: LangGraph, including checkpointing for resumable scans and human-in-loop gates
+* **Policy enforcement**: OPA, Rego policy language for scope, action, and output schema enforcement
+* **Knowledge**: Qdrant for general semantic knowledge retrieval of MITRE ATT&CK and OWASP information; structured knowledge index for traceable information extraction in reports
+* **Context**: Explicitly managed token limits for each phase, structured output trimming for tools to prevent context explosion
+
+This is not a project that can be built in a weekend, but it is a project that can be built by a single developer with a consumer GPU and a solid methodology. The intelligence is in the model. The reliability is in the architecture surrounding it.
+
+---
+
+## Closing Thought
+
+The reason why most AI security tools are doomed to failure is not that the AI is not "intelligent" or "capable" enough. It is that developers misunderstand how to use AI, trying to constrain it by prompts, when in reality, the right answer is to give it the right architecture.
+
+Fine-tune less. Build better scaffolding. Use a real policy engine. Provide the model with appropriate surface area to be intelligent, and leave everything else out of its hands.
+
+That's the whole game.

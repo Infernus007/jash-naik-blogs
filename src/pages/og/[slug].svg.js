@@ -1,7 +1,7 @@
 // Dynamic OpenGraph image generator endpoint
 import { getCollection } from 'astro:content';
 
-export async function GET({ params, request }) {
+export async function GET({ params }) {
   const { slug } = params;
   
   if (!slug) {

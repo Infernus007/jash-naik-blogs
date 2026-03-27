@@ -185,7 +185,7 @@ switch (type) {
 }
 
 // Clean up undefined values
-const cleanStructuredData = JSON.parse(JSON.stringify(structuredData, (key, value) => 
+const cleanStructuredData = JSON.parse(JSON.stringify(structuredData, (_, value) => 
   value === undefined ? undefined : value
 ));
 ---

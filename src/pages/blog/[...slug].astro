@@ -1,7 +1,6 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import IndexLayout from "../../layouts/indexLayout.astro";
-import { Image } from "astro:assets";
 import "../../styles/BlogPost.css";
 import MyCard from "../../components/blog/Card";
 import { AcmeLogo } from "../../components/Navbar/Logo.tsx";
@@ -10,7 +9,7 @@ import ImageWrapper from "../../components/blog/AssetsWrapper/image.astro";
 import OptimizedImage from "../../components/blog/OptimizedImage/index.astro";
 import { Button } from "@nextui-org/button";
 import { Skeleton } from "@nextui-org/skeleton";
-import { getImagePromise, resolveHeroImageUrl } from "../../utils/utils.ts";
+import { resolveHeroImageUrl } from "../../utils/utils.ts";
 import { siteConfig } from "../../site.config";
 import Breadcrumb from "../../components/Breadcrumb/index.astro";
 import SocialShare from "../../components/SocialShare/index.astro";
@@ -666,9 +665,7 @@ const breadcrumbItems = [
       const header = document.getElementById("header");
       const sidebar = document.getElementById("sidebar");
       const mainContent = document.getElementById("mainContent");
-      const layoutContainer = document.getElementById("layoutContainer");
       const mainHeader = document.querySelector("header"); // Main site header
-      const leftSidebar = document.querySelector("aside"); // Left sidebar
 
       let isZenMode = false;
 
@@ -680,7 +677,6 @@ const breadcrumbItems = [
           header?.classList.add("hidden", "pointer-events-none");
           sidebar?.classList.add("hidden", "pointer-events-none");
           mainHeader?.classList.add("hidden", "pointer-events-none");
-          leftSidebar?.classList.add("hidden");
 
           // Hide footer as well
           const footer = document.querySelector("footer");
@@ -742,7 +738,6 @@ const breadcrumbItems = [
         header?.classList.remove("hidden", "pointer-events-none");
         sidebar?.classList.remove("hidden", "pointer-events-none");
         mainHeader?.classList.remove("hidden", "pointer-events-none");
-        leftSidebar?.classList.remove("hidden");
 
         // Show footer
         const footer = document.querySelector("footer");

@@ -1,5 +1,4 @@
 import { getCollection } from 'astro:content';
-import { siteConfig } from '../site.config';
 
 export async function GET(context) {
   const posts = await getCollection('blog');
